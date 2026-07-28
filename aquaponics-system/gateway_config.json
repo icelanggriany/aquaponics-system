@@ -1,0 +1,30 @@
+{
+    "lamp_mode": "Manual",
+    "lamp_state": 1,
+    "lamp_schedule": {
+        "start": "06:00",
+        "end": "18:00"
+    },
+    "pump_b_mode": "Auto",
+    "pump_b_state": 1,
+    "pump_b_schedule": {
+        "start": "07:00",
+        "end": "17:00"
+    },
+    "pump_p_state": 1,
+    "pump_s_state": 0,
+    "aerator_state": 0,
+    "feed_mode": "Auto",
+    "schedules_list": [
+        {
+            "time": "08:00",
+            "portion": 1
+        },
+        {
+            "time": "16:00",
+            "portion": 2
+        }
+    ],
+    "serial_port": "AUTO",
+    "use_simulation": false
+}
