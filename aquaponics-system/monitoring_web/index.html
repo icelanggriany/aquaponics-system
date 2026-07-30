@@ -2074,7 +2074,7 @@
 <body>
 
   <!-- Login & Register Screen -->
-  <div id="login-screen" style="display: none;">
+  <div id="login-screen" style="display: flex;">
     <div class="ambient-blob blob-1"></div>
     <div class="ambient-blob blob-2"></div>
 
@@ -2111,7 +2111,7 @@
     </div>
   </div>
 
-  <div class="desktop-container">
+  <div class="desktop-container" style="display: none;">
     <!-- Desktop Sidebar Navigation Section -->
     <div class="desktop-info">
       <div class="sidebar-brand">
@@ -4554,7 +4554,16 @@ if (type === 'Schedules') {
         renderSchedules();
       }
       
-      telemetryData.status = data.status || 'Aktif';
+      // Pengecekan keaktifan data berdasarkan timestamp (Mati jika lebih tua dari 25 detik)
+      let isStale = false;
+      if (data.timestamp) {
+        const lastTime = new Date(data.timestamp).getTime();
+        if (!isNaN(lastTime) && (Date.now() - lastTime > 25000)) {
+          isStale = true;
+        }
+      }
+      
+      telemetryData.status = (isStale || data.status === 'Mati') ? 'Mati' : (data.status || 'Aktif');
       updateUI();
 
       const sideSync = document.getElementById('sidebar-sync-text');
