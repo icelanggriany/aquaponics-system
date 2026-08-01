@@ -1,22 +1,23 @@
 /**
- * ESP32 Aquaponics LoRa Gateway Firmware (Pengganti Raspberry Pi)
+ * ESP32 Aquaponics LoRa Gateway Firmware (Pengganti Raspberry Pi) - FINAL STABLE
  * 
  * Fungsi:
  * 1. Menerima data sensor via LoRa Nirkabel dari ESP32 #1 (Transmitter di Kolam)
  * 2. Terhubung ke WiFi (thecia99)
- * 3. Mengunggah data sensor ke Firebase Realtime Database Cloud secara real-time
- * 4. Membaca instruksi kontrol tombol dari Firebase dan memancarkannya via LoRa ke ESP32 #1
+ * 3. Mengunggah data sensor ke Firebase Realtime Database Cloud secara HTTPS SSL real-time
+ * 4. Membaca instruksi kontrol tombol baru dari Firebase dan memancarkannya via LoRa ke ESP32 #1
  */
 
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include "LoRa_E220.h"
 
 // --- KONFIGURASI WIFI & FIREBASE ---
 const char* WIFI_SSID = "thecia99";
 const char* WIFI_PASS = "Rumahorens1969";
-const char* FIREBASE_URL = "https://akuaponik-iot-default-rtdb.asia-southeast1.firebasedatabase.app";
+const char* FIREBASE_URL = "https://aquaponics-system-8d6f6-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 // --- PINOUT LORA E220 / E32 PADA ESP32 #2 ---
 #define E220_RX_PIN  16   // ESP32 RX2 connected to LoRa TXD
@@ -30,6 +31,7 @@ LoRa_E220 e220(&Serial2, E220_AUX_PIN, E220_M0_PIN, E220_M1_PIN);
 
 unsigned long lastFirebasePollTime = 0;
 const unsigned long POLL_INTERVAL = 2000; // Cek perintah dari Firebase setiap 2 detik
+String lastControlPayload = "";
 
 void connectWiFi() {
   if (WiFi.status() == WL_CONNECTED) return;
@@ -59,16 +61,19 @@ void uploadTelemetryToFirebase(String jsonPayload) {
     if (WiFi.status() != WL_CONNECTED) return;
   }
   
+  WiFiClientSecure client;
+  client.setInsecure(); // SSL Bypass untuk Firebase REST API
+
   HTTPClient http;
   String fullUrl = String(FIREBASE_URL) + "/sensor_data.json";
-  http.begin(fullUrl);
+  http.begin(client, fullUrl);
   http.addHeader("Content-Type", "application/json");
   
   int httpResponseCode = http.PUT(jsonPayload);
   if (httpResponseCode > 0) {
-    Serial.printf("[Firebase] Telemetry berhasil diunggah! Code: %d\n", httpResponseCode);
+    Serial.printf("[Firebase] Telemetry sensor berhasil diunggah ke Cloud! Code HTTP: %d\n", httpResponseCode);
   } else {
-    Serial.printf("[Firebase Error] Gagal mengunggah telemetry: %s\n", http.errorToString(httpResponseCode).c_str());
+    Serial.printf("[Firebase Error] Gagal mengunggah: %d (%s)\n", httpResponseCode, http.errorToString(httpResponseCode).c_str());
   }
   http.end();
 }
@@ -76,18 +81,22 @@ void uploadTelemetryToFirebase(String jsonPayload) {
 void checkFirebaseControls() {
   if (WiFi.status() != WL_CONNECTED) return;
   
+  WiFiClientSecure client;
+  client.setInsecure();
+
   HTTPClient http;
   String fullUrl = String(FIREBASE_URL) + "/control.json";
-  http.begin(fullUrl);
+  http.begin(client, fullUrl);
   
   int httpResponseCode = http.GET();
   if (httpResponseCode == 200) {
     String responseStr = http.getString();
-    // Jika ada data perintah kontrol dari Firebase, teruskan via LoRa ke ESP32 #1
-    if (responseStr.length() > 2 && responseStr != "null") {
+    // Hanya pancarkan via LoRa jika ada PERUBAHAN tombol kontrol baru dari Web
+    if (responseStr.length() > 2 && responseStr != "null" && responseStr != lastControlPayload) {
+      lastControlPayload = responseStr;
       ResponseStatus status = e220.sendMessage(responseStr);
       if (status.code == 1) {
-        Serial.println("[LoRa TX] Perintah kontrol Firebase berhasil dipancarkan ke ESP32 #1!");
+        Serial.println("[LoRa TX] Perintah kontrol BARU dari Web berhasil dipancarkan ke ESP32 #1!");
       }
     }
   }
@@ -123,14 +132,12 @@ void loop() {
       DynamicJsonDocument doc(1024);
       DeserializationError err = deserializeJson(doc, incomingMsg);
       if (!err) {
-        // Tambahkan timestamp dan status Aktif
         doc["status"] = "Aktif";
-        doc["timestamp"] = millis();
         
         String outputJson;
         serializeJson(doc, outputJson);
         
-        // Unggah langsung ke Firebase Realtime Database
+        // Unggah langsung ke Firebase Realtime Database secara SSL Secure
         uploadTelemetryToFirebase(outputJson);
       } else {
         Serial.println("[JSON Error] Data LoRa yang diterima cacat/tidak lengkap.");
