@@ -2119,8 +2119,9 @@
         <button type="submit" class="btn-primary" id="auth-btn">Masuk</button>
       </form>
 
-      <div class="login-toggle-mode" id="auth-toggle" onclick="toggleAuthMode()">
-        Belum punya akun?<span id="auth-toggle-btn">Daftar Sekarang</span>
+      <div class="login-toggle-mode" style="margin-top:16px; text-align:center;">
+        <span id="auth-toggle-text" style="color:var(--text-sub); font-size:0.85rem;">Belum punya akun?</span>
+        <button type="button" id="auth-toggle-btn" onclick="toggleAuthMode()" style="background:none; border:none; color:var(--primary); font-weight:700; font-family:inherit; cursor:pointer; text-decoration:underline; font-size:0.85rem; padding:4px 8px; margin-left:2px;">Daftar Sekarang</button>
       </div>
     </div>
   </div>
@@ -4094,7 +4095,8 @@
       const title = document.getElementById('auth-title');
       const subtitle = document.getElementById('auth-subtitle');
       const btn = document.getElementById('auth-btn');
-      const toggleText = document.getElementById('auth-toggle');
+      const toggleText = document.getElementById('auth-toggle-text');
+      const toggleBtn = document.getElementById('auth-toggle-btn');
 
       document.getElementById('auth-error-msg').style.display = 'none';
 
@@ -4102,12 +4104,14 @@
         title.innerText = 'Smart Akuaponik';
         subtitle.innerText = 'Masuk untuk memantau & mengontrol sistem';
         btn.innerText = 'Masuk';
-        toggleText.innerHTML = `Belum punya akun?<span id="auth-toggle-btn" style="cursor:pointer; color:var(--primary); font-weight:700; margin-left:4px;">Daftar Sekarang</span>`;
+        if (toggleText) toggleText.innerText = 'Belum punya akun?';
+        if (toggleBtn) toggleBtn.innerText = 'Daftar Sekarang';
       } else {
         title.innerText = 'Daftar Akun';
         subtitle.innerText = 'Buat akun pengelola sistem akuaponik';
         btn.innerText = 'Daftar';
-        toggleText.innerHTML = `Sudah punya akun?<span id="auth-toggle-btn" style="cursor:pointer; color:var(--primary); font-weight:700; margin-left:4px;">Masuk di sini</span>`;
+        if (toggleText) toggleText.innerText = 'Sudah punya akun?';
+        if (toggleBtn) toggleBtn.innerText = 'Masuk di sini';
       }
     }
 
