@@ -5270,16 +5270,8 @@
         renderSchedules();
       }
       
-      // Pengecekan keaktifan data berdasarkan timestamp (Mati jika lebih tua dari 25 detik)
-      let isStale = false;
-      if (data.timestamp) {
-        const lastTime = new Date(data.timestamp).getTime();
-        if (!isNaN(lastTime) && (Date.now() - lastTime > 25000)) {
-          isStale = true;
-        }
-      }
-      
-      telemetryData.status = (isStale || data.status === 'Mati') ? 'Mati' : (data.status || 'Aktif');
+      // Pengecekan status keaktifan sistem
+      telemetryData.status = (data.status === 'Mati') ? 'Mati' : 'Aktif';
       updateUI();
       checkRealtimeAlerts(telemetryData);
 
@@ -5444,6 +5436,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('theme-deep-ocean');
       localStorage.setItem('aquaponics_theme_deep_ocean', 'false');
+      startLocalApiPolling();
     });
   </script>
 </body>
