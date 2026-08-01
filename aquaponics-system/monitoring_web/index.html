@@ -3184,14 +3184,14 @@
           .catch(err => console.error('Pendaftaran Service Worker gagal:', err));
       }
 
-      // Check if user is logged in locally
-      const isLoggedIn = localStorage.getItem('aquaponics_logged_in') === 'true';
+      // Check if user is logged in for current active session
+      const isLoggedIn = sessionStorage.getItem('aquaponics_logged_in') === 'true';
       if (isLoggedIn) {
         document.getElementById('login-screen').style.display = 'none';
         document.querySelector('.desktop-container').style.display = 'flex';
         startLocalApiPolling();
       } else {
-        // Not logged in: show login screen
+        // New session / Not logged in: always show login screen first
         document.getElementById('login-screen').style.display = 'flex';
         document.querySelector('.desktop-container').style.display = 'none';
       }
@@ -4145,7 +4145,8 @@ if (type === 'Schedules') {
 
           if (email === savedEmail && password === savedPass) {
             console.log("Login lokal sukses.");
-            localStorage.setItem('aquaponics_logged_in', 'true');
+            sessionStorage.setItem('aquaponics_logged_in', 'true');
+            localStorage.removeItem('aquaponics_logged_in');
 
             document.getElementById('login-screen').style.display = 'none';
             document.querySelector('.desktop-container').style.display = 'flex';
@@ -4188,6 +4189,7 @@ if (type === 'Schedules') {
     }
 
     function executeLogout() {
+      sessionStorage.removeItem('aquaponics_logged_in');
       localStorage.removeItem('aquaponics_logged_in');
       window.location.reload();
     }
