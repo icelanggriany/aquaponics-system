@@ -10,7 +10,11 @@ import time
 import json
 import datetime
 import threading
+import sqlite3
 import urllib.request
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # --- KONFIGURASI FIREBASE REALTIME DATABASE ---
@@ -20,11 +24,15 @@ FIREBASE_DATABASE_URL = "https://aquaponics-system-8d6f6-default-rtdb.asia-south
 is_raspberry_pi = False
 try:
     import RPi.GPIO as GPIO
-    import serial
     is_raspberry_pi = True
 except ImportError:
     print("Menjalankan dalam MODUL SIMULASI (Non-RPi Hardware).")
     print("Gunakan Raspberry Pi asli dengan pin UART/GPIO terpasang untuk mode produksi.")
+
+try:
+    import serial
+except ImportError:
+    serial = None
 
 # --- KONFIGURASI PIN LORA E220 (RASPBERRY PI) ---
 # Penomoran di bawah menggunakan GPIO BCM (karena pustaka RPi.GPIO diatur ke GPIO.BCM).
@@ -62,8 +70,7 @@ class E220LoRaSimulator:
         print(f"[LoRa Sim] Mengirim perintah RF E220: {data}")
 
     def _mock_loop(self):
-        # Loop dinonaktifkan atas request user untuk menghindari pengiriman data dummy.
-        # Simulator hanya berjalan pasif tanpa mengirimkan data tiruan.
+        # Simulator berjalan pasif tanpa mengirimkan data dummy/tiruan.
         while self._running:
             time.sleep(1)
 
@@ -315,8 +322,176 @@ config_data = {
     "feed_mode": "Auto",
     "schedules_list": [],
     "serial_port": "AUTO",
-    "use_simulation": False
+    "use_simulation": False,
+    "email_notif_enabled": False,
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "sender_email": "",
+    "sender_password": "",
+    "recipient_email": "",
+    "tds_min": 400,
+    "tds_max": 900,
+    "temp_w_min": 24.0,
+    "temp_w_max": 30.0,
+    "water_level_min": 50.0
 }
+
+# --- EMAIL NOTIFICATION SERVICE ---
+last_email_alerts = {
+    "temp_w": 0,
+    "tds": 0,
+    "water_level": 0,
+    "offline": 0
+}
+EMAIL_COOLDOWN_SECONDS = 900  # 15 menit cooldown per jenis alert
+
+def send_email_notification(subject, body_html, force=False):
+    def _send():
+        enabled = config_data.get("email_notif_enabled", False)
+        if not enabled and not force:
+            return
+
+        recipient = config_data.get("recipient_email", "").strip()
+        provider = config_data.get("email_provider", "emailjs")
+
+        # 1. Kirim via EmailJS REST API
+        if provider == "emailjs" or config_data.get("emailjs_service_id"):
+            service_id = config_data.get("emailjs_service_id", "service_4e9rkbf").strip()
+            template_id = config_data.get("emailjs_template_id", "template_p2vuw8k").strip()
+            public_key = config_data.get("emailjs_public_key", "4v1gUffZm6c9CtGXH").strip()
+
+            if service_id and template_id and public_key:
+                try:
+                    payload = {
+                        "service_id": service_id,
+                        "template_id": template_id,
+                        "user_id": public_key,
+                        "template_params": {
+                            "name": "Smart Aquaponik System",
+                            "to_email": recipient,
+                            "email": recipient,
+                            "subject": f"⚠️ [Smart Aquaponik Alert] {subject}",
+                            "message": body_html,
+                            "time": datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+                        }
+                    }
+                    req = urllib.request.Request(
+                        "https://api.emailjs.com/api/v1.0/email/send",
+                        data=json.dumps(payload).encode('utf-8'),
+                        headers={"Content-Type": "application/json"},
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        if resp.status == 200:
+                            print(f"[EmailJS Notif] Email berhasil dikirimkan via EmailJS ke {recipient}: {subject}")
+                            return
+                except Exception as e:
+                    print(f"[EmailJS Error] Gagal kirim via EmailJS: {e}. Mencoba fallback ke SMTP...")
+
+        # 2. Fallback ke SMTP (jika EmailJS belum terisi penuh atau gagal)
+        sender = config_data.get("sender_email", "").strip()
+        password = config_data.get("sender_password", "").strip()
+        smtp_server = config_data.get("smtp_server", "smtp.gmail.com").strip()
+        smtp_port = int(config_data.get("smtp_port", 587))
+
+        if not sender or not password or not recipient:
+            print("[Email Notif] WARNING: Alamat email pengirim/password/penerima belum dikonfigurasi.")
+            return
+
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = f"⚠️ [Smart Aquaponik Alert] {subject}"
+            msg["From"] = f"Smart Aquaponik System <{sender}>"
+            msg["To"] = recipient
+
+            part = MIMEText(body_html, "html")
+            msg.attach(part)
+
+            server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
+            server.starttls()
+            server.login(sender, password)
+            server.sendmail(sender, [recipient], msg.as_string())
+            server.quit()
+            print(f"[Email Notif] Email berhasil dikirimkan via SMTP ke {recipient}: {subject}")
+        except Exception as e:
+            print(f"[Email Notif Error] Gagal mengirim email via SMTP: {e}")
+
+    threading.Thread(target=_send, daemon=True).start()
+
+def check_and_send_sensor_alerts(data):
+    if not config_data.get("email_notif_enabled", False):
+        return
+
+    now_time = time.time()
+    
+    # 1. Cek Suhu Air
+    temp_w = data.get("temp_w")
+    if temp_w is not None and temp_w > 0:
+        min_temp = float(config_data.get("temp_w_min", 24.0))
+        max_temp = float(config_data.get("temp_w_max", 30.0))
+        if temp_w < min_temp or temp_w > max_temp:
+            if now_time - last_email_alerts["temp_w"] > EMAIL_COOLDOWN_SECONDS:
+                last_email_alerts["temp_w"] = now_time
+                subject = f"Peringatan Suhu Air Abnormal: {temp_w}°C"
+                body = f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #ef4444;">⚠️ Peringatan Suhu Air Abnormal!</h2>
+                    <p>Sistem Akuaponik mendeteksi suhu air berada di luar batas aman:</p>
+                    <ul>
+                        <li><strong>Suhu Air Saat Ini:</strong> {temp_w}°C</li>
+                        <li><strong>Batas Safe Zone:</strong> {min_temp}°C - {max_temp}°C</li>
+                        <li><strong>Waktu Pembacaan:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                    </ul>
+                    <p>Harap periksa kondisi fisik kolam dan pemanas/pendingin air segera.</p>
+                </div>
+                """
+                send_email_notification(subject, body)
+
+    # 2. Cek TDS Air
+    tds = data.get("tds")
+    if tds is not None and tds > 0:
+        min_tds = float(config_data.get("tds_min", 400))
+        max_tds = float(config_data.get("tds_max", 900))
+        if tds < min_tds or tds > max_tds:
+            if now_time - last_email_alerts["tds"] > EMAIL_COOLDOWN_SECONDS:
+                last_email_alerts["tds"] = now_time
+                subject = f"Peringatan TDS Air Abnormal: {tds} ppm"
+                body = f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #f59e0b;">⚠️ Peringatan Nutrisi Air (TDS) Abnormal!</h2>
+                    <p>Sistem Akuaponik mendeteksi konsentrasi TDS di luar batas ideal:</p>
+                    <ul>
+                        <li><strong>TDS Saat Ini:</strong> {tds} ppm</li>
+                        <li><strong>Batas Ideal:</strong> {min_tds} ppm - {max_tds} ppm</li>
+                        <li><strong>Waktu Pembacaan:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                    </ul>
+                    <p>Harap sesuaikan penambahan pelet/nutrisi atau penggantian air kolam.</p>
+                </div>
+                """
+                send_email_notification(subject, body)
+
+    # 3. Cek Ketinggian Air
+    water_level = data.get("water_level")
+    if water_level is not None and water_level >= 0:
+        min_level = float(config_data.get("water_level_min", 50.0))
+        if water_level < min_level:
+            if now_time - last_email_alerts["water_level"] > EMAIL_COOLDOWN_SECONDS:
+                last_email_alerts["water_level"] = now_time
+                subject = f"Peringatan Level Air Rendah: {water_level}%"
+                body = f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #ef4444;">⚠️ Peringatan Ketinggian Air Kolam Kritis!</h2>
+                    <p>Sistem mendeteksi ketinggian air kolam berkurang drastis di bawah batas minimum:</p>
+                    <ul>
+                        <li><strong>Ketinggian Air Saat Ini:</strong> {water_level}%</li>
+                        <li><strong>Batas Minimum:</strong> {min_level}%</li>
+                        <li><strong>Waktu Pembacaan:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                    </ul>
+                    <p>Harap periksa kemungkinan kebocoran pipa atau nyalakan pengisian air.</p>
+                </div>
+                """
+                send_email_notification(subject, body)
+
 
 def load_config():
     global config_data, latest_sensor_data
@@ -393,7 +568,8 @@ def evaluate_scheduler_and_send(send_feed=0):
         cmd["feed"] = send_feed
         
     payload = json.dumps(cmd)
-    lora.send_packet(payload)
+    if lora:
+        lora.send_packet(payload)
     print(f"[Scheduler] Mengirim kontrol LoRa ke ESP32: {payload}")
 
 # --- LOCAL API SERVER VARIABLES & HANDLER ---
@@ -421,7 +597,7 @@ latest_sensor_data = {
     "feed_mode": "Auto",
     "schedules": [],
     
-    "status": "Mati",
+    "status": "Aktif",
     "timestamp": ""
 }
 sensor_history = []
@@ -590,58 +766,7 @@ class LocalAPIServer(BaseHTTPRequestHandler):
                 cmd = json.loads(post_data.decode("utf-8"))
                 print(f"[API Server] Menerima data kontrol: {cmd}")
                 
-                global config_data, latest_sensor_data
-                
-                if "lamp_mode" in cmd:
-                    config_data["lamp_mode"] = cmd["lamp_mode"]
-                    latest_sensor_data["lamp_mode"] = cmd["lamp_mode"]
-                if "lamp" in cmd:
-                    config_data["lamp_state"] = 1 if (cmd["lamp"] == 1 or cmd["lamp"] is True) else 0
-                    config_data["lamp_mode"] = "Manual"  # Otomatis beralih ke Manual saat dikontrol manual
-                    latest_sensor_data["lamp"] = config_data["lamp_state"]
-                    latest_sensor_data["lamp_mode"] = "Manual"
-                if "lamp_schedule" in cmd:
-                    config_data["lamp_schedule"] = cmd["lamp_schedule"]
-                    latest_sensor_data["lamp_schedule"] = cmd["lamp_schedule"]
-                    
-                if "pump_b_mode" in cmd:
-                    config_data["pump_b_mode"] = cmd["pump_b_mode"]
-                    latest_sensor_data["pump_b_mode"] = cmd["pump_b_mode"]
-                if "pump_b" in cmd:
-                    config_data["pump_b_state"] = 1 if (cmd["pump_b"] == 1 or cmd["pump_b"] is True) else 0
-                    config_data["pump_b_mode"] = "Manual"  # Otomatis beralih ke Manual saat dikontrol manual
-                    latest_sensor_data["pump_b"] = config_data["pump_b_state"]
-                    latest_sensor_data["pump_b_mode"] = "Manual"
-                if "pump_b_schedule" in cmd:
-                    config_data["pump_b_schedule"] = cmd["pump_b_schedule"]
-                    latest_sensor_data["pump_b_schedule"] = cmd["pump_b_schedule"]
-                    
-                if "pump_p" in cmd:
-                    config_data["pump_p_state"] = 1 if (cmd["pump_p"] == 1 or cmd["pump_p"] is True) else 0
-                    latest_sensor_data["pump_p"] = config_data["pump_p_state"]
-                if "pump_s" in cmd:
-                    config_data["pump_s_state"] = 1 if (cmd["pump_s"] == 1 or cmd["pump_s"] is True) else 0
-                    latest_sensor_data["pump_s"] = config_data["pump_s_state"]
-                if "aerator" in cmd:
-                    config_data["aerator_state"] = 1 if (cmd["aerator"] == 1 or cmd["aerator"] is True) else 0
-                    latest_sensor_data["aerator"] = config_data["aerator_state"]
-                    
-                if "feed_mode" in cmd:
-                    config_data["feed_mode"] = cmd["feed_mode"]
-                    latest_sensor_data["feed_mode"] = cmd["feed_mode"]
-                if "schedules" in cmd:
-                    config_data["schedules_list"] = cmd["schedules"]
-                    latest_sensor_data["schedules"] = cmd["schedules"]
-                    
-                save_config()
-                
-                send_feed = 0
-                if "feed" in cmd:
-                    send_feed = int(cmd["feed"])
-                    # Beri penanda pakan aktif secara lokal sementara waktu
-                    latest_sensor_data["feeder"] = 1
-                
-                evaluate_scheduler_and_send(send_feed)
+                apply_remote_command(cmd)
                 
                 self._set_headers(200)
                 self.wfile.write(json.dumps({"status": "success", "received": cmd}).encode("utf-8"))
@@ -717,6 +842,9 @@ def upload_sensor_data(sensor_data_json):
         # Unggah data sensor terkini ke Firebase Realtime Database
         push_to_firebase(latest_sensor_data)
         
+        # Periksa peringatan ambang batas sensor untuk email
+        check_and_send_sensor_alerts(data)
+        
     except json.JSONDecodeError:
         print(f"Error parsing JSON LoRa packet: {sensor_data_json}")
     except Exception as e:
@@ -789,7 +917,33 @@ def apply_remote_command(cmd):
             config_data["schedules_list"] = cmd["schedules"]
             latest_sensor_data["schedules"] = cmd["schedules"]
             
+        # Parameter Konfigurasi Email
+        email_keys = [
+            "email_notif_enabled", "email_provider", "emailjs_service_id", "emailjs_template_id", "emailjs_public_key",
+            "smtp_server", "smtp_port", "sender_email", "sender_password", "recipient_email",
+            "tds_min", "tds_max", "temp_w_min", "temp_w_max", "water_level_min"
+        ]
+        for key in email_keys:
+            if key in cmd:
+                config_data[key] = cmd[key]
+                latest_sensor_data[key] = cmd[key]
+
         save_config()
+
+        if cmd.get("send_test_email"):
+            subject = "Uji Coba Email Notifikasi"
+            body = f"""
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #10b981; border-radius: 8px;">
+                <h2 style="color: #10b981;">✅ Uji Coba Email Notifikasi Berhasil!</h2>
+                <p>Email ini dikirimkan untuk memverifikasi bahwa konfigurasi SMTP Sistem Akuaponik telah aktif dan dapat berfungsi dengan baik.</p>
+                <ul>
+                    <li><strong>Email Pengirim:</strong> {config_data.get('sender_email')}</li>
+                    <li><strong>Email Penerima:</strong> {config_data.get('recipient_email')}</li>
+                    <li><strong>Waktu Pengujian:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                </ul>
+            </div>
+            """
+            send_email_notification(subject, body, force=True)
         
         send_feed = 0
         if "feed" in cmd:
@@ -859,6 +1013,43 @@ def main():
         # Loop utama tetap hidup
         while True:
             time.sleep(5) # Cek setiap 5 detik
+            
+            # Evaluasi status keaktifan fisik alat berdasarkan timestamp telemetri ESP32
+            if latest_sensor_data.get("timestamp"):
+                try:
+                    last_time = datetime.datetime.fromisoformat(latest_sensor_data["timestamp"])
+                    elapsed = (datetime.datetime.now() - last_time).total_seconds()
+                    if elapsed > 15.0:
+                        latest_sensor_data["status"] = "Mati"
+                    else:
+                        latest_sensor_data["status"] = "Aktif"
+                except Exception:
+                    latest_sensor_data["status"] = "Mati"
+            else:
+                latest_sensor_data["status"] = "Mati"
+            
+            # Synchronize ke Firebase Realtime Database
+            push_to_firebase(latest_sensor_data)
+            
+            # Peringatan Email jika Alat Offline
+            if latest_sensor_data.get("status") == "Mati" and config_data.get("email_notif_enabled", False):
+                now_time = time.time()
+                if now_time - last_email_alerts["offline"] > EMAIL_COOLDOWN_SECONDS:
+                    last_email_alerts["offline"] = now_time
+                    subject = "Peringatan Koneksi Alat Offline!"
+                    body = f"""
+                    <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ef4444; border-radius: 8px;">
+                        <h2 style="color: #ef4444;">🔴 Peringatan Koneksi Terputus (Offline)!</h2>
+                        <p>Gateway tidak menerima paket telemetri LoRa dari perangkat ESP32 selama lebih dari 15 detik.</p>
+                        <ul>
+                            <li><strong>Status Sistem:</strong> Offline (Mati)</li>
+                            <li><strong>Waktu Terakhir Aktif:</strong> {latest_sensor_data.get('timestamp', 'Tidak Diketahui')}</li>
+                            <li><strong>Waktu Deteksi:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                        </ul>
+                        <p>Harap periksa catu daya ESP32, antena LoRa, dan koneksi kabel serial.</p>
+                    </div>
+                    """
+                    send_email_notification(subject, body)
             
             send_feed = 0
             

@@ -20,18 +20,9 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  
-  <!-- EmailJS Library untuk Notifikasi Email Real-Time -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script>
-    (function() {
-      if (typeof emailjs !== 'undefined') {
-        emailjs.init("4v1gUffZm6c9CtGXH");
-      }
-    })();
-  </script>
-  <!-- Chart.js CDN -->
+  <!-- Chart.js CDN & EmailJS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
   <style>
     :root {
@@ -68,6 +59,110 @@
       --border: #1e293b;
       --border-glass: rgba(255, 255, 255, 0.07);
       --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    /* Deep Ocean Theme Variables & Styling */
+    body.theme-deep-ocean {
+      --bg-app: #032b45;
+      --bg-card: rgba(6, 44, 77, 0.75);
+      --text-main: #f0f9ff;
+      --text-sub: #7dd3fc;
+      --primary: #0ea5e9;
+      --primary-light: rgba(14, 165, 233, 0.25);
+      --green: #14b8a6;
+      --green-light: rgba(20, 184, 166, 0.25);
+      --orange: #f59e0b;
+      --orange-light: rgba(245, 158, 11, 0.25);
+      --border: #0369a1;
+      --border-glass: rgba(56, 189, 248, 0.25);
+      --shadow: 0 12px 36px rgba(2, 44, 74, 0.6);
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 35%, #075985 65%, #0c4a6e 100%) !important;
+    }
+
+    body.theme-deep-ocean .device-mockup {
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 40%, #0c4a6e 100%) !important;
+      border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    }
+
+    body.theme-deep-ocean .app-header {
+      background: rgba(3, 43, 69, 0.7) !important;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
+    }
+
+    body.theme-deep-ocean .card-sensor,
+    body.theme-deep-ocean .card-control,
+    body.theme-deep-ocean .card-action,
+    body.theme-deep-ocean .feeder-card,
+    body.theme-deep-ocean .chart-container,
+    body.theme-deep-ocean .summary-card {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(3, 105, 161, 0.45)) !important;
+      border: 1px solid rgba(56, 189, 248, 0.28) !important;
+      box-shadow: 0 12px 32px rgba(0, 30, 60, 0.35) !important;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+
+    body.theme-deep-ocean .bottom-nav {
+      background: rgba(4, 30, 51, 0.88) !important;
+      border-top: 1px solid rgba(56, 189, 248, 0.3) !important;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    body.theme-deep-ocean .nav-item.active {
+      color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.2) !important;
+    }
+
+    /* Ocean Wave Header Banner */
+    .ocean-wave-banner {
+      display: none;
+      position: relative;
+      width: 100%;
+      height: 170px;
+      border-radius: 28px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 40%, #0369a1 100%);
+      box-shadow: 0 14px 40px rgba(2, 132, 199, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    body.theme-deep-ocean .ocean-wave-banner {
+      display: block;
+    }
+
+    .ocean-wave-svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .ocean-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      animation: rise 10s infinite ease-in;
+      pointer-events: none;
+    }
+
+    @keyframes rise {
+      0% {
+        bottom: -20px;
+        transform: translateX(0) scale(0.5);
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.8;
+      }
+      100% {
+        bottom: 100%;
+        transform: translateX(30px) scale(1.2);
+        opacity: 0;
+      }
     }
 
     * {
@@ -624,6 +719,58 @@
 
     body.dark-mode .card-sensor:hover {
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Modern Bento Widget Styling */
+    .bento-card {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bento-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .bento-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bento-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+    }
+
+    .badge-red { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .badge-blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+    .badge-green { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .badge-sky { background: rgba(14, 165, 233, 0.12); color: #0284c7; }
+
+    @keyframes pulse-wave {
+      0% { stroke-dashoffset: 200; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    .pulse-line {
+      stroke-dasharray: 200;
+      animation: pulse-wave 2.8s infinite linear;
     }
 
     .card-sensor:active {
@@ -1241,15 +1388,15 @@
 
     /* Modal / Popups overlay */
     .modal-overlay {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 200;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 10000;
       display: none;
       align-items: center;
       justify-content: center;
@@ -1262,10 +1409,13 @@
 
     .modal-box {
       background-color: var(--bg-card);
-      border-radius: 28px;
+      border-radius: 24px;
       width: 100%;
-      max-width: 350px;
-      padding: 26px;
+      max-width: 480px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
       border: 1px solid var(--border-glass);
       position: relative;
@@ -1290,21 +1440,36 @@
       font-family: var(--font-outfit);
       font-size: 1.25rem;
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       color: var(--text-main);
       letter-spacing: -0.3px;
+      flex-shrink: 0;
     }
 
     .modal-body {
       font-size: 0.88rem;
       color: var(--text-sub);
-      margin-bottom: 22px;
+      margin-bottom: 16px;
       line-height: 1.55;
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: var(--border-glass);
+      border-radius: 10px;
     }
 
     .modal-footer {
       display: flex;
       gap: 12px;
+      flex-shrink: 0;
+      margin-top: auto;
     }
 
     .btn-secondary {
@@ -1902,9 +2067,9 @@
 
     .login-container {
       width: 90%;
-      max-width: 380px;
-      padding: 34px 30px;
-      border-radius: 30px;
+      max-width: 370px;
+      padding: 22px 20px;
+      border-radius: 24px;
       background: rgba(17, 24, 39, 0.65);
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
@@ -1912,7 +2077,7 @@
       box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 8px;
       z-index: 2;
       position: relative;
       animation: modalSlide 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1929,13 +2094,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 4px;
     }
 
     .login-logo {
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1959,15 +2124,15 @@
 
     .login-title {
       font-family: var(--font-outfit);
-      font-size: 1.55rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: var(--text-main);
       letter-spacing: -0.5px;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .login-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       color: var(--text-sub);
       font-weight: 600;
     }
@@ -1975,7 +2140,16 @@
     .login-form {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 6px;
+    }
+
+    .login-form .form-group {
+      margin-bottom: 0px;
+    }
+
+    .login-form label {
+      margin-bottom: 2px;
+      font-size: 0.76rem;
     }
 
     .login-error {
@@ -2075,12 +2249,8 @@
       animation: blink 1s step-end infinite;
     }
 
-    /* Enforce initial login screen state in CSS to prevent any render glitch */
-    .desktop-container {
-      display: none;
-    }
-    #login-screen {
-      display: flex;
+    @keyframes blink {
+      50% { opacity: 0; }
     }
   </style>
 </head>
@@ -2113,7 +2283,31 @@
         </div>
         <div class="form-group">
           <label for="auth-password">Kata Sandi</label>
-          <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required>
+          <div style="position: relative; width: 100%;">
+            <input type="password" id="auth-password" class="form-control" style="padding-right: 40px;" placeholder="••••••••" required>
+            <button type="button" onclick="togglePasswordVisibility('auth-password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Tampilkan / Sembunyikan Kata Sandi">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group" id="auth-confirm-group" style="display: none;">
+          <label for="auth-confirm-password">Konfirmasi Kata Sandi</label>
+          <div style="position: relative; width: 100%;">
+            <input type="password" id="auth-confirm-password" class="form-control" style="padding-right: 40px;" placeholder="••••••••">
+            <button type="button" onclick="togglePasswordVisibility('auth-confirm-password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Tampilkan / Sembunyikan Kata Sandi">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="auth-forgot-link" style="text-align: right; margin-top: 0px; margin-bottom: 2px;">
+          <a href="javascript:void(0)" onclick="switchAuthMode('forgot')" style="font-size: 0.78rem; color: var(--primary); font-weight: 600; text-decoration: none;">Lupa Kata Sandi?</a>
         </div>
 
         <button type="submit" class="btn-primary" id="auth-btn">Masuk</button>
@@ -2416,99 +2610,147 @@
             </div> <!-- End Left Column Wrapper -->
 
             <div class="sensor-grid" style="margin-top: 0;">
-                <!-- Suhu Air Card -->
-                <div class="card-sensor">
-                  <div class="sensor-icon-container blue">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                <!-- Bento Card 1: Suhu Air Kolam (Pulse Heartbeat Sparkline Widget) -->
+                <div class="card-sensor bento-card">
+                  <div class="bento-header">
+                    <span class="bento-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                      </svg>
+                      Suhu Air Kolam
+                    </span>
+                    <div class="bento-badge badge-red">🌡️</div>
+                  </div>
+                  
+                  <!-- Pulse Heartbeat Graphic -->
+                  <div style="height: 44px; width: 100%; margin: 2px 0 6px 0; position: relative;">
+                    <svg width="100%" height="44" viewBox="0 0 200 44" fill="none" preserveAspectRatio="none">
+                      <path d="M0 22 L40 22 L50 8 L60 36 L70 16 L80 26 L90 22 L200 22" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25" />
+                      <path d="M0 22 L40 22 L50 8 L60 36 L70 16 L80 26 L90 22 L200 22" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="pulse-line" />
                     </svg>
                   </div>
-                  <div style="display:flex; flex-direction:column;">
-                    <span class="sensor-label">Suhu Air</span>
-                    <span class="sensor-value" id="val-suhu">-</span>
+
+                  <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                      <span style="font-size: 1.85rem; font-weight: 800; color: #ef4444; line-height: 1;" id="val-suhu">-</span>
+                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;" id="val-suhu-status">Optimal (24 - 30°C)</span>
+                    </div>
+                    <span style="font-size: 0.72rem; font-weight: 700; color: var(--green); background: rgba(16,185,129,0.12); padding: 4px 8px; border-radius: 8px;">● Stabil</span>
                   </div>
                 </div>
 
-                <!-- TDS Card -->
-                <div class="card-sensor">
-                  <div class="sensor-icon-container blue">
-                    <!-- Custom TDS droplet -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z" /><text x="12" y="16.5"
-                        font-size="6.5" font-family="Outfit" font-weight="bold" fill="currentColor"
-                        text-anchor="middle">TDS</text>
-                    </svg>
+                <!-- Bento Card 2: TDS Nutrisi Air (Circular Radial Gauge Widget) -->
+                <div class="card-sensor bento-card">
+                  <div class="bento-header">
+                    <span class="bento-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                      </svg>
+                      TDS Nutrisi Air
+                    </span>
+                    <div class="bento-badge badge-blue">💧</div>
                   </div>
-                  <div style="display:flex; flex-direction:column;">
-                    <span class="sensor-label">TDS Air</span>
-                    <span class="sensor-value" id="val-tds">-</span>
+
+                  <!-- Radial Ring Meter -->
+                  <div style="display: flex; align-items: center; gap: 14px; margin: 4px 0;">
+                    <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <svg width="68" height="68" viewBox="0 0 72 72">
+                        <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(59, 130, 246, 0.15)" stroke-width="7" />
+                        <circle id="bento-tds-ring" cx="36" cy="36" r="30" fill="none" stroke="#3b82f6" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="60" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.8s ease;" />
+                      </svg>
+                      <div style="position: absolute; text-align: center;">
+                        <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-sub); display: block;">PPM</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); line-height: 1;" id="val-tds">-</span>
+                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;">Target: 400 - 900 PPM</span>
+                      <span style="font-size: 0.72rem; font-weight: 700; color: var(--primary);" id="val-tds-status">Nutrisi Stabil</span>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Tinggi Air Card -->
-                <div class="card-sensor">
-                  <div class="sensor-icon-container blue">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path
-                        d="M2 6c.6 0 1.2-.2 1.6-.6.8-.8 2-.8 2.8 0 .8.8 2 .8 2.8 0 .8-.8 2-.8 2.8 0 .8.8 2 .8 2.8 0 .8-.8 2-.8 2.8 0 .4.4 1 .6 1.6.6" />
-                      <path
-                        d="M2 12c.6 0 1.2-.2 1.6-.6.8-.8 2-.8 2.8 0 .8.8 2 .8 2.8 0 .8-.8 2-.8 2.8 0 .8.8 2 .8 2.8 0 .8-.8 2-.8 2.8 0 .4.4 1 .6 1.6.6" />
-                      <path
-                        d="M2 18c.6 0 1.2-.2 1.6-.6.8-.8 2-.8 2.8 0 .8.8 2 .8 2.8 0 .8-.8 2-.8 2.8 0 .8.8 2 .8 2.8 0 .8-.8 2-.8 2.8 0 .4.4 1 .6 1.6.6" />
-                    </svg>
+                <!-- Bento Card 3: Suhu & Kelembaban Udara (Equalizer Bar Sparkline Widget) -->
+                <div class="card-sensor bento-card">
+                  <div class="bento-header">
+                    <span class="bento-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2" />
+                      </svg>
+                      Udara & Kelembaban
+                    </span>
+                    <div class="bento-badge badge-sky">☁️</div>
                   </div>
-                  <div style="display:flex; flex-direction:column;">
-                    <span class="sensor-label">Tinggi Air</span>
-                    <span class="sensor-value" id="val-tinggi-air">-</span>
+
+                  <!-- Equalizer Vertical Bars -->
+                  <div style="display: flex; align-items: flex-end; gap: 5px; height: 38px; margin: 4px 0 6px 0;">
+                    <div style="flex: 1; background: rgba(14, 165, 233, 0.2); height: 40%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(14, 165, 233, 0.4); height: 65%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: #0284c7; height: 90%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(14, 165, 233, 0.5); height: 75%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(14, 165, 233, 0.3); height: 50%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(14, 165, 233, 0.6); height: 85%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: #0284c7; height: 95%; border-radius: 4px;"></div>
+                  </div>
+
+                  <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                      <span style="font-size: 1.6rem; font-weight: 800; color: #0284c7; line-height: 1;" id="val-suhu-udara">-</span>
+                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 2px;">Suhu Udara</span>
+                    </div>
+                    <div style="text-align: right;">
+                      <span style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); line-height: 1;" id="val-humidity">-</span>
+                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 2px;">Kelembaban</span>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Suhu Udara Card -->
-                <div class="card-sensor">
-                  <div class="sensor-icon-container blue">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
-                      <path
-                        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-                    </svg>
+                <!-- Bento Card 4: Ketinggian Air (Liquid Radial Gauge Widget) -->
+                <div class="card-sensor bento-card">
+                  <div class="bento-header">
+                    <span class="bento-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 6c.6 0 1.2-.2 1.6-.6.8-.8 2-.8 2.8 0 .8.8 2 .8 2.8 0 .8-.8 2-.8 2.8 0" />
+                        <path d="M2 12c.6 0 1.2-.2 1.6-.6.8-.8 2-.8 2.8 0 .8.8 2 .8 2.8 0 .8-.8 2-.8 2.8 0" />
+                      </svg>
+                      Level Air Kolam
+                    </span>
+                    <div class="bento-badge badge-green">🌊</div>
                   </div>
-                  <div style="display:flex; flex-direction:column;">
-                    <span class="sensor-label">Suhu Udara</span>
-                    <span class="sensor-value" id="val-suhu-udara">-</span>
+
+                  <!-- Liquid Radial Meter -->
+                  <div style="display: flex; align-items: center; gap: 14px; margin: 4px 0;">
+                    <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <svg width="68" height="68" viewBox="0 0 72 72">
+                        <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(16, 185, 129, 0.15)" stroke-width="7" />
+                        <circle id="bento-water-ring" cx="36" cy="36" r="30" fill="none" stroke="#10b981" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="40" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.8s ease;" />
+                      </svg>
+                      <div style="position: absolute; text-align: center;">
+                        <span style="font-size: 0.65rem; font-weight: 700; color: var(--green); display: block;">WATER</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span style="font-size: 1.8rem; font-weight: 800; color: #10b981; line-height: 1;" id="val-tinggi-air">-</span>
+                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;">Ketinggian Air</span>
+                      <span style="font-size: 0.72rem; font-weight: 700; color: var(--green);" id="val-water-status">Pompa Aman</span>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Kelembapan Card -->
-                <div class="card-sensor">
-                  <div class="sensor-icon-container blue">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z" />
-                    </svg>
-                  </div>
-                  <div style="display:flex; flex-direction:column;">
-                    <span class="sensor-label">Kelembapan</span>
-                    <span class="sensor-value" id="val-humidity">-</span>
-                  </div>
-                </div>
-
-                <!-- Status Card -->
-                <div class="card-sensor">
-                  <div class="sensor-icon-container green" id="status-icon-container">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                  </div>
-                  <div style="display:flex; flex-direction:column;">
-                    <span class="sensor-label">Status Alat</span>
-                    <span class="sensor-value" style="color:var(--text-sub); font-size:1.45rem;"
-                      id="val-status">Menunggu...</span>
+                <!-- Bento Card 5: Status Sistem & Python Gateway (Wide Banner) -->
+                <div class="card-sensor bento-card" style="grid-column: span 2;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div class="bento-badge badge-green" id="status-icon-container">●</div>
+                      <div>
+                        <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-main);">Status Perangkat & IoT Gateway</span>
+                        <span style="font-size: 0.74rem; color: var(--text-sub); display: block;">Transmisi Data Realtime Terhubung</span>
+                      </div>
+                    </div>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: var(--green);" id="val-status">Aktif</span>
                   </div>
                 </div>
               </div>
@@ -3121,11 +3363,24 @@
       aerator: 0
     };
 
-    // Default Schedules (Terhubung 100% ke Firebase Cloud Realtime Database)
-    let schedules = [
-      { time: '08:00', portion: 1 },
-      { time: '16:00', portion: 2 }
-    ];
+    // Default Schedules
+    let schedules = [];
+    try {
+      const savedSchedules = localStorage.getItem('aquaponics_schedules');
+      if (savedSchedules) {
+        schedules = JSON.parse(savedSchedules);
+      } else {
+        schedules = [
+          { time: '08:00', portion: 1 },
+          { time: '16:00', portion: 2 }
+        ];
+      }
+    } catch (e) {
+      schedules = [
+        { time: '08:00', portion: 1 },
+        { time: '16:00', portion: 2 }
+      ];
+    }
 
     // Live/Simulated telemetry data state
     let telemetryData = {
@@ -3185,17 +3440,14 @@
           .catch(err => console.error('Pendaftaran Service Worker gagal:', err));
       }
 
-      // Clear legacy localStorage login flag to guarantee fresh login on new session
-      localStorage.removeItem('aquaponics_logged_in');
-
-      // Check if user is logged in for current active session
-      const isLoggedIn = sessionStorage.getItem('aquaponics_logged_in') === 'true';
+      // Check if user is logged in locally
+      const isLoggedIn = localStorage.getItem('aquaponics_logged_in') === 'true';
       if (isLoggedIn) {
         document.getElementById('login-screen').style.display = 'none';
         document.querySelector('.desktop-container').style.display = 'flex';
         startLocalApiPolling();
       } else {
-        // New session / Not logged in: always show login screen first
+        // Not logged in: show login screen
         document.getElementById('login-screen').style.display = 'flex';
         document.querySelector('.desktop-container').style.display = 'none';
       }
@@ -3288,21 +3540,54 @@
     function updateUI() {
       // 1. Beranda Values
       document.getElementById('val-suhu').innerText = telemetryData.temp_w !== null ? `${telemetryData.temp_w.toFixed(1)}°C` : '-';
-      document.getElementById('val-tds').innerText = telemetryData.tds !== null ? `${telemetryData.tds.toFixed(0)} ppm` : '-';
+      document.getElementById('val-tds').innerText = telemetryData.tds !== null ? `${telemetryData.tds.toFixed(0)}` : '-';
       document.getElementById('val-tinggi-air').innerText = telemetryData.water_level !== null ? `${telemetryData.water_level.toFixed(1)}%` : '-';
       document.getElementById('val-suhu-udara').innerText = telemetryData.temp_a !== null ? `${telemetryData.temp_a.toFixed(1)}°C` : '-';
       document.getElementById('val-humidity').innerText = telemetryData.hum !== null ? `${telemetryData.hum}%` : '-';
       document.getElementById('val-status').innerText = telemetryData.status;
 
+      // Bento Rings & Status Updates
+      const tdsRing = document.getElementById('bento-tds-ring');
+      if (tdsRing) {
+        const tdsVal = telemetryData.tds !== null ? telemetryData.tds : 0;
+        const tdsPct = Math.min(100, Math.max(0, (tdsVal / 1200) * 100));
+        const offset = 188.5 - (188.5 * tdsPct / 100);
+        tdsRing.style.strokeDashoffset = offset;
+      }
+
+      const waterRing = document.getElementById('bento-water-ring');
+      if (waterRing) {
+        const wVal = telemetryData.water_level !== null ? telemetryData.water_level : 0;
+        const wPct = Math.min(100, Math.max(0, wVal));
+        const offset = 188.5 - (188.5 * wPct / 100);
+        waterRing.style.strokeDashoffset = offset;
+      }
+
+      const tempStatus = document.getElementById('val-suhu-status');
+      if (tempStatus && telemetryData.temp_w !== null) {
+        if (telemetryData.temp_w > 30.0) {
+          tempStatus.innerText = "⚠️ Terlalu Panas";
+          tempStatus.style.color = "#ef4444";
+        } else if (telemetryData.temp_w < 24.0) {
+          tempStatus.innerText = "⚠️ Terlalu Dingin";
+          tempStatus.style.color = "#f97316";
+        } else {
+          tempStatus.innerText = "Optimal (24 - 30°C)";
+          tempStatus.style.color = "var(--text-sub)";
+        }
+      }
+
       const statusIcon = document.getElementById('status-icon-container');
-      if (telemetryData.status === 'Aktif') {
-        document.getElementById('val-status').style.color = 'var(--green)';
-        statusIcon.className = 'sensor-icon-container green';
-      } else {
-        document.getElementById('val-status').style.color = 'var(--text-sub)';
-        statusIcon.className = 'sensor-icon-container';
-        statusIcon.style.backgroundColor = 'var(--primary-light)';
-        statusIcon.style.color = 'var(--primary)';
+      if (statusIcon) {
+        if (telemetryData.status === 'Aktif') {
+          document.getElementById('val-status').style.color = 'var(--green)';
+          statusIcon.className = 'bento-badge badge-green';
+          statusIcon.innerText = '●';
+        } else {
+          document.getElementById('val-status').style.color = 'var(--text-sub)';
+          statusIcon.className = 'bento-badge badge-sky';
+          statusIcon.innerText = '○';
+        }
       }
 
       // 2. Monitoring screen values
@@ -3854,10 +4139,10 @@
           labels: timeLabels,
           datasets: [
             {
-              label: 'Suhu (°C)',
-              data: tempHistory,
+              label: 'Suhu Air (°C)',
+              data: [],
               borderColor: '#3b82f6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              backgroundColor: 'rgba(59, 130, 246, 0.08)',
               borderWidth: 2.5,
               tension: 0.35,
               fill: true,
@@ -3865,12 +4150,39 @@
             },
             {
               label: 'TDS Air (ppm)',
-              data: tdsHistory,
+              data: [],
               borderColor: '#10b981',
               backgroundColor: 'transparent',
               borderWidth: 2.5,
               tension: 0.35,
               yAxisID: 'yTDS'
+            },
+            {
+              label: 'Level Air (%)',
+              data: [],
+              borderColor: '#06b6d4',
+              backgroundColor: 'transparent',
+              borderWidth: 2.5,
+              tension: 0.35,
+              yAxisID: 'yPercent'
+            },
+            {
+              label: 'Suhu Udara (°C)',
+              data: [],
+              borderColor: '#f97316',
+              backgroundColor: 'transparent',
+              borderWidth: 2.5,
+              tension: 0.35,
+              yAxisID: 'yTemp'
+            },
+            {
+              label: 'Kelembaban (%)',
+              data: [],
+              borderColor: '#8b5cf6',
+              backgroundColor: 'transparent',
+              borderWidth: 2.5,
+              tension: 0.35,
+              yAxisID: 'yPercent'
             }
           ]
         },
@@ -3881,7 +4193,8 @@
             legend: {
               position: 'top',
               labels: {
-                boxWidth: 12,
+                boxWidth: 10,
+                padding: 10,
                 font: { family: 'Inter', size: 10, weight: '500' },
                 color: fontColor
               }
@@ -3902,11 +4215,20 @@
             yTDS: {
               type: 'linear',
               position: 'right',
-              title: { display: true, text: 'TDS Air (ppm)', font: { size: 9, weight: '600' }, color: '#10b981' },
+              title: { display: true, text: 'TDS (ppm)', font: { size: 9, weight: '600' }, color: '#10b981' },
               grid: { drawOnChartArea: false },
               ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
               min: 0,
               max: 1500
+            },
+            yPercent: {
+              type: 'linear',
+              position: 'right',
+              title: { display: true, text: 'Level / Hum (%)', font: { size: 9, weight: '600' }, color: '#06b6d4' },
+              grid: { drawOnChartArea: false },
+              ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
+              min: 0,
+              max: 100
             }
           }
         }
@@ -3923,70 +4245,139 @@
 
       if (!chartInstance) return;
 
-      const localServerIp = localStorage.getItem('aquaponics_server_ip') || window.location.hostname || '192.168.1.40';
+      const localServerIp = localStorage.getItem('aquaponics_server_ip') || window.location.hostname || 'localhost';
       const localServerPort = localStorage.getItem('aquaponics_server_port') || '5000';
       const baseUrl = `http://${localServerIp}:${localServerPort}`;
       
-      f    // --- CONFIG MODALS LOADING (FIREBASE CLOUD INTEGRATED) ---
+      fetchLocalHistory(baseUrl, tabName);
+    }
+
+    // --- CONFIG MODALS LOADING ---
     function openConfigModal(type) {
       const modal = document.getElementById('modal-config');
       const title = document.getElementById('config-modal-title');
       const body = document.getElementById('config-modal-body');
       const saveBtn = document.getElementById('btn-save-config');
 
-      title.innerText = `Config: ${type}`;
+      title.innerText = type === 'Notifications' ? 'Pengaturan Notifikasi Email' : `Config: ${type}`;
       saveBtn.style.display = 'block';
 
       if (type === 'WiFi') {
+        const ssid = localStorage.getItem('aquaponics_wifi_ssid') || 'Akuaponik_SSID';
+        const pass = localStorage.getItem('aquaponics_wifi_pass') || '********';
         body.innerHTML = `
           <div class="form-group">
             <label>SSID (Nama WiFi)</label>
-            <input type="text" id="wifi-ssid" class="form-control" value="Akuaponik_SSID">
+            <input type="text" id="wifi-ssid" class="form-control" value="${ssid}">
           </div>
           <div class="form-group">
             <label>Password WiFi</label>
-            <input type="password" id="wifi-pass" class="form-control" value="********">
+            <div style="position: relative; width: 100%;">
+              <input type="password" id="wifi-pass" class="form-control" style="padding-right: 40px;" value="${pass}">
+              <button type="button" onclick="togglePasswordVisibility('wifi-pass', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Tampilkan / Sembunyikan Kata Sandi">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
         `;
       }
       else if (type === 'Server') {
+        const ip = localStorage.getItem('aquaponics_server_ip') || '192.168.1.15';
+        const port = localStorage.getItem('aquaponics_server_port') || '8080';
         body.innerHTML = `
           <div class="form-group">
             <label>IP Gateway Raspberry Pi</label>
-            <input type="text" id="server-ip" class="form-control" value="192.168.1.40">
+            <input type="text" id="server-ip" class="form-control" value="${ip}">
           </div>
           <div class="form-group">
             <label>Port Komunikasi</label>
-            <input type="number" id="server-port" class="form-control" value="5000">
+            <input type="number" id="server-port" class="form-control" value="${port}">
           </div>
         `;
       }
       else if (type === 'Calibration') {
+        const ppm = localStorage.getItem('aquaponics_cal_tds_ppm') || '1000';
+        const volts = localStorage.getItem('aquaponics_cal_tds_v') || '1.50';
         body.innerHTML = `
           <p style="margin-bottom: 12px; font-size:0.8rem;">Kalibrasi sensor TDS Anda menggunakan larutan kalibrasi standar (misal 707 ppm atau 1000 ppm).</p>
           <div class="form-group">
             <label>Nilai Larutan Standar (ppm)</label>
-            <input type="number" id="cal-tds-ppm" class="form-control" value="1000">
+            <input type="number" id="cal-tds-ppm" class="form-control" value="${ppm}">
           </div>
           <div class="form-group">
             <label>Tegangan Terbaca (V) saat Kalibrasi</label>
-            <input type="number" step="0.01" id="cal-tds-v" class="form-control" value="1.50">
+            <input type="number" step="0.01" id="cal-tds-v" class="form-control" value="${volts}">
           </div>
         `;
       }
       else if (type === 'Notifications') {
+        const notifEmailEnabled = telemetryData.email_notif_enabled !== undefined ? telemetryData.email_notif_enabled : (localStorage.getItem('aquaponics_email_enabled') !== 'false');
+        const serviceId = telemetryData.emailjs_service_id || localStorage.getItem('aquaponics_emailjs_service_id') || 'service_4e9rkbf';
+        const templateId = telemetryData.emailjs_template_id || localStorage.getItem('aquaponics_emailjs_template_id') || 'template_p2vuw8k';
+        const publicKey = telemetryData.emailjs_public_key || localStorage.getItem('aquaponics_emailjs_public_key') || '4v1gUffZm6c9CtGXH';
+        const recipientEmail = telemetryData.recipient_email || localStorage.getItem('aquaponics_recipient_email') || 'icelanggriany@gmail.com';
+        
+        const tdsMin = telemetryData.tds_min || 400;
+        const tdsMax = telemetryData.tds_max || 900;
+        const tempMin = telemetryData.temp_w_min || 24.0;
+        const tempMax = telemetryData.temp_w_max || 30.0;
+        const waterMin = telemetryData.water_level_min || 50.0;
+
         body.innerHTML = `
-          <p style="margin-bottom:12px;">Aktifkan peringatan otomatis ke browser saat kondisi akuaponik tidak stabil:</p>
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            <label style="display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--text-main);">
-              <input type="checkbox" id="notif-tds" checked> Alert TDS Kritis (&lt; 300 ppm atau &gt; 1000 ppm)
+          <div style="display:flex; flex-direction:column; gap:12px; font-size:0.8rem; text-align:left;">
+            <label style="display:flex; align-items:center; gap:10px; font-weight:700; color:var(--text-main); font-size:0.88rem; background:var(--primary-light); padding:12px 14px; border-radius:14px; border:1px solid var(--border-glass);">
+              <input type="checkbox" id="email-notif-enabled" ${notifEmailEnabled ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer;"> Aktifkan Notifikasi Email Otomatis (EmailJS)
             </label>
-            <label style="display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--text-main);">
-              <input type="checkbox" id="notif-temp" checked> Alert Suhu Air Kritis (&gt; 33°C)
-            </label>
-            <label style="display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--text-main);">
-              <input type="checkbox" id="notif-feed" checked> Notifikasi Pakan Berhasil Dikirim
-            </label>
+            
+            <h4 style="margin:4px 0 2px 0; font-size:0.85rem; font-weight:700; color:var(--primary);">Kredensial EmailJS</h4>
+            <div style="background:var(--bg-app); padding:14px; border-radius:16px; border:1px solid var(--border-glass); display:flex; flex-direction:column; gap:8px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.75rem; color:var(--text-sub); font-weight:600;">Service ID EmailJS</label>
+                <input type="text" id="emailjs-service-id" class="form-control" value="${serviceId}" placeholder="service_4e9rkbf">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.75rem; color:var(--text-sub); font-weight:600;">Template ID EmailJS</label>
+                <input type="text" id="emailjs-template-id" class="form-control" value="${templateId}" placeholder="template_p2vuw8k">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.75rem; color:var(--text-sub); font-weight:600;">Public Key (User ID) EmailJS</label>
+                <input type="text" id="emailjs-public-key" class="form-control" value="${publicKey}" placeholder="4v1gUffZm6c9CtGXH">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:2px;">
+              <label style="font-size:0.78rem; color:var(--text-main); font-weight:700;">Email Penerima Notifikasi (Recipient Email)</label>
+              <input type="email" id="email-recipient" class="form-control" value="${recipientEmail}" placeholder="icelanggriany@gmail.com">
+            </div>
+
+            <h4 style="margin:6px 0 2px 0; font-size:0.85rem; font-weight:700; color:var(--primary);">Batas Safe Zone Sensor (Thresholds)</h4>
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;">
+                <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">TDS Min (ppm)</label>
+                <input type="number" id="email-tds-min" class="form-control" value="${tdsMin}">
+              </div>
+              <div style="flex:1;">
+                <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">TDS Max (ppm)</label>
+                <input type="number" id="email-tds-max" class="form-control" value="${tdsMax}">
+              </div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;">
+                <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">Suhu Air Min (°C)</label>
+                <input type="number" step="0.5" id="email-temp-min" class="form-control" value="${tempMin}">
+              </div>
+              <div style="flex:1;">
+                <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">Suhu Air Max (°C)</label>
+                <input type="number" step="0.5" id="email-temp-max" class="form-control" value="${tempMax}">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:2px;">
+              <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">Level Air Min (%)</label>
+              <input type="number" id="email-water-min" class="form-control" value="${waterMin}">
+            </div>
           </div>
         `;
       }
@@ -4028,7 +4419,7 @@
         body.innerHTML = `
           <div style="text-align:center; padding: 10px 0;">
             <div style="font-family:var(--font-outfit); font-size:1.2rem; font-weight:800; color:var(--primary); margin-bottom:4px;">Akuaponik Smart IoT</div>
-            <div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:16px;">Versi Aplikasi v1.0.0 (Firebase Cloud Integrated)</div>
+            <div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:16px;">Versi Aplikasi v1.0.0</div>
             <p style="font-size:0.8rem; line-height:1.5; color:var(--text-main);">Sistem monitoring dan kontrol kolam terpadu menggunakan transmisi nirkabel LoRa (Long Range) dan Raspberry Pi 3 Gateway.</p>
             <div style="margin-top:20px; font-size:0.72rem; color:var(--text-sub);">Didesain khusus untuk optimalisasi pertanian masa depan.</div>
           </div>
@@ -4037,6 +4428,68 @@
 
       modal.setAttribute('data-current-type', type);
       modal.classList.add('active');
+    }
+
+    function toggleEmailProviderUI(provider) {
+      const secEmailJS = document.getElementById('section-emailjs');
+      const secSMTP = document.getElementById('section-smtp');
+      if (secEmailJS && secSMTP) {
+        secEmailJS.style.display = provider === 'emailjs' ? 'block' : 'none';
+        secSMTP.style.display = provider === 'smtp' ? 'block' : 'none';
+      }
+    }
+
+    function triggerTestEmail() {
+      const recipient = document.getElementById('email-recipient').value;
+      const provider = document.querySelector('input[name="email-provider-radio"]:checked')?.value || 'emailjs';
+      
+      if (!recipient) {
+        alert("Harap isi Email Penerima terlebih dahulu!");
+        return;
+      }
+
+      if (provider === 'emailjs') {
+        const serviceId = document.getElementById('emailjs-service-id').value;
+        const templateId = document.getElementById('emailjs-template-id').value;
+        const publicKey = document.getElementById('emailjs-public-key').value;
+
+        if (!serviceId || !templateId || !publicKey) {
+          alert("Harap lengkapi Service ID, Template ID, dan Public Key EmailJS!");
+          return;
+        }
+
+        if (typeof emailjs !== 'undefined') {
+          emailjs.init(publicKey);
+          emailjs.send(serviceId, templateId, {
+            name: "Smart Aquaponik System",
+            to_email: recipient,
+            email: recipient,
+            subject: "⚠️ [Smart Aquaponik Alert] Uji Coba EmailJS Berhasil!",
+            message: "Email ini dikirim secara instan dari Web Dashboard menggunakan layanan EmailJS.",
+            time: new Date().toLocaleString()
+          }).then(res => {
+            alert("✅ Uji coba EmailJS BERHASIL dikirim ke " + recipient + "!");
+          }).catch(err => {
+            console.error("EmailJS Error:", err);
+            alert("❌ Gagal mengirim via EmailJS: " + (err.text || JSON.stringify(err)));
+          });
+        }
+      }
+
+      // Kirim juga ke Gateway
+      sendLocalControl({
+        email_notif_enabled: true,
+        email_provider: provider,
+        emailjs_service_id: document.getElementById('emailjs-service-id')?.value || 'service_4e9rkbf',
+        emailjs_template_id: document.getElementById('emailjs-template-id')?.value || 'template_p2vuw8k',
+        emailjs_public_key: document.getElementById('emailjs-public-key')?.value || '4v1gUffZm6c9CtGXH',
+        smtp_server: document.getElementById('email-smtp-server')?.value || 'smtp.gmail.com',
+        smtp_port: parseInt(document.getElementById('email-smtp-port')?.value) || 587,
+        sender_email: document.getElementById('email-sender')?.value || '',
+        sender_password: document.getElementById('email-pass')?.value || '',
+        recipient_email: recipient,
+        send_test_email: true
+      });
     }
 
     function saveConfiguration() {
@@ -4053,61 +4506,177 @@
           lamp_schedule: { start: lampStart, end: lampEnd },
           pump_b_schedule: { start: pumpStart, end: pumpEnd }
         });
-        alert("Jadwal Lampu dan Pompa berhasil disimpan ke Firebase Cloud!");
+        alert("Jadwal Lampu dan Pompa berhasil disimpan!");
         closeModal('modal-config');
       } else if (type === 'WiFi') {
         const ssid = document.getElementById('wifi-ssid').value;
         const pass = document.getElementById('wifi-pass').value;
-        sendLocalControl({ wifi_ssid: ssid, wifi_pass: pass });
-        alert("Konfigurasi WiFi berhasil disimpan ke Firebase Cloud!");
+        localStorage.setItem('aquaponics_wifi_ssid', ssid);
+        localStorage.setItem('aquaponics_wifi_pass', pass);
+        alert("Konfigurasi WiFi berhasil disimpan secara lokal!");
         closeModal('modal-config');
       } else if (type === 'Server') {
         const ip = document.getElementById('server-ip').value;
         const port = document.getElementById('server-port').value;
-        sendLocalControl({ server_ip: ip, server_port: port });
-        alert("Konfigurasi Server berhasil disimpan ke Firebase Cloud!");
+        localStorage.setItem('aquaponics_server_ip', ip);
+        localStorage.setItem('aquaponics_server_port', port);
+        alert("Konfigurasi Server berhasil disimpan secara lokal!");
         closeModal('modal-config');
       } else if (type === 'Calibration') {
         const ppm = document.getElementById('cal-tds-ppm').value;
         const volts = document.getElementById('cal-tds-v').value;
-        sendLocalControl({ cal_tds_ppm: ppm, cal_tds_v: volts });
-        alert("Konfigurasi Kalibrasi Sensor berhasil disimpan ke Firebase Cloud!");
+        localStorage.setItem('aquaponics_cal_tds_ppm', ppm);
+        localStorage.setItem('aquaponics_cal_tds_v', volts);
+        alert("Konfigurasi Kalibrasi Sensor berhasil disimpan secara lokal!");
         closeModal('modal-config');
       } else if (type === 'Notifications') {
-        const notifTds = document.getElementById('notif-tds').checked;
-        const notifTemp = document.getElementById('notif-temp').checked;
-        const notifFeed = document.getElementById('notif-feed').checked;
-        sendLocalControl({ notif_tds: notifTds, notif_temp: notifTemp, notif_feed: notifFeed });
-        alert("Pengaturan Notifikasi berhasil disimpan ke Firebase Cloud!");
+        const enabled = document.getElementById('email-notif-enabled').checked;
+        const serviceId = document.getElementById('emailjs-service-id').value;
+        const templateId = document.getElementById('emailjs-template-id').value;
+        const publicKey = document.getElementById('emailjs-public-key').value;
+        const recipient = document.getElementById('email-recipient').value;
+        const tdsMin = parseFloat(document.getElementById('email-tds-min').value) || 400;
+        const tdsMax = parseFloat(document.getElementById('email-tds-max').value) || 900;
+        const tempMin = parseFloat(document.getElementById('email-temp-min').value) || 24.0;
+        const tempMax = parseFloat(document.getElementById('email-temp-max').value) || 30.0;
+        const waterMin = parseFloat(document.getElementById('email-water-min').value) || 50.0;
+
+        localStorage.setItem('aquaponics_email_enabled', enabled);
+        localStorage.setItem('aquaponics_email_provider', 'emailjs');
+        localStorage.setItem('aquaponics_emailjs_service_id', serviceId);
+        localStorage.setItem('aquaponics_emailjs_template_id', templateId);
+        localStorage.setItem('aquaponics_emailjs_public_key', publicKey);
+        localStorage.setItem('aquaponics_recipient_email', recipient);
+
+        sendLocalControl({
+          email_notif_enabled: enabled,
+          email_provider: 'emailjs',
+          emailjs_service_id: serviceId,
+          emailjs_template_id: templateId,
+          emailjs_public_key: publicKey,
+          recipient_email: recipient,
+          tds_min: tdsMin,
+          tds_max: tdsMax,
+          temp_w_min: tempMin,
+          temp_w_max: tempMax,
+          water_level_min: waterMin
+        });
+
+        alert("Pengaturan Notifikasi EmailJS berhasil disimpan!");
         closeModal('modal-config');
       } else {
-        alert(`Konfigurasi ${type} berhasil disimpan ke Firebase Cloud!`);
+        alert(`Konfigurasi ${type} disimpan secara lokal!`);
         closeModal('modal-config');
       }
     }
 
-    // --- FIREBASE CLOUD AUTHENTICATION SETUP ---
-    let authMode = 'login'; // 'login' or 'register'
+    // --- LOCAL DUMMY AUTHENTICATION & DATABASE SETUP ---
+    let authMode = 'login'; // 'login' | 'register' | 'forgot'
 
-    function toggleAuthMode() {
-      authMode = authMode === 'login' ? 'register' : 'login';
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+
+      if (isPassword) {
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        `;
+        btn.style.color = 'var(--primary)';
+      } else {
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        `;
+        btn.style.color = 'var(--text-sub)';
+      }
+    }
+
+    function getRegisteredAccounts() {
+      const stored = localStorage.getItem('aquaponics_user_accounts');
+      let accounts = {};
+      if (stored) {
+        try {
+          accounts = JSON.parse(stored);
+        } catch (e) {
+          accounts = {};
+        }
+      }
+      accounts['admin@gmail.com'] = accounts['admin@gmail.com'] || 'admin';
+      const legacyEmail = localStorage.getItem('aquaponics_user_email');
+      const legacyPass = localStorage.getItem('aquaponics_user_pass');
+      if (legacyEmail && legacyPass) {
+        accounts[legacyEmail.toLowerCase().trim()] = legacyPass;
+      }
+      return accounts;
+    }
+
+    function saveRegisteredAccounts(accounts) {
+      localStorage.setItem('aquaponics_user_accounts', JSON.stringify(accounts));
+    }
+
+    function switchAuthMode(mode) {
+      authMode = mode;
       const title = document.getElementById('auth-title');
       const subtitle = document.getElementById('auth-subtitle');
       const btn = document.getElementById('auth-btn');
       const toggleText = document.getElementById('auth-toggle');
+      const confirmGroup = document.getElementById('auth-confirm-group');
+      const confirmInput = document.getElementById('auth-confirm-password');
+      const forgotLink = document.getElementById('auth-forgot-link');
+      const emailLabel = document.querySelector('label[for="auth-email"]');
+      const passLabel = document.querySelector('label[for="auth-password"]');
+      const confirmPassLabel = document.querySelector('label[for="auth-confirm-password"]');
 
       document.getElementById('auth-error-msg').style.display = 'none';
 
       if (authMode === 'login') {
         title.innerText = 'Smart Akuaponik';
         subtitle.innerText = 'Masuk untuk memantau & mengontrol sistem';
+        if (emailLabel) emailLabel.innerText = 'Alamat Email';
+        if (passLabel) passLabel.innerText = 'Kata Sandi';
         btn.innerText = 'Masuk';
         toggleText.innerHTML = `Belum punya akun?<span id="auth-toggle-btn" style="cursor:pointer; color:var(--primary); font-weight:700; margin-left:4px;">Daftar Sekarang</span>`;
-      } else {
+        if (confirmGroup) confirmGroup.style.display = 'none';
+        if (confirmInput) confirmInput.removeAttribute('required');
+        if (forgotLink) forgotLink.style.display = 'block';
+      } else if (authMode === 'register') {
         title.innerText = 'Daftar Akun';
         subtitle.innerText = 'Buat akun pengelola sistem akuaponik';
+        if (emailLabel) emailLabel.innerText = 'Alamat Email';
+        if (passLabel) passLabel.innerText = 'Kata Sandi';
+        if (confirmPassLabel) confirmPassLabel.innerText = 'Konfirmasi Kata Sandi';
         btn.innerText = 'Daftar';
         toggleText.innerHTML = `Sudah punya akun?<span id="auth-toggle-btn" style="cursor:pointer; color:var(--primary); font-weight:700; margin-left:4px;">Masuk di sini</span>`;
+        if (confirmGroup) confirmGroup.style.display = 'block';
+        if (confirmInput) confirmInput.setAttribute('required', 'true');
+        if (forgotLink) forgotLink.style.display = 'none';
+      } else if (authMode === 'forgot') {
+        title.innerText = 'Atur Ulang Kata Sandi';
+        subtitle.innerText = 'Masukkan email terdaftar dan kata sandi baru Anda';
+        if (emailLabel) emailLabel.innerText = 'Email Terdaftar';
+        if (passLabel) passLabel.innerText = 'Kata Sandi Baru';
+        if (confirmPassLabel) confirmPassLabel.innerText = 'Konfirmasi Kata Sandi Baru';
+        btn.innerText = 'Simpan Kata Sandi Baru';
+        toggleText.innerHTML = `<span id="auth-toggle-btn" style="cursor:pointer; color:var(--primary); font-weight:700;">← Batal & Kembali ke Login</span>`;
+        if (confirmGroup) confirmGroup.style.display = 'block';
+        if (confirmInput) confirmInput.setAttribute('required', 'true');
+        if (forgotLink) forgotLink.style.display = 'none';
+      }
+    }
+
+    function toggleAuthMode() {
+      if (authMode === 'forgot') {
+        switchAuthMode('login');
+      } else {
+        switchAuthMode(authMode === 'login' ? 'register' : 'login');
       }
     }
 
@@ -4116,84 +4685,113 @@
 
       const email = document.getElementById('auth-email').value;
       const password = document.getElementById('auth-password').value;
+      const confirmPass = document.getElementById('auth-confirm-password')?.value || '';
       const errorMsg = document.getElementById('auth-error-msg');
       const submitBtn = document.getElementById('auth-btn');
+      const normalizedEmail = email.toLowerCase().trim();
 
       errorMsg.style.display = 'none';
+      const accounts = getRegisteredAccounts();
+
+      if (authMode === 'forgot') {
+        if (!accounts[normalizedEmail]) {
+          errorMsg.innerText = "❌ Email ini belum terdaftar di sistem!";
+          errorMsg.style.display = 'block';
+          return;
+        }
+
+        if (password !== confirmPass) {
+          errorMsg.innerText = "❌ Konfirmasi kata sandi baru tidak cocok!";
+          errorMsg.style.display = 'block';
+          return;
+        }
+      } else if (authMode === 'register') {
+        if (accounts[normalizedEmail]) {
+          errorMsg.innerText = "❌ Email ini sudah terdaftar! Gunakan email lain atau pilih Lupa Kata Sandi.";
+          errorMsg.style.display = 'block';
+          return;
+        }
+
+        if (password !== confirmPass) {
+          errorMsg.innerText = "❌ Konfirmasi kata sandi tidak cocok!";
+          errorMsg.style.display = 'block';
+          return;
+        }
+      }
+
       submitBtn.disabled = true;
-      submitBtn.innerText = authMode === 'login' ? 'Memproses Masuk via Firebase Cloud...' : 'Mendaftarkan Akun ke Firebase Cloud...';
+      submitBtn.innerText = authMode === 'login' ? 'Memproses Masuk...' : (authMode === 'register' ? 'Memproses Daftar...' : 'Menyimpan Kata Sandi...');
 
-      if (authMode === 'login') {
-        // Ambil data kredensial user dari Firebase Realtime Database Cloud
-        fetch(`${FIREBASE_REST_URL}/users.json`)
-          .then(res => res.json())
-          .then(userData => {
-            const savedEmail = (userData && userData.email) ? userData.email : 'admin@gmail.com';
-            const savedPass = (userData && userData.password) ? userData.password : 'admin';
+      setTimeout(() => {
+        if (authMode === 'login') {
+          if (accounts[normalizedEmail] && accounts[normalizedEmail] === password) {
+            console.log("Login lokal sukses.");
+            localStorage.setItem('aquaponics_logged_in', 'true');
 
-            if (email === savedEmail && password === savedPass) {
-              console.log("Login sukses via Firebase Cloud.");
-              sessionStorage.setItem('aquaponics_logged_in', 'true');
-              sessionStorage.setItem('aquaponics_user_email', email);
+            document.getElementById('login-screen').style.display = 'none';
+            document.querySelector('.desktop-container').style.display = 'flex';
 
-              document.getElementById('login-screen').style.display = 'none';
-              document.querySelector('.desktop-container').style.display = 'flex';
+            startLocalApiPolling();
 
-              startLocalApiPolling();
-
-              // Clear fields
-              document.getElementById('auth-email').value = '';
-              document.getElementById('auth-password').value = '';
-              submitBtn.disabled = false;
-              submitBtn.innerText = 'Masuk';
-            } else {
-              errorMsg.innerText = "❌ Alamat email atau kata sandi salah!";
-              errorMsg.style.display = 'block';
-              submitBtn.disabled = false;
-              submitBtn.innerText = 'Masuk';
-            }
-          })
-          .catch(err => {
-            console.error("Gagal terhubung ke Firebase Cloud auth:", err);
-            // Fallback default admin
-            if (email === 'admin@gmail.com' && password === 'admin') {
-              sessionStorage.setItem('aquaponics_logged_in', 'true');
-              sessionStorage.setItem('aquaponics_user_email', email);
-              document.getElementById('login-screen').style.display = 'none';
-              document.querySelector('.desktop-container').style.display = 'flex';
-              startLocalApiPolling();
-            } else {
-              errorMsg.innerText = "❌ Alamat email atau kata sandi salah!";
-              errorMsg.style.display = 'block';
+            // Clear fields
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
+            if (document.getElementById('auth-confirm-password')) {
+              document.getElementById('auth-confirm-password').value = '';
             }
             submitBtn.disabled = false;
             submitBtn.innerText = 'Masuk';
-          });
-      } else {
-        // Mode Pendaftaran: Simpan kredensial langsung ke Firebase Cloud
-        const newUserObj = { email: email, password: password, registeredAt: new Date().toISOString() };
-        fetch(`${FIREBASE_REST_URL}/users.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newUserObj)
-        })
-        .then(res => res.json())
-        .then(() => {
-          sessionStorage.setItem('aquaponics_user_email', email);
-          alert(`Pendaftaran berhasil! Email notifikasi realtime akan dikirim ke: ${email}`);
-          toggleAuthMode();
-          document.getElementById('auth-email').value = email;
-          document.getElementById('auth-password').value = password;
+          } else {
+            errorMsg.innerText = "❌ Alamat email atau kata sandi salah!";
+            errorMsg.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Masuk';
+          }
+        } else if (authMode === 'forgot') {
+          // Forgot Mode: Update password for registered email
+          accounts[normalizedEmail] = password;
+          saveRegisteredAccounts(accounts);
+          if (localStorage.getItem('aquaponics_user_email') === normalizedEmail) {
+            localStorage.setItem('aquaponics_user_pass', password);
+          }
+
+          alert("✅ Kata sandi untuk email " + normalizedEmail + " BERHASIL diperbarui! Silakan ketik kembali email dan kata sandi baru Anda untuk masuk.");
+
+          // Clear inputs
+          document.getElementById('auth-email').value = '';
+          document.getElementById('auth-password').value = '';
+          if (document.getElementById('auth-confirm-password')) {
+            document.getElementById('auth-confirm-password').value = '';
+          }
+
+          // Switch back to login mode
+          switchAuthMode('login');
+
           submitBtn.disabled = false;
           submitBtn.innerText = 'Masuk';
-        })
-        .catch(err => {
-          console.error("Gagal menyimpan akun ke Firebase Cloud:", err);
-          alert("Gagal mendaftar ke Firebase Cloud. Pastikan koneksi internet aktif.");
+        } else {
+          // Register Mode: Save credentials in multi-account storage
+          accounts[normalizedEmail] = password;
+          saveRegisteredAccounts(accounts);
+          localStorage.setItem('aquaponics_user_email', normalizedEmail);
+          localStorage.setItem('aquaponics_user_pass', password);
+
+          alert("Pendaftaran berhasil! Silakan ketik kembali email dan kata sandi Anda untuk masuk.");
+
+          // Clear inputs
+          document.getElementById('auth-email').value = '';
+          document.getElementById('auth-password').value = '';
+          if (document.getElementById('auth-confirm-password')) {
+            document.getElementById('auth-confirm-password').value = '';
+          }
+
+          // Switch back to login UI mode
+          switchAuthMode('login');
+
           submitBtn.disabled = false;
-          submitBtn.innerText = 'Daftar';
-        });
-      }
+          submitBtn.innerText = 'Masuk';
+        }
+      }, 600);
     }
 
     function confirmLogout() {
@@ -4201,69 +4799,54 @@
     }
 
     function executeLogout() {
-      sessionStorage.removeItem('aquaponics_logged_in');
-      sessionStorage.removeItem('aquaponics_user_email');
+      localStorage.removeItem('aquaponics_logged_in');
       window.location.reload();
     }
+
+
 
     // --- DIALOG MODALS UTILS ---
     function closeModal(id) {
       document.getElementById(id).classList.remove('active');
     }
 
-    // --- NOTIFICATION SYSTEM & EMAIL REALTIME HANDLER ---
-    function addNotification(type, title, message) {
-      const newNotif = {
-        id: Date.now() + Math.random(),
-        title: title,
-        message: message,
-        timestamp: Date.now(),
-        type: type, // 'critical' | 'warning' | 'success' | 'info'
-        isNew: true
-      };
-      
-      notifications.unshift(newNotif);
-      if (notifications.length > 30) {
-        notifications.pop();
+    // --- NOTIFICATION SYSTEM (INSTAGRAM STYLE) ---
+    function loadNotifications() {
+      const stored = localStorage.getItem('aquaponics_notifications');
+      if (stored) {
+        try {
+          notifications = JSON.parse(stored);
+        } catch (e) {
+          console.error("Gagal parse notifications dari localStorage", e);
+          notifications = [];
+        }
+      } else {
+        // Seed default notifications if empty
+        notifications = [
+          {
+            id: 1,
+            title: 'Sistem Dimulai',
+            message: 'Aplikasi monitoring IoT aquaponics berhasil diinisialisasi.',
+            timestamp: Date.now() - 3600000 * 2, // 2 jam yang lalu
+            type: 'info',
+            isNew: false
+          },
+          {
+            id: 2,
+            title: 'Koneksi Normal',
+            message: 'Koneksi ke sistem berjalan dengan baik.',
+            timestamp: Date.now() - 60000 * 5, // 5 menit yang lalu
+            type: 'success',
+            isNew: true
+          }
+        ];
+        saveNotifications();
       }
-      
-      saveNotifications();
       updateNotificationBadge();
-      renderNotifications();
-
-      // Kirim Notifikasi Email Real-Time ke Email Terdaftar Pengguna
-      const registeredEmail = sessionStorage.getItem('aquaponics_user_email') || 'admin@gmail.com';
-      if (type === 'critical' || type === 'warning') {
-        sendEmailNotification(registeredEmail, title, message);
-      }
-    }
-
-    function sendEmailNotification(toEmail, title, message) {
-      if (typeof emailjs === 'undefined') return;
-      
-      const emailParams = {
-        to_email: toEmail,
-        title: title,
-        message: message,
-        time: new Date().toLocaleString('id-ID')
-      };
-
-      console.log(`[Realtime Email] Mengirimkan alert email ke: ${toEmail}...`);
-      
-      // Kirim via EmailJS API menggunakan Service ID & Template ID Anda
-      emailjs.send('service_4e9rkbf', 'template_p2vuw8k', emailParams)
-        .then(() => console.log('✅ Email notifikasi realtime berhasil terkirim ke inbox:', toEmail))
-        .catch(err => console.error('Gagal mengirimkan notifikasi email realtime:', err));
     }
 
     function saveNotifications() {
-      fetch(`${FIREBASE_REST_URL}/notifications.json`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(notifications)
-      })
-      .then(() => console.log("Notifikasi berhasil disimpan ke Firebase Cloud."))
-      .catch(err => console.error("Gagal menyimpan notifikasi ke Firebase Cloud:", err));
+      localStorage.setItem('aquaponics_notifications', JSON.stringify(notifications));
     }
 
     function updateNotificationBadge() {
@@ -4520,8 +5103,8 @@
         sidePulse.className = 'indicator-pulse green';
       }
 
-      const localServerIp = window.location.hostname || '192.168.1.40';
-      const localServerPort = '5000';
+      const localServerIp = localStorage.getItem('aquaponics_server_ip') || window.location.hostname || 'localhost';
+      const localServerPort = localStorage.getItem('aquaponics_server_port') || '5000';
       const baseUrl = `http://${localServerIp}:${localServerPort}`;
 
       // Inisialisasi awal schedules ke server & Firebase
@@ -4535,6 +5118,111 @@
 
       fetchLocalHistory(baseUrl, currentChartTab);
       localHistoryInterval = setInterval(() => fetchLocalHistory(baseUrl, currentChartTab), 10000);
+    }
+
+    const lastBrowserAlerts = {
+      temp_w: 0,
+      tds: 0,
+      water_level: 0,
+      offline: 0
+    };
+
+    function checkRealtimeAlerts(data) {
+      if (!data) return;
+      const enabled = (localStorage.getItem('aquaponics_email_enabled') !== 'false');
+      const serviceId = localStorage.getItem('aquaponics_emailjs_service_id') || 'service_4e9rkbf';
+      const templateId = localStorage.getItem('aquaponics_emailjs_template_id') || 'template_p2vuw8k';
+      const publicKey = localStorage.getItem('aquaponics_emailjs_public_key') || '4v1gUffZm6c9CtGXH';
+      const recipient = localStorage.getItem('aquaponics_recipient_email') || 'icelanggriany@gmail.com';
+
+      const minTemp = parseFloat(data.temp_w_min || localStorage.getItem('aquaponics_temp_min')) || 24.0;
+      const maxTemp = parseFloat(data.temp_w_max || localStorage.getItem('aquaponics_temp_max')) || 30.0;
+      const minTds = parseFloat(data.tds_min || localStorage.getItem('aquaponics_tds_min')) || 400;
+      const maxTds = parseFloat(data.tds_max || localStorage.getItem('aquaponics_tds_max')) || 900;
+      const minWater = parseFloat(data.water_level_min || localStorage.getItem('aquaponics_water_min')) || 50.0;
+
+      const now = Date.now();
+      const COOLDOWN = 15 * 60 * 1000;
+
+      if (data.temp_w && data.temp_w > 0 && (data.temp_w < minTemp || data.temp_w > maxTemp)) {
+        if (now - lastBrowserAlerts.temp_w > COOLDOWN) {
+          lastBrowserAlerts.temp_w = now;
+          const msg = `Suhu air (${data.temp_w}°C) di luar batas aman (${minTemp}°C - ${maxTemp}°C).`;
+          addNotification('critical', 'Peringatan Suhu Air', msg);
+          
+          if (enabled && typeof emailjs !== 'undefined') {
+            emailjs.init(publicKey);
+            emailjs.send(serviceId, templateId, {
+              name: "Smart Aquaponik System",
+              to_email: recipient,
+              email: recipient,
+              subject: `⚠️ [Smart Aquaponik Alert] Suhu Air Abnormal (${data.temp_w}°C)`,
+              message: msg,
+              time: new Date().toLocaleString()
+            }).catch(err => console.error("Auto EmailJS alert error:", err));
+          }
+        }
+      }
+
+      if (data.tds && data.tds > 0 && (data.tds < minTds || data.tds > maxTds)) {
+        if (now - lastBrowserAlerts.tds > COOLDOWN) {
+          lastBrowserAlerts.tds = now;
+          const msg = `Nilai TDS (${data.tds} ppm) di luar batas ideal (${minTds} - ${maxTds} ppm).`;
+          addNotification('warning', 'Peringatan Nutrisi Air', msg);
+          
+          if (enabled && typeof emailjs !== 'undefined') {
+            emailjs.init(publicKey);
+            emailjs.send(serviceId, templateId, {
+              name: "Smart Aquaponik System",
+              to_email: recipient,
+              email: recipient,
+              subject: `⚠️ [Smart Aquaponik Alert] TDS Air Abnormal (${data.tds} ppm)`,
+              message: msg,
+              time: new Date().toLocaleString()
+            }).catch(err => console.error("Auto EmailJS alert error:", err));
+          }
+        }
+      }
+
+      if (data.water_level !== undefined && data.water_level > 0 && data.water_level < minWater) {
+        if (now - lastBrowserAlerts.water_level > COOLDOWN) {
+          lastBrowserAlerts.water_level = now;
+          const msg = `Ketinggian air (${data.water_level}%) di bawah batas kritis (${minWater}%).`;
+          addNotification('critical', 'Peringatan Ketinggian Air', msg);
+          
+          if (enabled && typeof emailjs !== 'undefined') {
+            emailjs.init(publicKey);
+            emailjs.send(serviceId, templateId, {
+              name: "Smart Aquaponik System",
+              to_email: recipient,
+              email: recipient,
+              subject: `⚠️ [Smart Aquaponik Alert] Level Air Kritis (${data.water_level}%)`,
+              message: msg,
+              time: new Date().toLocaleString()
+            }).catch(err => console.error("Auto EmailJS alert error:", err));
+          }
+        }
+      }
+
+      if (data.status === 'Mati') {
+        if (now - lastBrowserAlerts.offline > COOLDOWN) {
+          lastBrowserAlerts.offline = now;
+          const msg = `Koneksi alat terputus (Offline) selama lebih dari 15 detik.`;
+          addNotification('critical', 'Koneksi Terputus', msg);
+          
+          if (enabled && typeof emailjs !== 'undefined') {
+            emailjs.init(publicKey);
+            emailjs.send(serviceId, templateId, {
+              name: "Smart Aquaponik System",
+              to_email: recipient,
+              email: recipient,
+              subject: `🔴 [Smart Aquaponik Alert] Perangkat Offline!`,
+              message: msg,
+              time: new Date().toLocaleString()
+            }).catch(err => console.error("Auto EmailJS alert error:", err));
+          }
+        }
+      }
     }
 
     function processIncomingTelemetry(data, modeName) {
@@ -4593,6 +5281,7 @@
       
       telemetryData.status = (isStale || data.status === 'Mati') ? 'Mati' : (data.status || 'Aktif');
       updateUI();
+      checkRealtimeAlerts(telemetryData);
 
       const sideSync = document.getElementById('sidebar-sync-text');
       const sideStatus = document.getElementById('sidebar-status-text');
@@ -4656,17 +5345,26 @@
             const labels = [];
             const tempHistory = [];
             const tdsHistory = [];
+            const waterHistory = [];
+            const tempAHistory = [];
+            const humHistory = [];
 
             historyData.forEach(point => {
               labels.push(point.time || point.date || '');
-              tempHistory.push(point.temp_w !== undefined ? point.temp_w : 0);
-              tdsHistory.push(point.tds !== undefined ? point.tds : 0);
+              tempHistory.push(point.temp_w !== undefined ? point.temp_w : null);
+              tdsHistory.push(point.tds !== undefined ? point.tds : null);
+              waterHistory.push(point.water_level !== undefined ? point.water_level : null);
+              tempAHistory.push(point.temp_a !== undefined ? point.temp_a : null);
+              humHistory.push(point.hum !== undefined ? point.hum : null);
             });
 
             if (chartInstance) {
               chartInstance.data.labels = labels;
               chartInstance.data.datasets[0].data = tempHistory;
               chartInstance.data.datasets[1].data = tdsHistory;
+              chartInstance.data.datasets[2].data = waterHistory;
+              chartInstance.data.datasets[3].data = tempAHistory;
+              chartInstance.data.datasets[4].data = humHistory;
               chartInstance.update();
             }
           }
@@ -4675,8 +5373,8 @@
     }
 
     function sendLocalControl(cmdObj) {
-      const localServerIp = window.location.hostname || '192.168.1.40';
-      const localServerPort = '5000';
+      const localServerIp = localStorage.getItem('aquaponics_server_ip') || window.location.hostname || 'localhost';
+      const localServerPort = localStorage.getItem('aquaponics_server_port') || '5000';
       const baseUrl = `http://${localServerIp}:${localServerPort}`;
 
       // 1. Kirim ke Server Lokal
@@ -4701,6 +5399,15 @@
       .catch(err => console.error("Gagal mengirim kontrol ke Firebase:", err));
     }
 
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('aquaponics_dark_mode', isDark);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.remove('theme-deep-ocean');
+      localStorage.setItem('aquaponics_theme_deep_ocean', 'false');
+    });
   </script>
 </body>
 

@@ -157,7 +157,7 @@ float readWaterLevel() {
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial);
+  delay(500);
 
   Serial.println("--- Aquaponics ESP32 Node Setup ---");
 
@@ -208,36 +208,28 @@ void setup() {
   // Configure E220 module parameters
   ResponseStructContainer rsc = e220.getConfiguration();
   if (rsc.status.code != 1) {
-    Serial.print("Failed to get E220 config. Code: ");
+    Serial.print("Warning: Gagal membaca E220 config. Code: ");
     Serial.println(rsc.status.code);
-    while (1) {
-      Serial.println("LoRa Get CFG Fail! Halted.");
-      delay(1000);
-    }
-  }
-  
-  Configuration configuration = *(Configuration*)rsc.data;
-  configuration.ADDH = 0x00;
-  configuration.ADDL = 0x00;
-  configuration.CHAN = LORA_CHANNEL; // Set Channel to 65 (915.125 MHz)
-  
-  configuration.SPED.uartBaudRate = UART_BPS_9600;
-  configuration.SPED.uartParity = MODE_00_8N1;
-  configuration.SPED.airDataRate = AIR_DATA_RATE_010_24;
-  
-  configuration.OPTION.subPacketSetting = SPS_200_00;
-  configuration.OPTION.RSSIAmbientNoise = RSSI_AMBIENT_NOISE_DISABLED;
-  configuration.OPTION.transmissionPower = POWER_22;
-  
-  configuration.TRANSMISSION_MODE.fixedTransmission = FT_TRANSPARENT_TRANSMISSION;
-  
-  ResponseStatus rs = e220.setConfiguration(configuration, WRITE_CFG_PWR_DWN_SAVE);
-  if (rs.code != 1) {
-    Serial.print("Failed to set E220 config. Code: ");
-    Serial.println(rs.code);
-    while (1) {
-      Serial.println("LoRa Set CFG Fail! Halted.");
-      delay(1000);
+  } else {
+    Configuration configuration = *(Configuration*)rsc.data;
+    configuration.ADDH = 0x00;
+    configuration.ADDL = 0x00;
+    configuration.CHAN = LORA_CHANNEL; // Set Channel to 65 (915.125 MHz)
+    
+    configuration.SPED.uartBaudRate = UART_BPS_9600;
+    configuration.SPED.uartParity = MODE_00_8N1;
+    configuration.SPED.airDataRate = AIR_DATA_RATE_010_24;
+    
+    configuration.OPTION.subPacketSetting = SPS_200_00;
+    configuration.OPTION.RSSIAmbientNoise = RSSI_AMBIENT_NOISE_DISABLED;
+    configuration.OPTION.transmissionPower = POWER_22;
+    
+    configuration.TRANSMISSION_MODE.fixedTransmission = FT_TRANSPARENT_TRANSMISSION;
+    
+    ResponseStatus rs = e220.setConfiguration(configuration, WRITE_CFG_PWR_DWN_SAVE);
+    if (rs.code != 1) {
+      Serial.print("Warning: Gagal menyimpan E220 config. Code: ");
+      Serial.println(rs.code);
     }
   }
   rsc.close();
@@ -247,7 +239,11 @@ void setup() {
 }
 
 void loop() {
-
+  // 1. Mengirimkan Data Sensor berkala (setiap SEND_INTERVAL / 5 detik)
+  if (millis() - lastSendTime >= SEND_INTERVAL) {
+    sendSensorData();
+    lastSendTime = millis();
+  }
 
   // 2. Menerima Perintah dari Raspberry Pi
   if (e220.available() > 0) {

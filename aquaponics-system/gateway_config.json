@@ -2,14 +2,14 @@
     "lamp_mode": "Manual",
     "lamp_state": 1,
     "lamp_schedule": {
-        "start": "06:00",
-        "end": "18:00"
+        "end": "18:00",
+        "start": "06:00"
     },
     "pump_b_mode": "Auto",
-    "pump_b_state": 1,
+    "pump_b_state": 0,
     "pump_b_schedule": {
-        "start": "07:00",
-        "end": "17:00"
+        "end": "17:00",
+        "start": "07:00"
     },
     "pump_p_state": 1,
     "pump_s_state": 0,
@@ -17,14 +17,25 @@
     "feed_mode": "Auto",
     "schedules_list": [
         {
-            "time": "08:00",
-            "portion": 1
+            "portion": 1,
+            "time": "08:00"
         },
         {
-            "time": "16:00",
-            "portion": 2
+            "portion": 2,
+            "time": "16:00"
         }
     ],
     "serial_port": "AUTO",
-    "use_simulation": false
+    "use_simulation": true,
+    "email_notif_enabled": true,
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "sender_email": "icelanggriany@gmail.com",
+    "sender_password": "untukkerja",
+    "recipient_email": "icelanggriany@gmail.com",
+    "tds_min": 400,
+    "tds_max": 900,
+    "temp_w_min": 24,
+    "temp_w_max": 30,
+    "water_level_min": 50
 }
