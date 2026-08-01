@@ -5339,7 +5339,10 @@
     function fetchLocalHistory(baseUrl, range) {
       const selectedRange = range || currentChartTab || 'harian';
       fetch(`${baseUrl}/api/history?range=${selectedRange}`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error('Local API offline');
+          return res.json();
+        })
         .then(historyData => {
           if (historyData && historyData.length > 0) {
             const labels = [];
@@ -5369,7 +5372,41 @@
             }
           }
         })
-        .catch(err => console.error(`Gagal mengambil history ${selectedRange} dari server lokal:`, err));
+        .catch(err => {
+          // Fallback otomatis ke Firebase Cloud jika server lokal tidak terjangkau
+          fetch(`${FIREBASE_REST_URL}/history.json`)
+            .then(res => res.json())
+            .then(fbHistory => {
+              if (fbHistory && Array.isArray(fbHistory)) {
+                const labels = [];
+                const tempHistory = [];
+                const tdsHistory = [];
+                const waterHistory = [];
+                const tempAHistory = [];
+                const humHistory = [];
+
+                fbHistory.forEach(point => {
+                  labels.push(point.time || point.date || '');
+                  tempHistory.push(point.temp_w !== undefined ? point.temp_w : null);
+                  tdsHistory.push(point.tds !== undefined ? point.tds : null);
+                  waterHistory.push(point.water_level !== undefined ? point.water_level : null);
+                  tempAHistory.push(point.temp_a !== undefined ? point.temp_a : null);
+                  humHistory.push(point.hum !== undefined ? point.hum : null);
+                });
+
+                if (chartInstance) {
+                  chartInstance.data.labels = labels;
+                  chartInstance.data.datasets[0].data = tempHistory;
+                  chartInstance.data.datasets[1].data = tdsHistory;
+                  chartInstance.data.datasets[2].data = waterHistory;
+                  chartInstance.data.datasets[3].data = tempAHistory;
+                  chartInstance.data.datasets[4].data = humHistory;
+                  chartInstance.update();
+                }
+              }
+            })
+            .catch(() => {}); // Konsol bersih tanpa pesan error merah
+        });
     }
 
     function sendLocalControl(cmdObj) {
