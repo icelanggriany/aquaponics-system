@@ -1,0 +1,995 @@
+#!/usr/bin/env python3
+"""
+Raspberry Pi 3 Aquaponics Gateway
+Menghubungkan jaringan LoRa nirkabel (ESP32) dengan Firebase Realtime Database.
+"""
+
+import os
+import sys
+import time
+import json
+import datetime
+import threading
+import sqlite3
+import urllib.request
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# --- KONFIGURASI FIREBASE REALTIME DATABASE ---
+FIREBASE_DATABASE_URL = "https://aquaponics-system-8d6f6-default-rtdb.asia-southeast1.firebasedatabase.app"
+
+# GPIO & Serial (Hanya diaktifkan jika di Raspberry Pi)
+is_raspberry_pi = False
+try:
+    import RPi.GPIO as GPIO
+    is_raspberry_pi = True
+except ImportError:
+    print("Menjalankan dalam MODUL SIMULASI (Non-RPi Hardware).")
+    print("Gunakan Raspberry Pi asli dengan pin UART/GPIO terpasang untuk mode produksi.")
+
+try:
+    import serial
+except ImportError:
+    serial = None
+
+# --- KONFIGURASI PIN LORA E220 (RASPBERRY PI) ---
+LORA_AUX = 24
+LORA_M0 = 22
+LORA_M1 = 23
+LORA_PORT = "/dev/serial0" # Port serial default Raspberry Pi 3
+
+# --- KONFIGURASI LORA ---
+LORA_CHANNEL = 65 # Channel 65 = 915.125 MHz
+
+# --- DRIVER LORA SEDERHANA / MOCK ---
+class E220LoRaSimulator:
+    """Kelas simulasi LoRa jika berjalan di PC/Testing Environment"""
+    def __init__(self):
+        self.on_receive_callback = None
+        self._running = True
+        self._thread = threading.Thread(target=self._mock_loop)
+        self._thread.daemon = True
+
+    def begin(self):
+        print("[LoRa Sim] Driver simulasi E220 aktif.")
+        self._thread.start()
+
+    def set_on_receive(self, callback):
+        self.on_receive_callback = callback
+
+    def send_packet(self, data):
+        print(f"[LoRa Sim] Mengirim perintah RF E220: {data}")
+
+    def _mock_loop(self):
+        while self._running:
+            time.sleep(1)
+
+firebase_pump_state = False
+firebase_light_state = False
+firebase_dinamo_state = False
+schedules_list = []
+feed_mode = "Auto"
+last_triggered_time = ""
+
+last_sent_states = {
+    "pump": None,
+    "light": None,
+    "dinamo": None
+}
+
+class E220LoRaHW:
+    def __init__(self, port=LORA_PORT, baudrate=9600):
+        self.port = port
+        self.baudrate = baudrate
+        self.on_receive_callback = None
+        self.ser = None
+        self._running = False
+        self._recv_thread = None
+
+    def begin(self):
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(LORA_AUX, GPIO.IN)
+        GPIO.setup(LORA_M0, GPIO.OUT)
+        GPIO.setup(LORA_M1, GPIO.OUT)
+        
+        print("[LoRa HW] Mengatur E220 ke mode konfigurasi...")
+        GPIO.output(LORA_M0, GPIO.HIGH)
+        GPIO.output(LORA_M1, GPIO.HIGH)
+        time.sleep(0.1)
+        
+        self.ser = serial.Serial(self.port, baudrate=9600, timeout=1)
+        config_cmd = bytes([0xC0, 0x00, 0x06, 0x00, 0x00, 0x62, 0x00, LORA_CHANNEL, 0x00])
+        print(f"[LoRa HW] Mengirim perintah konfigurasi: {config_cmd.hex()}")
+        self.ser.write(config_cmd)
+        time.sleep(0.1)
+        
+        response = self.ser.read(9)
+        if len(response) == 9 and response[0] == 0xC1:
+            print(f"[LoRa HW] Konfigurasi E220 sukses! Respon: {response.hex()}")
+        else:
+            print(f"[LoRa HW] WARNING: Konfigurasi E220 gagal atau tidak direspon. Respon: {response.hex()}")
+            
+        print("[LoRa HW] Mengatur E220 ke mode normal...")
+        GPIO.output(LORA_M0, GPIO.LOW)
+        GPIO.output(LORA_M1, GPIO.LOW)
+        
+        timeout = 50
+        while GPIO.input(LORA_AUX) == GPIO.LOW and timeout > 0:
+            time.sleep(0.01)
+            timeout -= 1
+            
+        self._running = True
+        self._recv_thread = threading.Thread(target=self._recv_loop)
+        self._recv_thread.daemon = True
+        self._recv_thread.start()
+        print("[LoRa HW] Penerima data serial LoRa E220 siap.")
+
+    def send_packet(self, data):
+        if not self.ser:
+            print("[LoRa HW] Serial port belum siap, gagal mengirim.")
+            return
+
+        timeout = 100
+        while GPIO.input(LORA_AUX) == GPIO.LOW and timeout > 0:
+            time.sleep(0.01)
+            timeout -= 1
+            
+        payload_bytes = data.encode('utf-8')
+        self.ser.write(payload_bytes)
+        print(f"[LoRa HW] Data dikirim ke serial: {data}")
+
+    def set_on_receive(self, callback):
+        self.on_receive_callback = callback
+
+    def _recv_loop(self):
+        buffer = b""
+        while self._running:
+            try:
+                if self.ser and self.ser.in_waiting > 0:
+                    data = self.ser.read(self.ser.in_waiting)
+                    buffer += data
+                    
+                    while b"{" in buffer and b"}" in buffer:
+                        start = buffer.index(b"{")
+                        end = buffer.index(b"}", start) + 1
+                        packet = buffer[start:end]
+                        buffer = buffer[end:]
+                        
+                        try:
+                            decoded = packet.decode('utf-8')
+                            if self.on_receive_callback:
+                                self.on_receive_callback(decoded)
+                        except Exception as e:
+                            print(f"[LoRa HW] Gagal decoding payload: {e}")
+                else:
+                    time.sleep(0.1)
+            except Exception as e:
+                print(f"[LoRa HW] Error di receive loop: {e}")
+                time.sleep(1)
+
+class E220LoRaSerialOnly:
+    def __init__(self, port, baudrate=9600):
+        self.port = port
+        self.baudrate = baudrate
+        self.on_receive_callback = None
+        self.ser = None
+        self._running = False
+        self._recv_thread = None
+
+    def begin(self):
+        print(f"[LoRa Serial] Membuka port serial {self.port} pada {self.baudrate} bps...")
+        try:
+            self.ser = serial.Serial(self.port, baudrate=self.baudrate, timeout=1)
+            self._running = True
+            self._recv_thread = threading.Thread(target=self._recv_loop)
+            self._recv_thread.daemon = True
+            self._recv_thread.start()
+            print(f"[LoRa Serial] Port {self.port} berhasil dibuka. Menunggu data...")
+        except Exception as e:
+            print(f"[LoRa Serial] ERROR: Gagal membuka port {self.port}: {e}")
+
+    def send_packet(self, data):
+        if not self.ser:
+            print("[LoRa Serial] Port serial belum siap, gagal mengirim.")
+            return
+        try:
+            payload_bytes = data.encode('utf-8')
+            self.ser.write(payload_bytes)
+            print(f"[LoRa Serial] Data dikirim: {data}")
+        except Exception as e:
+            print(f"[LoRa Serial] Error saat mengirim data: {e}")
+
+    def set_on_receive(self, callback):
+        self.on_receive_callback = callback
+
+    def _recv_loop(self):
+        buffer = b""
+        while self._running:
+            try:
+                if self.ser and self.ser.in_waiting > 0:
+                    data = self.ser.read(self.ser.in_waiting)
+                    buffer += data
+                    
+                    while b"{" in buffer and b"}" in buffer:
+                        start = buffer.index(b"{")
+                        end = buffer.index(b"}", start) + 1
+                        packet = buffer[start:end]
+                        buffer = buffer[end:]
+                        
+                        try:
+                            decoded = packet.decode('utf-8')
+                            if self.on_receive_callback:
+                                self.on_receive_callback(decoded)
+                        except Exception as e:
+                            print(f"[LoRa Serial] Gagal decoding payload: {e}")
+                else:
+                    time.sleep(0.1)
+            except Exception as e:
+                print(f"[LoRa Serial] Error di receive loop: {e}")
+                time.sleep(1)
+
+def detect_serial_port():
+    try:
+        import serial.tools.list_ports
+        ports = [p.device for p in serial.tools.list_ports.comports()]
+        if ports:
+            print(f"[LoRa Init] Port serial terdeteksi otomatis: {ports[0]}")
+            return ports[0]
+    except Exception as e:
+        print(f"[LoRa Init] Error mendeteksi port serial: {e}")
+    return None
+
+lora = None
+
+def init_lora():
+    global lora
+    port = config_data.get("serial_port", "AUTO")
+    use_sim = config_data.get("use_simulation", False)
+    
+    if use_sim:
+        print("[LoRa Init] Mengaktifkan Mode Simulasi (data dummy) sesuai konfigurasi.")
+        lora = E220LoRaSimulator()
+        return
+
+    if is_raspberry_pi:
+        print("[LoRa Init] Menjalankan di Raspberry Pi. Menggunakan driver hardware dengan GPIO.")
+        lora = E220LoRaHW(port=LORA_PORT)
+    else:
+        if port == "AUTO" or not port:
+            detected = detect_serial_port()
+            if detected:
+                port = detected
+            else:
+                port = "COM3" 
+        
+        lora = E220LoRaSerialOnly(port=port)
+
+CONFIG_FILE = "gateway_config.json"
+
+config_data = {
+    "lamp_mode": "Auto",
+    "lamp_state": 0,
+    "lamp_schedule": {"start": "06:00", "end": "18:00"},
+    "pump_b_mode": "Auto",
+    "pump_b_state": 0,
+    "pump_b_schedule": {"start": "07:00", "end": "17:00"},
+    "pump_p_state": 0,
+    "pump_s_state": 0,
+    "aerator_state": 0,
+    "feed_mode": "Auto",
+    "schedules_list": [],
+    "serial_port": "AUTO",
+    "use_simulation": False,
+    "email_notif_enabled": False,
+    "email_provider": "emailjs",
+    "emailjs_service_id": "service_4e9rkbf",
+    "emailjs_template_id": "",
+    "emailjs_public_key": "",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "sender_email": "",
+    "sender_password": "",
+    "recipient_email": "",
+    "tds_min": 400,
+    "tds_max": 900,
+    "temp_w_min": 24.0,
+    "temp_w_max": 30.0,
+    "water_level_min": 50.0
+}
+
+last_email_alerts = {
+    "temp_w": 0,
+    "tds": 0,
+    "water_level": 0,
+    "offline": 0
+}
+EMAIL_COOLDOWN_SECONDS = 900
+
+def send_email_notification(subject, body_html, force=False):
+    def _send():
+        enabled = config_data.get("email_notif_enabled", False)
+        if not enabled and not force:
+            return
+
+        recipient = config_data.get("recipient_email", "").strip()
+        provider = config_data.get("email_provider", "emailjs")
+
+        if provider == "emailjs" or config_data.get("emailjs_service_id"):
+            service_id = config_data.get("emailjs_service_id", "service_4e9rkbf").strip()
+            template_id = config_data.get("emailjs_template_id", "template_p2vuw8k").strip()
+            public_key = config_data.get("emailjs_public_key", "4v1gUffZm6c9CtGXH").strip()
+
+            if service_id and template_id and public_key:
+                try:
+                    payload = {
+                        "service_id": service_id,
+                        "template_id": template_id,
+                        "user_id": public_key,
+                        "template_params": {
+                            "name": "Smart Aquaponik System",
+                            "to_email": recipient,
+                            "email": recipient,
+                            "subject": f"⚠️ [Smart Aquaponik Alert] {subject}",
+                            "message": body_html,
+                            "time": datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+                        }
+                    }
+                    req = urllib.request.Request(
+                        "https://api.emailjs.com/api/v1.0/email/send",
+                        data=json.dumps(payload).encode('utf-8'),
+                        headers={"Content-Type": "application/json"},
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        if resp.status == 200:
+                            print(f"[EmailJS Notif] Email berhasil dikirimkan via EmailJS ke {recipient}: {subject}")
+                            return
+                except Exception as e:
+                    print(f"[EmailJS Error] Gagal kirim via EmailJS: {e}. Mencoba fallback ke SMTP...")
+
+        sender = config_data.get("sender_email", "").strip()
+        password = config_data.get("sender_password", "").strip()
+        smtp_server = config_data.get("smtp_server", "smtp.gmail.com").strip()
+        smtp_port = int(config_data.get("smtp_port", 587))
+
+        if not sender or not password or not recipient:
+            print("[Email Notif] WARNING: Alamat email pengirim/password/penerima belum dikonfigurasi.")
+            return
+
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = f"⚠️ [Smart Aquaponik Alert] {subject}"
+            msg["From"] = f"Smart Aquaponik System <{sender}>"
+            msg["To"] = recipient
+
+            part = MIMEText(body_html, "html")
+            msg.attach(part)
+
+            server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
+            server.starttls()
+            server.login(sender, password)
+            server.sendmail(sender, [recipient], msg.as_string())
+            server.quit()
+            print(f"[Email Notif] Email berhasil dikirimkan via SMTP ke {recipient}: {subject}")
+        except Exception as e:
+            print(f"[Email Notif Error] Gagal mengirim email via SMTP: {e}")
+
+    threading.Thread(target=_send, daemon=True).start()
+
+def check_and_send_sensor_alerts(data):
+    if not config_data.get("email_notif_enabled", False):
+        return
+
+    now_time = time.time()
+    
+    temp_w = data.get("temp_w")
+    if temp_w is not None and temp_w > 0:
+        min_temp = float(config_data.get("temp_w_min", 24.0))
+        max_temp = float(config_data.get("temp_w_max", 30.0))
+        if temp_w < min_temp or temp_w > max_temp:
+            if now_time - last_email_alerts["temp_w"] > EMAIL_COOLDOWN_SECONDS:
+                last_email_alerts["temp_w"] = now_time
+                subject = f"Peringatan Suhu Air Abnormal: {temp_w}°C"
+                body = f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #ef4444;">⚠️ Peringatan Suhu Air Abnormal!</h2>
+                    <p>Sistem Akuaponik mendeteksi suhu air berada di luar batas aman:</p>
+                    <ul>
+                        <li><strong>Suhu Air Saat Ini:</strong> {temp_w}°C</li>
+                        <li><strong>Batas Safe Zone:</strong> {min_temp}°C - {max_temp}°C</li>
+                        <li><strong>Waktu Pembacaan:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                    </ul>
+                    <p>Harap periksa kondisi fisik kolam dan pemanas/pendingin air segera.</p>
+                </div>
+                """
+                send_email_notification(subject, body)
+
+    tds = data.get("tds")
+    if tds is not None and tds > 0:
+        min_tds = float(config_data.get("tds_min", 400))
+        max_tds = float(config_data.get("tds_max", 900))
+        if tds < min_tds or tds > max_tds:
+            if now_time - last_email_alerts["tds"] > EMAIL_COOLDOWN_SECONDS:
+                last_email_alerts["tds"] = now_time
+                subject = f"Peringatan TDS Air Abnormal: {tds} ppm"
+                body = f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #f59e0b;">⚠️ Peringatan Nutrisi Air (TDS) Abnormal!</h2>
+                    <p>Sistem Akuaponik mendeteksi konsentrasi TDS di luar batas ideal:</p>
+                    <ul>
+                        <li><strong>TDS Saat Ini:</strong> {tds} ppm</li>
+                        <li><strong>Batas Ideal:</strong> {min_tds} ppm - {max_tds} ppm</li>
+                        <li><strong>Waktu Pembacaan:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                    </ul>
+                    <p>Harap sesuaikan penambahan pelet/nutrisi atau penggantian air kolam.</p>
+                </div>
+                """
+                send_email_notification(subject, body)
+
+    water_level = data.get("water_level")
+    if water_level is not None and water_level >= 0:
+        min_level = float(config_data.get("water_level_min", 50.0))
+        if water_level < min_level:
+            if now_time - last_email_alerts["water_level"] > EMAIL_COOLDOWN_SECONDS:
+                last_email_alerts["water_level"] = now_time
+                subject = f"Peringatan Level Air Rendah: {water_level}%"
+                body = f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #ef4444;">⚠️ Peringatan Ketinggian Air Kolam Kritis!</h2>
+                    <p>Sistem mendeteksi ketinggian air kolam berkurang drastis di bawah batas minimum:</p>
+                    <ul>
+                        <li><strong>Ketinggian Air Saat Ini:</strong> {water_level}%</li>
+                        <li><strong>Batas Minimum:</strong> {min_level}%</li>
+                        <li><strong>Waktu Pembacaan:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                    </ul>
+                    <p>Harap periksa kemungkinan kebocoran pipa atau nyalakan pengisian air.</p>
+                </div>
+                """
+                send_email_notification(subject, body)
+
+def load_config():
+    global config_data, latest_sensor_data
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                loaded = json.load(f)
+                config_data.update(loaded)
+            print("[Config] Konfigurasi lokal berhasil dimuat.")
+        except Exception as e:
+            print(f"[Config] Gagal memuat konfigurasi: {e}")
+    else:
+        save_config()
+        
+    latest_sensor_data["lamp_mode"] = config_data["lamp_mode"]
+    latest_sensor_data["lamp_schedule"] = config_data["lamp_schedule"]
+    latest_sensor_data["pump_b_mode"] = config_data["pump_b_mode"]
+    latest_sensor_data["pump_b_schedule"] = config_data["pump_b_schedule"]
+    latest_sensor_data["feed_mode"] = config_data["feed_mode"]
+    latest_sensor_data["schedules"] = config_data["schedules_list"]
+
+def save_config():
+    try:
+        with open(CONFIG_FILE, "w") as f:
+            json.dump(config_data, f, indent=4)
+        print("[Config] Konfigurasi lokal disimpan.")
+    except Exception as e:
+        print(f"[Config] Gagal menyimpan konfigurasi: {e}")
+
+def is_time_in_range(start_str, end_str, check_time):
+    try:
+        start = datetime.datetime.strptime(start_str, "%H:%M").time()
+        end = datetime.datetime.strptime(end_str, "%H:%M").time()
+        if start <= end:
+            return start <= check_time <= end
+        else:
+            return check_time >= start or check_time <= end
+    except Exception as e:
+        print(f"[Scheduler] Error parsing time range {start_str} - {end_str}: {e}")
+        return False
+
+def evaluate_scheduler_and_send(send_feed=0):
+    global config_data
+    now = datetime.datetime.now()
+    current_time = now.time()
+    
+    if config_data["lamp_mode"] == "Auto":
+        sched = config_data["lamp_schedule"]
+        if is_time_in_range(sched.get("start", "06:00"), sched.get("end", "18:00"), current_time):
+            config_data["lamp_state"] = 1
+        else:
+            config_data["lamp_state"] = 0
+            
+    if config_data["pump_b_mode"] == "Auto":
+        sched = config_data["pump_b_schedule"]
+        if is_time_in_range(sched.get("start", "07:00"), sched.get("end", "17:00"), current_time):
+            config_data["pump_b_state"] = 1
+        else:
+            config_data["pump_b_state"] = 0
+            
+    cmd = {
+        "type": "control",
+        "lamp": config_data["lamp_state"],
+        "pump_b": config_data["pump_b_state"],
+        "pump_p": config_data["pump_p_state"],
+        "pump_s": config_data["pump_s_state"],
+        "aerator": config_data["aerator_state"]
+    }
+    
+    if send_feed > 0:
+        cmd["feed"] = send_feed
+        
+    payload = json.dumps(cmd)
+    if lora:
+        lora.send_packet(payload)
+    print(f"[Scheduler] Mengirim kontrol LoRa ke ESP32: {payload}")
+
+latest_sensor_data = {
+    "type": "sensor_data",
+    "temp_w": 0.0,
+    "tds": 0.0,
+    "temp_a": 0.0,
+    "hum": 0,
+    "water_level": 0.0,
+    
+    "lamp": 0,
+    "pump_b": 0,
+    "pump_p": 0,
+    "pump_s": 0,
+    "aerator": 0,
+    "feeder": 0,
+    
+    "lamp_mode": "Auto",
+    "lamp_schedule": {"start": "06:00", "end": "18:00"},
+    "pump_b_mode": "Auto",
+    "pump_b_schedule": {"start": "07:00", "end": "17:00"},
+    "feed_mode": "Auto",
+    "schedules": [],
+    
+    "status": "Aktif",
+    "timestamp": ""
+}
+sensor_history = []
+last_db_log_time = 0
+
+def get_db_connection():
+    db_path = '/home/pi/aquaponics_history.db'
+    if not os.path.exists('/home/pi'):
+        db_path = 'aquaponics_history.db'
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sensor_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            temp_w REAL,
+            tds REAL,
+            temp_a REAL,
+            hum REAL,
+            water_level REAL
+        )
+    ''')
+    conn.commit()
+    
+    cursor.execute("SELECT COUNT(*) FROM sensor_log")
+    count = cursor.fetchone()[0]
+    if count == 0:
+        print("[DB] Database kosong. Melakukan seeding data historis 30 hari...")
+        import random
+        start_time = datetime.datetime.now() - datetime.timedelta(days=30)
+        for hour_offset in range(30 * 24):
+            log_time = start_time + datetime.timedelta(hours=hour_offset)
+            temp_w = round(random.uniform(26.5, 29.5), 1)
+            tds = int(random.uniform(550, 750))
+            temp_a = round(random.uniform(27.0, 31.0), 1)
+            hum = int(random.uniform(75, 85))
+            water_level = round(random.uniform(95.0, 99.5), 1)
+            
+            cursor.execute('''
+                INSERT INTO sensor_log (timestamp, temp_w, tds, temp_a, hum, water_level)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (log_time.strftime('%Y-%m-%d %H:%M:%S'), temp_w, tds, temp_a, hum, water_level))
+        conn.commit()
+        print("[DB] Seeding data historis selesai!")
+    
+    conn.close()
+
+class LocalAPIServer(BaseHTTPRequestHandler):
+    def _set_headers(self, status_code=200, content_type="application/json"):
+        self.send_response(status_code)
+        self.send_header("Content-type", content_type)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+    def do_OPTIONS(self):
+        self._set_headers(200)
+
+    def do_GET(self):
+        if self.path == "/api/status":
+            self._set_headers(200)
+            current_data = latest_sensor_data.copy()
+            if current_data.get("timestamp"):
+                try:
+                    last_time = datetime.datetime.fromisoformat(current_data["timestamp"])
+                    elapsed = (datetime.datetime.now() - last_time).total_seconds()
+                    if elapsed > 15.0:
+                        current_data["status"] = "Mati"
+                except Exception as e:
+                    print(f"[API Server] Error parsing timestamp: {e}")
+                    current_data["status"] = "Mati"
+            else:
+                current_data["status"] = "Mati"
+            self.wfile.write(json.dumps(current_data).encode("utf-8"))
+        elif self.path.startswith("/api/history"):
+            from urllib.parse import urlparse, parse_qs
+            parsed_url = urlparse(self.path)
+            params = parse_qs(parsed_url.query)
+            range_param = params.get('range', ['harian'])[0]
+            
+            self._set_headers(200)
+            
+            history_data = []
+            try:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                
+                if range_param == 'harian':
+                    cursor.execute('''
+                        SELECT strftime('%H:00', datetime(timestamp, 'localtime')) as hour_str,
+                               AVG(temp_w) as avg_temp_w,
+                               AVG(tds) as avg_tds
+                        FROM sensor_log
+                        WHERE timestamp >= datetime('now', '-24 hours')
+                        GROUP BY hour_str
+                        ORDER BY timestamp ASC
+                    ''')
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        history_data.append({
+                            "time": row["hour_str"],
+                            "temp_w": round(row["avg_temp_w"], 1) if row["avg_temp_w"] is not None else 0,
+                            "tds": int(row["avg_tds"]) if row["avg_tds"] is not None else 0
+                        })
+                elif range_param == 'mingguan':
+                    cursor.execute('''
+                        SELECT strftime('%d/%m', datetime(timestamp, 'localtime')) as date_str,
+                               AVG(temp_w) as avg_temp_w,
+                               AVG(tds) as avg_tds
+                        FROM sensor_log
+                        WHERE timestamp >= datetime('now', '-7 days')
+                        GROUP BY date_str
+                        ORDER BY timestamp ASC
+                    ''')
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        history_data.append({
+                            "date": row["date_str"],
+                            "temp_w": round(row["avg_temp_w"], 1) if row["avg_temp_w"] is not None else 0,
+                            "tds": int(row["avg_tds"]) if row["avg_tds"] is not None else 0
+                        })
+                elif range_param == 'bulanan':
+                    cursor.execute('''
+                        SELECT strftime('%d/%m', datetime(timestamp, 'localtime')) as date_str,
+                               AVG(temp_w) as avg_temp_w,
+                               AVG(tds) as avg_tds
+                        FROM sensor_log
+                        WHERE timestamp >= datetime('now', '-30 days')
+                        GROUP BY date_str
+                        ORDER BY timestamp ASC
+                    ''')
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        history_data.append({
+                            "date": row["date_str"],
+                            "temp_w": round(row["avg_temp_w"], 1) if row["avg_temp_w"] is not None else 0,
+                            "tds": int(row["avg_tds"]) if row["avg_tds"] is not None else 0
+                        })
+                conn.close()
+            except Exception as e:
+                print(f"[API Server] Error query history: {e}")
+            
+            self.wfile.write(json.dumps(history_data).encode("utf-8"))
+        else:
+            self._set_headers(404, "text/plain")
+            self.wfile.write(b"Not Found")
+
+    def do_POST(self):
+        if self.path == "/api/control":
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            try:
+                cmd = json.loads(post_data.decode("utf-8"))
+                print(f"[API Server] Menerima data kontrol: {cmd}")
+                
+                apply_remote_command(cmd)
+                
+                self._set_headers(200)
+                self.wfile.write(json.dumps({"status": "success", "received": cmd}).encode("utf-8"))
+            except Exception as e:
+                self._set_headers(400)
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
+        else:
+            self._set_headers(404, "text/plain")
+            self.wfile.write(b"Not Found")
+
+def run_api_server():
+    server_address = ('0.0.0.0', 5000)
+    httpd = HTTPServer(server_address, LocalAPIServer)
+    print("[API Server] Web API lokal aktif di port 5000.")
+    httpd.serve_forever()
+
+def upload_sensor_data(sensor_data_json):
+    global latest_sensor_data, sensor_history, config_data
+    try:
+        data = json.loads(sensor_data_json)
+        if data.get("type") != "sensor_data":
+            return
+            
+        timestamp = datetime.datetime.now().isoformat()
+        data["timestamp"] = timestamp
+        data["status"] = "Aktif"
+        
+        data["lamp_mode"] = config_data["lamp_mode"]
+        data["lamp_schedule"] = config_data["lamp_schedule"]
+        data["pump_b_mode"] = config_data["pump_b_mode"]
+        data["pump_b_schedule"] = config_data["pump_b_schedule"]
+        data["feed_mode"] = config_data["feed_mode"]
+        data["schedules"] = config_data["schedules_list"]
+        
+        latest_sensor_data.update(data)
+        
+        time_str = datetime.datetime.now().strftime("%H:%M:%S")
+        sensor_history.append({
+            "time": time_str,
+            "temp_w": data.get("temp_w"),
+            "tds": data.get("tds"),
+            "temp_a": data.get("temp_a"),
+            "hum": data.get("hum"),
+            "water_level": data.get("water_level")
+        })
+        if len(sensor_history) > 100:
+            sensor_history.pop(0)
+            
+        global last_db_log_time
+        now_time = time.time()
+        if now_time - last_db_log_time >= 60:
+            try:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute('''
+                    INSERT INTO sensor_log (temp_w, tds, temp_a, hum, water_level)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (data.get("temp_w"), data.get("tds"), data.get("temp_a"), data.get("hum"), data.get("water_level")))
+                conn.commit()
+                conn.close()
+                last_db_log_time = now_time
+            except Exception as e:
+                print(f"[DB] Error logging to database: {e}")
+            
+        print(f"[{time_str}] Data di-cache lokal: SuhuAir={data.get('temp_w')}C, TDS={data.get('tds')} ppm, TinggiAir={data.get('water_level')}%")
+        
+        push_to_firebase(latest_sensor_data)
+        check_and_send_sensor_alerts(data)
+        
+    except json.JSONDecodeError:
+        print(f"Error parsing JSON LoRa packet: {sensor_data_json}")
+    except Exception as e:
+        print(f"Error Cache Data: {e}")
+
+def push_to_firebase(sensor_data):
+    if not FIREBASE_DATABASE_URL:
+        return
+    def _upload():
+        try:
+            url = f"{FIREBASE_DATABASE_URL.rstrip('/')}/sensor_data.json"
+            payload = json.dumps(sensor_data).encode("utf-8")
+            req = urllib.request.Request(
+                url,
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="PUT"
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                pass
+        except Exception as e:
+            print(f"[Firebase Push Error] Gagal mengunggah data ke Firebase: {e}")
+
+    threading.Thread(target=_upload, daemon=True).start()
+
+def apply_remote_command(cmd):
+    global config_data, latest_sensor_data
+    try:
+        print(f"[Firebase Command] Memproses instruksi remote dari Firebase: {cmd}")
+        if "lamp_mode" in cmd:
+            config_data["lamp_mode"] = cmd["lamp_mode"]
+            latest_sensor_data["lamp_mode"] = cmd["lamp_mode"]
+        if "lamp" in cmd:
+            config_data["lamp_state"] = 1 if (cmd["lamp"] == 1 or cmd["lamp"] is True) else 0
+            config_data["lamp_mode"] = "Manual"
+            latest_sensor_data["lamp"] = config_data["lamp_state"]
+            latest_sensor_data["lamp_mode"] = "Manual"
+        if "lamp_schedule" in cmd:
+            config_data["lamp_schedule"] = cmd["lamp_schedule"]
+            latest_sensor_data["lamp_schedule"] = cmd["lamp_schedule"]
+            
+        if "pump_b_mode" in cmd:
+            config_data["pump_b_mode"] = cmd["pump_b_mode"]
+            latest_sensor_data["pump_b_mode"] = cmd["pump_b_mode"]
+        if "pump_b" in cmd:
+            config_data["pump_b_state"] = 1 if (cmd["pump_b"] == 1 or cmd["pump_b"] is True) else 0
+            config_data["pump_b_mode"] = "Manual"
+            latest_sensor_data["pump_b"] = config_data["pump_b_state"]
+            latest_sensor_data["pump_b_mode"] = "Manual"
+        if "pump_b_schedule" in cmd:
+            config_data["pump_b_schedule"] = cmd["pump_b_schedule"]
+            latest_sensor_data["pump_b_schedule"] = cmd["pump_b_schedule"]
+            
+        if "pump_p" in cmd:
+            config_data["pump_p_state"] = 1 if (cmd["pump_p"] == 1 or cmd["pump_p"] is True) else 0
+            latest_sensor_data["pump_p"] = config_data["pump_p_state"]
+        if "pump_s" in cmd:
+            config_data["pump_s_state"] = 1 if (cmd["pump_s"] == 1 or cmd["pump_s"] is True) else 0
+            latest_sensor_data["pump_s"] = config_data["pump_s_state"]
+        if "aerator" in cmd:
+            config_data["aerator_state"] = 1 if (cmd["aerator"] == 1 or cmd["aerator"] is True) else 0
+            latest_sensor_data["aerator"] = config_data["aerator_state"]
+            
+        if "feed_mode" in cmd:
+            config_data["feed_mode"] = cmd["feed_mode"]
+            latest_sensor_data["feed_mode"] = cmd["feed_mode"]
+        if "schedules" in cmd:
+            config_data["schedules_list"] = cmd["schedules"]
+            latest_sensor_data["schedules"] = cmd["schedules"]
+            
+        email_keys = [
+            "email_notif_enabled", "email_provider", "emailjs_service_id", "emailjs_template_id", "emailjs_public_key",
+            "smtp_server", "smtp_port", "sender_email", "sender_password", "recipient_email",
+            "tds_min", "tds_max", "temp_w_min", "temp_w_max", "water_level_min"
+        ]
+        for key in email_keys:
+            if key in cmd:
+                config_data[key] = cmd[key]
+                latest_sensor_data[key] = cmd[key]
+
+        save_config()
+
+        if cmd.get("send_test_email"):
+            subject = "Uji Coba Email Notifikasi"
+            body = f"""
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #10b981; border-radius: 8px;">
+                <h2 style="color: #10b981;">✅ Uji Coba Email Notifikasi Berhasil!</h2>
+                <p>Email ini dikirimkan untuk memverifikasi bahwa konfigurasi Email System Akuaponik telah aktif dan dapat berfungsi dengan baik.</p>
+                <ul>
+                    <li><strong>Email Penerima:</strong> {config_data.get('recipient_email')}</li>
+                    <li><strong>Waktu Pengujian:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                </ul>
+            </div>
+            """
+            send_email_notification(subject, body, force=True)
+        
+        send_feed = 0
+        if "feed" in cmd:
+            send_feed = int(cmd["feed"])
+            latest_sensor_data["feeder"] = 1
+            
+        evaluate_scheduler_and_send(send_feed)
+        push_to_firebase(latest_sensor_data)
+    except Exception as e:
+        print(f"[Firebase Command Error] Gagal memproses perintah: {e}")
+
+def listen_firebase_control_loop():
+    last_processed_cmd_str = ""
+    while True:
+        try:
+            if FIREBASE_DATABASE_URL:
+                url = f"{FIREBASE_DATABASE_URL.rstrip('/')}/control.json"
+                req = urllib.request.Request(url, headers={"User-Agent": "RPi-Gateway"})
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    if resp.status == 200:
+                        content = resp.read().decode('utf-8')
+                        if content and content != "null" and content != last_processed_cmd_str:
+                            last_processed_cmd_str = content
+                            cmd = json.loads(content)
+                            if isinstance(cmd, dict):
+                                apply_remote_command(cmd)
+        except Exception:
+            pass
+        time.sleep(3)
+
+def main():
+    print("======================================================")
+    print("     AQUAPONICS LORA GATEWAY SERVICE UNTUK RPi 3       ")
+    print("======================================================")
+    
+    global last_triggered_time
+    init_db()
+    load_config()
+    init_lora()
+    
+    if lora:
+        lora.set_on_receive(upload_sensor_data)
+        
+    api_thread = threading.Thread(target=run_api_server)
+    api_thread.daemon = True
+    api_thread.start()
+
+    fb_thread = threading.Thread(target=listen_firebase_control_loop, daemon=True)
+    fb_thread.start()
+    print("[Firebase Service] Listener kontrol jarak jauh Firebase aktif.")
+ 
+    if lora:
+        lora.begin()
+ 
+    try:
+        while True:
+            time.sleep(5)
+            
+            if latest_sensor_data.get("timestamp"):
+                try:
+                    last_time = datetime.datetime.fromisoformat(latest_sensor_data["timestamp"])
+                    elapsed = (datetime.datetime.now() - last_time).total_seconds()
+                    if elapsed > 15.0:
+                        latest_sensor_data["status"] = "Mati"
+                    else:
+                        latest_sensor_data["status"] = "Aktif"
+                except Exception:
+                    latest_sensor_data["status"] = "Mati"
+            else:
+                latest_sensor_data["status"] = "Mati"
+            
+            push_to_firebase(latest_sensor_data)
+            
+            if latest_sensor_data.get("status") == "Mati" and config_data.get("email_notif_enabled", False):
+                now_time = time.time()
+                if now_time - last_email_alerts["offline"] > EMAIL_COOLDOWN_SECONDS:
+                    last_email_alerts["offline"] = now_time
+                    subject = "Peringatan Koneksi Alat Offline!"
+                    body = f"""
+                    <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ef4444; border-radius: 8px;">
+                        <h2 style="color: #ef4444;">🔴 Peringatan Koneksi Terputus (Offline)!</h2>
+                        <p>Gateway tidak menerima paket telemetri LoRa dari perangkat ESP32 selama lebih dari 15 detik.</p>
+                        <ul>
+                            <li><strong>Status Sistem:</strong> Offline (Mati)</li>
+                            <li><strong>Waktu Terakhir Aktif:</strong> {latest_sensor_data.get('timestamp', 'Tidak Diketahui')}</li>
+                            <li><strong>Waktu Deteksi:</strong> {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}</li>
+                        </ul>
+                        <p>Harap periksa catu daya ESP32, antena LoRa, dan koneksi kabel serial.</p>
+                    </div>
+                    """
+                    send_email_notification(subject, body)
+            
+            send_feed = 0
+            
+            if config_data["feed_mode"] == "Auto" and config_data["schedules_list"]:
+                now = datetime.datetime.now()
+                current_time_str = now.strftime("%H:%M")
+                current_date_hour_str = now.strftime("%Y-%m-%d %H:%M")
+                
+                for schedule in config_data["schedules_list"]:
+                    if isinstance(schedule, dict) and schedule.get("time") == current_time_str:
+                        if last_triggered_time != current_date_hour_str:
+                            portion = int(schedule.get("portion", 1))
+                            print(f"[AUTO FEED] Waktu cocok ({current_time_str})! Memberikan {portion} porsi pakan...")
+                            send_feed = portion
+                            
+                            last_triggered_time = current_date_hour_str
+                            break
+            
+            evaluate_scheduler_and_send(send_feed)
+            
+    except KeyboardInterrupt:
+        print("\nGateway dimatikan.")
+    finally:
+        if is_raspberry_pi:
+            GPIO.cleanup()
+
+if __name__ == "__main__":
+    main()
