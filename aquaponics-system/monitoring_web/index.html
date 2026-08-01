@@ -2065,8 +2065,12 @@
       animation: blink 1s step-end infinite;
     }
 
-    @keyframes blink {
-      50% { opacity: 0; }
+    /* Enforce initial login screen state in CSS to prevent any render glitch */
+    .desktop-container {
+      display: none;
+    }
+    #login-screen {
+      display: flex;
     }
   </style>
 </head>
@@ -3107,24 +3111,11 @@
       aerator: 0
     };
 
-    // Default Schedules
-    let schedules = [];
-    try {
-      const savedSchedules = localStorage.getItem('aquaponics_schedules');
-      if (savedSchedules) {
-        schedules = JSON.parse(savedSchedules);
-      } else {
-        schedules = [
-          { time: '08:00', portion: 1 },
-          { time: '16:00', portion: 2 }
-        ];
-      }
-    } catch (e) {
-      schedules = [
-        { time: '08:00', portion: 1 },
-        { time: '16:00', portion: 2 }
-      ];
-    }
+    // Default Schedules (Terhubung 100% ke Firebase Cloud Realtime Database)
+    let schedules = [
+      { time: '08:00', portion: 1 },
+      { time: '16:00', portion: 2 }
+    ];
 
     // Live/Simulated telemetry data state
     let telemetryData = {
@@ -3183,6 +3174,9 @@
           })
           .catch(err => console.error('Pendaftaran Service Worker gagal:', err));
       }
+
+      // Clear legacy localStorage login flag to guarantee fresh login on new session
+      localStorage.removeItem('aquaponics_logged_in');
 
       // Check if user is logged in for current active session
       const isLoggedIn = sessionStorage.getItem('aquaponics_logged_in') === 'true';
@@ -4135,53 +4129,76 @@ if (type === 'Schedules') {
 
       errorMsg.style.display = 'none';
       submitBtn.disabled = true;
-      submitBtn.innerText = authMode === 'login' ? 'Memproses Masuk...' : 'Memproses Daftar...';
+      submitBtn.innerText = authMode === 'login' ? 'Memproses Masuk via Firebase Cloud...' : 'Mendaftarkan Akun ke Firebase Cloud...';
 
-      setTimeout(() => {
-        if (authMode === 'login') {
-          // Retrieve registered credentials from localStorage (fallback to admin@gmail.com / admin)
-          const savedEmail = localStorage.getItem('aquaponics_user_email') || 'admin@gmail.com';
-          const savedPass = localStorage.getItem('aquaponics_user_pass') || 'admin';
+      if (authMode === 'login') {
+        // Ambil data kredensial user dari Firebase Realtime Database Cloud
+        fetch(`${FIREBASE_REST_URL}/users.json`)
+          .then(res => res.json())
+          .then(userData => {
+            const savedEmail = (userData && userData.email) ? userData.email : 'admin@gmail.com';
+            const savedPass = (userData && userData.password) ? userData.password : 'admin';
 
-          if (email === savedEmail && password === savedPass) {
-            console.log("Login lokal sukses.");
-            sessionStorage.setItem('aquaponics_logged_in', 'true');
-            localStorage.removeItem('aquaponics_logged_in');
+            if (email === savedEmail && password === savedPass) {
+              console.log("Login sukses via Firebase Cloud.");
+              sessionStorage.setItem('aquaponics_logged_in', 'true');
 
-            document.getElementById('login-screen').style.display = 'none';
-            document.querySelector('.desktop-container').style.display = 'flex';
+              document.getElementById('login-screen').style.display = 'none';
+              document.querySelector('.desktop-container').style.display = 'flex';
 
-            startLocalApiPolling();
+              startLocalApiPolling();
 
-            // Clear fields
-            document.getElementById('auth-email').value = '';
-            document.getElementById('auth-password').value = '';
+              // Clear fields
+              document.getElementById('auth-email').value = '';
+              document.getElementById('auth-password').value = '';
+              submitBtn.disabled = false;
+              submitBtn.innerText = 'Masuk';
+            } else {
+              errorMsg.innerText = "❌ Alamat email atau kata sandi salah!";
+              errorMsg.style.display = 'block';
+              submitBtn.disabled = false;
+              submitBtn.innerText = 'Masuk';
+            }
+          })
+          .catch(err => {
+            console.error("Gagal terhubung ke Firebase Cloud auth:", err);
+            // Fallback default admin
+            if (email === 'admin@gmail.com' && password === 'admin') {
+              sessionStorage.setItem('aquaponics_logged_in', 'true');
+              document.getElementById('login-screen').style.display = 'none';
+              document.querySelector('.desktop-container').style.display = 'flex';
+              startLocalApiPolling();
+            } else {
+              errorMsg.innerText = "❌ Alamat email atau kata sandi salah!";
+              errorMsg.style.display = 'block';
+            }
             submitBtn.disabled = false;
             submitBtn.innerText = 'Masuk';
-          } else {
-            errorMsg.innerText = "❌ Alamat email atau kata sandi salah!";
-            errorMsg.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Masuk';
-          }
-        } else {
-          // Register Mode: Save credentials in localStorage
-          localStorage.setItem('aquaponics_user_email', email);
-          localStorage.setItem('aquaponics_user_pass', password);
-
-          alert("Pendaftaran berhasil! Silakan masuk menggunakan email dan kata sandi yang telah Anda daftarkan.");
-
-          // Switch back to login UI mode
+          });
+      } else {
+        // Mode Pendaftaran: Simpan kredensial langsung ke Firebase Cloud
+        const newUserObj = { email: email, password: password, registeredAt: new Date().toISOString() };
+        fetch(`${FIREBASE_REST_URL}/users.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newUserObj)
+        })
+        .then(res => res.json())
+        .then(() => {
+          alert("Pendaftaran berhasil dan tersimpan di Firebase Cloud! Silakan masuk menggunakan email dan kata sandi yang telah Anda daftarkan.");
           toggleAuthMode();
-
-          // Pre-fill the newly registered credentials
           document.getElementById('auth-email').value = email;
           document.getElementById('auth-password').value = password;
-
           submitBtn.disabled = false;
           submitBtn.innerText = 'Masuk';
-        }
-      }, 600);
+        })
+        .catch(err => {
+          console.error("Gagal menyimpan akun ke Firebase Cloud:", err);
+          alert("Gagal mendaftar ke Firebase Cloud. Pastikan koneksi internet aktif.");
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Daftar';
+        });
+      }
     }
 
     function confirmLogout() {
@@ -4190,54 +4207,58 @@ if (type === 'Schedules') {
 
     function executeLogout() {
       sessionStorage.removeItem('aquaponics_logged_in');
-      localStorage.removeItem('aquaponics_logged_in');
       window.location.reload();
     }
-
-
 
     // --- DIALOG MODALS UTILS ---
     function closeModal(id) {
       document.getElementById(id).classList.remove('active');
     }
 
-    // --- NOTIFICATION SYSTEM (INSTAGRAM STYLE) ---
+    // --- NOTIFICATION SYSTEM (FIREBASE CLOUD INTEGRATED) ---
     function loadNotifications() {
-      const stored = localStorage.getItem('aquaponics_notifications');
-      if (stored) {
-        try {
-          notifications = JSON.parse(stored);
-        } catch (e) {
-          console.error("Gagal parse notifications dari localStorage", e);
-          notifications = [];
-        }
-      } else {
-        // Seed default notifications if empty
-        notifications = [
-          {
-            id: 1,
-            title: 'Sistem Dimulai',
-            message: 'Aplikasi monitoring IoT aquaponics berhasil diinisialisasi.',
-            timestamp: Date.now() - 3600000 * 2, // 2 jam yang lalu
-            type: 'info',
-            isNew: false
-          },
-          {
-            id: 2,
-            title: 'Koneksi Normal',
-            message: 'Koneksi ke sistem berjalan dengan baik.',
-            timestamp: Date.now() - 60000 * 5, // 5 menit yang lalu
-            type: 'success',
-            isNew: true
+      fetch(`${FIREBASE_REST_URL}/notifications.json`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && Array.isArray(data)) {
+            notifications = data;
+          } else {
+            // Seed default notifications jika belum ada di Firebase Cloud
+            notifications = [
+              {
+                id: 1,
+                title: 'Sistem Dimulai',
+                message: 'Aplikasi monitoring IoT aquaponics berhasil terhubung ke Firebase Cloud.',
+                timestamp: Date.now() - 3600000 * 2,
+                type: 'info',
+                isNew: false
+              },
+              {
+                id: 2,
+                title: 'Koneksi Normal',
+                message: 'Koneksi Firebase Realtime Database berjalan lancar.',
+                timestamp: Date.now() - 60000 * 5,
+                type: 'success',
+                isNew: true
+              }
+            ];
+            saveNotifications();
           }
-        ];
-        saveNotifications();
-      }
-      updateNotificationBadge();
+          updateNotificationBadge();
+        })
+        .catch(() => {
+          updateNotificationBadge();
+        });
     }
 
     function saveNotifications() {
-      localStorage.setItem('aquaponics_notifications', JSON.stringify(notifications));
+      fetch(`${FIREBASE_REST_URL}/notifications.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notifications)
+      })
+      .then(() => console.log("Notifikasi berhasil disimpan ke Firebase Cloud."))
+      .catch(err => console.error("Gagal menyimpan notifikasi ke Firebase Cloud:", err));
     }
 
     function updateNotificationBadge() {
@@ -4494,8 +4515,8 @@ if (type === 'Schedules') {
         sidePulse.className = 'indicator-pulse green';
       }
 
-      const localServerIp = localStorage.getItem('aquaponics_server_ip') || window.location.hostname || '192.168.1.40';
-      const localServerPort = localStorage.getItem('aquaponics_server_port') || '5000';
+      const localServerIp = window.location.hostname || '192.168.1.40';
+      const localServerPort = '5000';
       const baseUrl = `http://${localServerIp}:${localServerPort}`;
 
       // Inisialisasi awal schedules ke server & Firebase
@@ -4649,8 +4670,8 @@ if (type === 'Schedules') {
     }
 
     function sendLocalControl(cmdObj) {
-      const localServerIp = localStorage.getItem('aquaponics_server_ip') || window.location.hostname || '192.168.1.40';
-      const localServerPort = localStorage.getItem('aquaponics_server_port') || '5000';
+      const localServerIp = window.location.hostname || '192.168.1.40';
+      const localServerPort = '5000';
       const baseUrl = `http://${localServerIp}:${localServerPort}`;
 
       // 1. Kirim ke Server Lokal
