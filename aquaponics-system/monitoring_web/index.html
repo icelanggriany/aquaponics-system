@@ -20,6 +20,16 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
+  
+  <!-- EmailJS Library untuk Notifikasi Email Real-Time -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    (function() {
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init("4v1gUffZm6c9CtGXH");
+      }
+    })();
+  </script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -3917,10 +3927,7 @@
       const localServerPort = localStorage.getItem('aquaponics_server_port') || '5000';
       const baseUrl = `http://${localServerIp}:${localServerPort}`;
       
-      fetchLocalHistory(baseUrl, tabName);
-    }
-
-    // --- CONFIG MODALS LOADING ---
+      f    // --- CONFIG MODALS LOADING (FIREBASE CLOUD INTEGRATED) ---
     function openConfigModal(type) {
       const modal = document.getElementById('modal-config');
       const title = document.getElementById('config-modal-title');
@@ -3931,64 +3938,54 @@
       saveBtn.style.display = 'block';
 
       if (type === 'WiFi') {
-        const ssid = localStorage.getItem('aquaponics_wifi_ssid') || 'Akuaponik_SSID';
-        const pass = localStorage.getItem('aquaponics_wifi_pass') || '********';
         body.innerHTML = `
           <div class="form-group">
             <label>SSID (Nama WiFi)</label>
-            <input type="text" id="wifi-ssid" class="form-control" value="${ssid}">
+            <input type="text" id="wifi-ssid" class="form-control" value="Akuaponik_SSID">
           </div>
           <div class="form-group">
             <label>Password WiFi</label>
-            <input type="password" id="wifi-pass" class="form-control" value="${pass}">
+            <input type="password" id="wifi-pass" class="form-control" value="********">
           </div>
         `;
       }
       else if (type === 'Server') {
-        const ip = localStorage.getItem('aquaponics_server_ip') || '192.168.1.15';
-        const port = localStorage.getItem('aquaponics_server_port') || '8080';
         body.innerHTML = `
           <div class="form-group">
             <label>IP Gateway Raspberry Pi</label>
-            <input type="text" id="server-ip" class="form-control" value="${ip}">
+            <input type="text" id="server-ip" class="form-control" value="192.168.1.40">
           </div>
           <div class="form-group">
             <label>Port Komunikasi</label>
-            <input type="number" id="server-port" class="form-control" value="${port}">
+            <input type="number" id="server-port" class="form-control" value="5000">
           </div>
         `;
       }
       else if (type === 'Calibration') {
-        const ppm = localStorage.getItem('aquaponics_cal_tds_ppm') || '1000';
-        const volts = localStorage.getItem('aquaponics_cal_tds_v') || '1.50';
         body.innerHTML = `
           <p style="margin-bottom: 12px; font-size:0.8rem;">Kalibrasi sensor TDS Anda menggunakan larutan kalibrasi standar (misal 707 ppm atau 1000 ppm).</p>
           <div class="form-group">
             <label>Nilai Larutan Standar (ppm)</label>
-            <input type="number" id="cal-tds-ppm" class="form-control" value="${ppm}">
+            <input type="number" id="cal-tds-ppm" class="form-control" value="1000">
           </div>
           <div class="form-group">
             <label>Tegangan Terbaca (V) saat Kalibrasi</label>
-            <input type="number" step="0.01" id="cal-tds-v" class="form-control" value="${volts}">
+            <input type="number" step="0.01" id="cal-tds-v" class="form-control" value="1.50">
           </div>
         `;
       }
-
       else if (type === 'Notifications') {
-        const notifTds = localStorage.getItem('aquaponics_notif_tds') !== 'false';
-        const notifTemp = localStorage.getItem('aquaponics_notif_temp') !== 'false';
-        const notifFeed = localStorage.getItem('aquaponics_notif_feed') === 'true';
         body.innerHTML = `
           <p style="margin-bottom:12px;">Aktifkan peringatan otomatis ke browser saat kondisi akuaponik tidak stabil:</p>
           <div style="display:flex; flex-direction:column; gap:12px;">
             <label style="display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--text-main);">
-              <input type="checkbox" id="notif-tds" ${notifTds ? 'checked' : ''}> Alert TDS Kritis (&lt; 300 ppm atau &gt; 1000 ppm)
+              <input type="checkbox" id="notif-tds" checked> Alert TDS Kritis (&lt; 300 ppm atau &gt; 1000 ppm)
             </label>
             <label style="display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--text-main);">
-              <input type="checkbox" id="notif-temp" ${notifTemp ? 'checked' : ''}> Alert Suhu Air Kritis (&gt; 33°C)
+              <input type="checkbox" id="notif-temp" checked> Alert Suhu Air Kritis (&gt; 33°C)
             </label>
             <label style="display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--text-main);">
-              <input type="checkbox" id="notif-feed" ${notifFeed ? 'checked' : ''}> Notifikasi Pakan Berhasil Dikirim
+              <input type="checkbox" id="notif-feed" checked> Notifikasi Pakan Berhasil Dikirim
             </label>
           </div>
         `;
@@ -4031,7 +4028,7 @@
         body.innerHTML = `
           <div style="text-align:center; padding: 10px 0;">
             <div style="font-family:var(--font-outfit); font-size:1.2rem; font-weight:800; color:var(--primary); margin-bottom:4px;">Akuaponik Smart IoT</div>
-            <div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:16px;">Versi Aplikasi v1.0.0</div>
+            <div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:16px;">Versi Aplikasi v1.0.0 (Firebase Cloud Integrated)</div>
             <p style="font-size:0.8rem; line-height:1.5; color:var(--text-main);">Sistem monitoring dan kontrol kolam terpadu menggunakan transmisi nirkabel LoRa (Long Range) dan Raspberry Pi 3 Gateway.</p>
             <div style="margin-top:20px; font-size:0.72rem; color:var(--text-sub);">Didesain khusus untuk optimalisasi pertanian masa depan.</div>
           </div>
@@ -4046,7 +4043,7 @@
       const modal = document.getElementById('modal-config');
       const type = modal.getAttribute('data-current-type');
 
-if (type === 'Schedules') {
+      if (type === 'Schedules') {
         const lampStart = document.getElementById('sched-lamp-start').value;
         const lampEnd = document.getElementById('sched-lamp-end').value;
         const pumpStart = document.getElementById('sched-pump-start').value;
@@ -4056,45 +4053,40 @@ if (type === 'Schedules') {
           lamp_schedule: { start: lampStart, end: lampEnd },
           pump_b_schedule: { start: pumpStart, end: pumpEnd }
         });
-        alert("Jadwal Lampu dan Pompa berhasil disimpan!");
+        alert("Jadwal Lampu dan Pompa berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       } else if (type === 'WiFi') {
         const ssid = document.getElementById('wifi-ssid').value;
         const pass = document.getElementById('wifi-pass').value;
-        localStorage.setItem('aquaponics_wifi_ssid', ssid);
-        localStorage.setItem('aquaponics_wifi_pass', pass);
-        alert("Konfigurasi WiFi berhasil disimpan secara lokal!");
+        sendLocalControl({ wifi_ssid: ssid, wifi_pass: pass });
+        alert("Konfigurasi WiFi berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       } else if (type === 'Server') {
         const ip = document.getElementById('server-ip').value;
         const port = document.getElementById('server-port').value;
-        localStorage.setItem('aquaponics_server_ip', ip);
-        localStorage.setItem('aquaponics_server_port', port);
-        alert("Konfigurasi Server berhasil disimpan secara lokal!");
+        sendLocalControl({ server_ip: ip, server_port: port });
+        alert("Konfigurasi Server berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       } else if (type === 'Calibration') {
         const ppm = document.getElementById('cal-tds-ppm').value;
         const volts = document.getElementById('cal-tds-v').value;
-        localStorage.setItem('aquaponics_cal_tds_ppm', ppm);
-        localStorage.setItem('aquaponics_cal_tds_v', volts);
-        alert("Konfigurasi Kalibrasi Sensor berhasil disimpan secara lokal!");
+        sendLocalControl({ cal_tds_ppm: ppm, cal_tds_v: volts });
+        alert("Konfigurasi Kalibrasi Sensor berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       } else if (type === 'Notifications') {
         const notifTds = document.getElementById('notif-tds').checked;
         const notifTemp = document.getElementById('notif-temp').checked;
         const notifFeed = document.getElementById('notif-feed').checked;
-        localStorage.setItem('aquaponics_notif_tds', notifTds);
-        localStorage.setItem('aquaponics_notif_temp', notifTemp);
-        localStorage.setItem('aquaponics_notif_feed', notifFeed);
-        alert("Pengaturan Notifikasi berhasil disimpan secara lokal!");
+        sendLocalControl({ notif_tds: notifTds, notif_temp: notifTemp, notif_feed: notifFeed });
+        alert("Pengaturan Notifikasi berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       } else {
-        alert(`Konfigurasi ${type} disimpan secara lokal!`);
+        alert(`Konfigurasi ${type} berhasil disimpan ke Firebase Cloud!`);
         closeModal('modal-config');
       }
     }
 
-    // --- LOCAL DUMMY AUTHENTICATION & DATABASE SETUP ---
+    // --- FIREBASE CLOUD AUTHENTICATION SETUP ---
     let authMode = 'login'; // 'login' or 'register'
 
     function toggleAuthMode() {
@@ -4142,6 +4134,7 @@ if (type === 'Schedules') {
             if (email === savedEmail && password === savedPass) {
               console.log("Login sukses via Firebase Cloud.");
               sessionStorage.setItem('aquaponics_logged_in', 'true');
+              sessionStorage.setItem('aquaponics_user_email', email);
 
               document.getElementById('login-screen').style.display = 'none';
               document.querySelector('.desktop-container').style.display = 'flex';
@@ -4165,6 +4158,7 @@ if (type === 'Schedules') {
             // Fallback default admin
             if (email === 'admin@gmail.com' && password === 'admin') {
               sessionStorage.setItem('aquaponics_logged_in', 'true');
+              sessionStorage.setItem('aquaponics_user_email', email);
               document.getElementById('login-screen').style.display = 'none';
               document.querySelector('.desktop-container').style.display = 'flex';
               startLocalApiPolling();
@@ -4185,7 +4179,8 @@ if (type === 'Schedules') {
         })
         .then(res => res.json())
         .then(() => {
-          alert("Pendaftaran berhasil dan tersimpan di Firebase Cloud! Silakan masuk menggunakan email dan kata sandi yang telah Anda daftarkan.");
+          sessionStorage.setItem('aquaponics_user_email', email);
+          alert(`Pendaftaran berhasil! Email notifikasi realtime akan dikirim ke: ${email}`);
           toggleAuthMode();
           document.getElementById('auth-email').value = email;
           document.getElementById('auth-password').value = password;
@@ -4207,6 +4202,7 @@ if (type === 'Schedules') {
 
     function executeLogout() {
       sessionStorage.removeItem('aquaponics_logged_in');
+      sessionStorage.removeItem('aquaponics_user_email');
       window.location.reload();
     }
 
@@ -4215,40 +4211,49 @@ if (type === 'Schedules') {
       document.getElementById(id).classList.remove('active');
     }
 
-    // --- NOTIFICATION SYSTEM (FIREBASE CLOUD INTEGRATED) ---
-    function loadNotifications() {
-      fetch(`${FIREBASE_REST_URL}/notifications.json`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && Array.isArray(data)) {
-            notifications = data;
-          } else {
-            // Seed default notifications jika belum ada di Firebase Cloud
-            notifications = [
-              {
-                id: 1,
-                title: 'Sistem Dimulai',
-                message: 'Aplikasi monitoring IoT aquaponics berhasil terhubung ke Firebase Cloud.',
-                timestamp: Date.now() - 3600000 * 2,
-                type: 'info',
-                isNew: false
-              },
-              {
-                id: 2,
-                title: 'Koneksi Normal',
-                message: 'Koneksi Firebase Realtime Database berjalan lancar.',
-                timestamp: Date.now() - 60000 * 5,
-                type: 'success',
-                isNew: true
-              }
-            ];
-            saveNotifications();
-          }
-          updateNotificationBadge();
-        })
-        .catch(() => {
-          updateNotificationBadge();
-        });
+    // --- NOTIFICATION SYSTEM & EMAIL REALTIME HANDLER ---
+    function addNotification(type, title, message) {
+      const newNotif = {
+        id: Date.now() + Math.random(),
+        title: title,
+        message: message,
+        timestamp: Date.now(),
+        type: type, // 'critical' | 'warning' | 'success' | 'info'
+        isNew: true
+      };
+      
+      notifications.unshift(newNotif);
+      if (notifications.length > 30) {
+        notifications.pop();
+      }
+      
+      saveNotifications();
+      updateNotificationBadge();
+      renderNotifications();
+
+      // Kirim Notifikasi Email Real-Time ke Email Terdaftar Pengguna
+      const registeredEmail = sessionStorage.getItem('aquaponics_user_email') || 'admin@gmail.com';
+      if (type === 'critical' || type === 'warning') {
+        sendEmailNotification(registeredEmail, title, message);
+      }
+    }
+
+    function sendEmailNotification(toEmail, title, message) {
+      if (typeof emailjs === 'undefined') return;
+      
+      const emailParams = {
+        to_email: toEmail,
+        title: title,
+        message: message,
+        time: new Date().toLocaleString('id-ID')
+      };
+
+      console.log(`[Realtime Email] Mengirimkan alert email ke: ${toEmail}...`);
+      
+      // Kirim via EmailJS API menggunakan Service ID & Template ID Anda
+      emailjs.send('service_4e9rkbf', 'template_p2vuw8k', emailParams)
+        .then(() => console.log('✅ Email notifikasi realtime berhasil terkirim ke inbox:', toEmail))
+        .catch(err => console.error('Gagal mengirimkan notifikasi email realtime:', err));
     }
 
     function saveNotifications() {
