@@ -3112,7 +3112,6 @@
             <h2 class="screen-title">Control</h2>
 
             <div class="control-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;">
-            <div class="control-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;">
               <!-- Control Lampu -->
               <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px 20px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
                 <div style="display:flex; align-items:center; gap:14px;">
@@ -3274,11 +3273,12 @@
 
           <!-- 4. CONFIG SCREEN -->
           <div id="screen-config" class="app-screen">
+            <h2 class="screen-title" style="font-family: var(--font-outfit) !important; font-size: 1.8rem !important; font-weight: 800 !important; color: #0f172a !important; margin-bottom: 20px !important; display: block !important;">Config</h2>
 
-            <div class="config-grid-container" style="display: flex !important; flex-wrap: wrap !important; gap: 16px !important; margin-top: 10px !important; width: 100% !important;">
+            <div class="config-grid-container" style="display: flex !important; flex-wrap: wrap !important; gap: 14px !important; width: 100% !important; max-width: 960px !important;">
               
               <!-- 1. Pengaturan WiFi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('WiFi')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('WiFi')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
                 <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M5 12.55a11 11 0 0 1 14.08 0" />
@@ -3296,7 +3296,7 @@
               </div>
 
               <!-- 2. Pengaturan Server -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Server')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Server')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
                 <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
@@ -3314,7 +3314,7 @@
               </div>
 
               <!-- 3. Kalibrasi Sensor -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Calibration')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Calibration')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
                 <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
@@ -3331,7 +3331,7 @@
               </div>
 
               <!-- 4. Integrasi Firebase -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Firebase')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Firebase')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
                 <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
@@ -3340,13 +3340,16 @@
                   </svg>
                   <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Integrasi Firebase</span>
                 </div>
-                <div style="display: flex !important; align-items: center !important; gap: 8px !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 8px !important; color: #ef4444 !important;">
                   <span id="firebase-status-badge" style="font-size: 0.8rem !important; font-weight: 600 !important; color: #ef4444 !important;">Terputus</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
                 </div>
               </div>
 
               <!-- 5. Notifikasi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Notifications')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Notifications')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
                 <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -3362,7 +3365,7 @@
               </div>
 
               <!-- 6. Tentang Aplikasi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('About')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('About')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
                 <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
@@ -3379,7 +3382,7 @@
               </div>
 
               <!-- 7. Keluar Akun -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="confirmLogout()" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+              <div class="config-row-card" role="button" tabindex="0" onclick="confirmLogout()" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
                 <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
