@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>Smart Akuaponik - Premium IoT Dashboard</title>
 
+  <!-- Auto-Clear Service Worker Cache Script -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+  </script>
+
   <!-- PWA Meta Tags & Manifest -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b0f17">
@@ -1397,18 +1408,33 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      z-index: 10000;
+      background-color: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      z-index: 99999;
       display: none;
       align-items: center;
       justify-content: center;
       padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    body:not(.dark-mode) .modal-overlay {
+      background-color: rgba(241, 245, 249, 0.65);
     }
 
     .modal-overlay.active {
       display: flex;
+    }
+
+    /* Soft 65% blur matching for top app-header and status bars when modal is active */
+    body.modal-open .app-header,
+    body.modal-open .status-bar-sim,
+    body.modal-open .demo-mode-banner {
+      filter: blur(18px);
+      opacity: 0.35;
+      pointer-events: none !important;
+      transition: filter 0.25s ease, opacity 0.25s ease;
     }
 
     .modal-box {
@@ -2253,8 +2279,169 @@
       animation: blink 1s step-end infinite;
     }
 
-    @keyframes blink {
-      50% { opacity: 0; }
+    /* Config Screen Styling */
+    .config-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+      width: 100%;
+    }
+
+    .config-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .config-row:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(37, 99, 235, 0.3);
+    }
+
+    .config-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .config-icon-container {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Config Screen List & Glassmorphism Card Styling */
+    .config-list {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 14px !important;
+      margin-top: 18px !important;
+      max-width: 650px !important;
+      width: 100% !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    .config-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 16px 20px !important;
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-glass) !important;
+      border-radius: 18px !important;
+      box-shadow: var(--shadow) !important;
+      cursor: pointer !important;
+      width: 100% !important;
+      text-align: left !important;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      outline: none !important;
+    }
+
+    .config-row:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 24px rgba(31, 38, 135, 0.12) !important;
+      border-color: var(--primary) !important;
+    }
+
+    .config-left {
+      display: flex !important;
+      align-items: center !important;
+      gap: 14px !important;
+    }
+
+    .config-icon-container {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 12px !important;
+      background-color: rgba(59, 130, 246, 0.12) !important;
+      color: var(--primary) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+    }
+
+    .config-title {
+      font-family: var(--font-inter) !important;
+      font-size: 0.98rem !important;
+      font-weight: 600 !important;
+      color: var(--text-main) !important;
+    }
+
+    .config-right {
+      color: var(--text-sub) !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    /* Mobile Smartphone Layout Responsiveness */
+    @media screen and (max-width: 768px) {
+      .screen-content {
+        padding: 12px 10px calc(80px + env(safe-area-inset-bottom)) 10px !important;
+      }
+      .sensor-grid {
+        gap: 8px !important;
+      }
+      .card-sensor.bento-card {
+        padding: 10px 10px !important;
+        border-radius: 18px !important;
+        gap: 4px !important;
+      }
+      .bento-title {
+        font-size: 0.72rem !important;
+        gap: 3px !important;
+      }
+      .bento-title svg {
+        width: 14px !important;
+        height: 14px !important;
+      }
+      .bento-badge {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 0.75rem !important;
+        border-radius: 6px !important;
+      }
+      .sensor-value-mobile {
+        font-size: 1.4rem !important;
+      }
+      .sensor-subtext-mobile {
+        font-size: 0.62rem !important;
+        line-height: 1.1 !important;
+      }
+      .sensor-pill-mobile {
+        font-size: 0.6rem !important;
+        padding: 2px 5px !important;
+        border-radius: 6px !important;
+      }
+      .circle-gauge-container {
+        width: 48px !important;
+        height: 48px !important;
+      }
+      .circle-gauge-container svg {
+        width: 48px !important;
+        height: 48px !important;
+      }
     }
   </style>
 </head>
@@ -2283,12 +2470,12 @@
       <form class="login-form" id="auth-form" onsubmit="handleAuthSubmit(event)">
         <div class="form-group">
           <label for="auth-email">Alamat Email</label>
-          <input type="email" id="auth-email" class="form-control" placeholder="nama@email.com (Opsional)">
+          <input type="email" id="auth-email" class="form-control" placeholder="nama@email.com">
         </div>
         <div class="form-group">
           <label for="auth-password">Kata Sandi</label>
           <div style="position: relative; width: 100%;">
-            <input type="password" id="auth-password" class="form-control" style="padding-right: 40px;" placeholder="•••••••• (Opsional)">
+            <input type="password" id="auth-password" class="form-control" style="padding-right: 40px;" placeholder="••••••••">
             <button type="button" onclick="togglePasswordVisibility('auth-password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Tampilkan / Sembunyikan Kata Sandi">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -2645,12 +2832,12 @@
                     </svg>
                   </div>
 
-                  <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 4px;">
                     <div>
-                      <span style="font-size: 1.85rem; font-weight: 800; color: #10b981; line-height: 1;" id="val-suhu">-</span>
-                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;" id="val-suhu-status">Optimal (24 - 32°C)</span>
+                      <span class="sensor-value-mobile" style="font-size: 1.85rem; font-weight: 800; color: #10b981; line-height: 1;" id="val-suhu">-</span>
+                      <span class="sensor-subtext-mobile" style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 2px;" id="val-suhu-status">Optimal (24-32°C)</span>
                     </div>
-                    <span style="font-size: 0.72rem; font-weight: 700; color: #10b981; background: rgba(16,185,129,0.12); padding: 4px 8px; border-radius: 8px;" id="val-suhu-pill">● Stabil</span>
+                    <span class="sensor-pill-mobile" style="font-size: 0.72rem; font-weight: 700; color: #10b981; background: rgba(16,185,129,0.12); padding: 4px 8px; border-radius: 8px;" id="val-suhu-pill">● Stabil</span>
                   </div>
                 </div>
 
@@ -2667,8 +2854,8 @@
                   </div>
 
                   <!-- Radial Ring Meter -->
-                  <div style="display: flex; align-items: center; gap: 14px; margin: 4px 0;">
-                    <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin: 4px 0;">
+                    <div class="circle-gauge-container" style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                       <svg width="68" height="68" viewBox="0 0 72 72">
                         <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(59, 130, 246, 0.15)" stroke-width="7" />
                         <circle id="bento-tds-ring" cx="36" cy="36" r="30" fill="none" stroke="#3b82f6" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="60" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.8s ease;" />
@@ -2678,10 +2865,10 @@
                       </div>
                     </div>
 
-                    <div>
-                      <span style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); line-height: 1;" id="val-tds">-</span>
-                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;">Target: 400 - 900 PPM</span>
-                      <span style="font-size: 0.72rem; font-weight: 700; color: var(--primary);" id="val-tds-status">Nutrisi Stabil</span>
+                    <div style="min-width: 0; flex: 1;">
+                      <span class="sensor-value-mobile" style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); line-height: 1;" id="val-tds">-</span>
+                      <span class="sensor-subtext-mobile" style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 2px;">Target: 400-900</span>
+                      <span class="sensor-pill-mobile" style="font-size: 0.72rem; font-weight: 700; color: var(--primary);" id="val-tds-status">Nutrisi Stabil</span>
                     </div>
                   </div>
                 </div>
@@ -2710,12 +2897,12 @@
                     <div style="flex: 1; background: #f97316; height: 95%; border-radius: 4px;"></div>
                   </div>
 
-                  <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 4px;">
                     <div>
-                      <span style="font-size: 1.85rem; font-weight: 800; color: #f97316; line-height: 1;" id="val-suhu-udara">-</span>
-                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;">Rentang Nyaman (20 - 33°C)</span>
+                      <span class="sensor-value-mobile" style="font-size: 1.85rem; font-weight: 800; color: #f97316; line-height: 1;" id="val-suhu-udara">-</span>
+                      <span class="sensor-subtext-mobile" style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 2px;">Rentang (20-33°C)</span>
                     </div>
-                    <span style="font-size: 0.72rem; font-weight: 700; color: #f97316; background: rgba(249, 115, 22, 0.12); padding: 4px 8px; border-radius: 8px;">● Normal</span>
+                    <span class="sensor-pill-mobile" style="font-size: 0.72rem; font-weight: 700; color: #f97316; background: rgba(249, 115, 22, 0.12); padding: 4px 8px; border-radius: 8px;">● Normal</span>
                   </div>
                 </div>
 
@@ -2732,8 +2919,8 @@
                   </div>
 
                   <!-- Radial Ring Meter for Humidity -->
-                  <div style="display: flex; align-items: center; gap: 14px; margin: 4px 0;">
-                    <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin: 4px 0;">
+                    <div class="circle-gauge-container" style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                       <svg width="68" height="68" viewBox="0 0 72 72">
                         <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(139, 92, 246, 0.15)" stroke-width="7" />
                         <circle id="bento-hum-ring" cx="36" cy="36" r="30" fill="none" stroke="#8b5cf6" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="45" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.8s ease;" />
@@ -2743,10 +2930,10 @@
                       </div>
                     </div>
 
-                    <div>
-                      <span style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); line-height: 1;" id="val-humidity">-</span>
-                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;">Target: 60% - 90%</span>
-                      <span style="font-size: 0.72rem; font-weight: 700; color: #8b5cf6;">Kelembaban Optimal</span>
+                    <div style="min-width: 0; flex: 1;">
+                      <span class="sensor-value-mobile" style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); line-height: 1;" id="val-humidity">-</span>
+                      <span class="sensor-subtext-mobile" style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 2px;">Target 60-90%</span>
+                      <span class="sensor-pill-mobile" style="font-size: 0.72rem; font-weight: 700; color: #8b5cf6;">Optimal</span>
                     </div>
                   </div>
                 </div>
@@ -3087,140 +3274,127 @@
 
           <!-- 4. CONFIG SCREEN -->
           <div id="screen-config" class="app-screen">
-            <h2 class="screen-title">Config</h2>
 
-            <div class="config-list">
-              <button class="config-row" onclick="openConfigModal('WiFi')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2.5">
-                      <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-                      <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-                      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-                      <circle cx="12" cy="20" r="1" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Pengaturan WiFi</span>
+            <div class="config-grid-container" style="display: flex !important; flex-wrap: wrap !important; gap: 16px !important; margin-top: 10px !important; width: 100% !important;">
+              
+              <!-- 1. Pengaturan WiFi -->
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('WiFi')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+                    <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                    <circle cx="12" cy="20" r="1" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Pengaturan WiFi</span>
                 </div>
-                <div class="config-right">
+                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
-              </button>
+              </div>
 
-              <button class="config-row" onclick="openConfigModal('Server')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2.5">
-                      <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
-                      <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
-                      <line x1="6" y1="6" x2="6.01" y2="6" />
-                      <line x1="6" y1="18" x2="6.01" y2="18" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Pengaturan Server</span>
+              <!-- 2. Pengaturan Server -->
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Server')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                    <line x1="6" y1="6" x2="6.01" y2="6" />
+                    <line x1="6" y1="18" x2="6.01" y2="18" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Pengaturan Server</span>
                 </div>
-                <div class="config-right">
+                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
-              </button>
+              </div>
 
-              <button class="config-row" onclick="openConfigModal('Calibration')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2.5">
-                      <circle cx="12" cy="12" r="10" />
-                      <circle cx="12" cy="12" r="6" />
-                      <circle cx="12" cy="12" r="2" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Kalibrasi Sensor</span>
+              <!-- 3. Kalibrasi Sensor -->
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Calibration')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="6" />
+                    <circle cx="12" cy="12" r="2" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Kalibrasi Sensor</span>
                 </div>
-                <div class="config-right">
+                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
-              </button>
+              </div>
 
-              <button class="config-row" onclick="openConfigModal('Schedules')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Jadwal Lampu & Pompa</span>
+              <!-- 4. Integrasi Firebase -->
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Firebase')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Integrasi Firebase</span>
                 </div>
-                <div class="config-right">
+                <div style="display: flex !important; align-items: center !important; gap: 8px !important;">
+                  <span id="firebase-status-badge" style="font-size: 0.8rem !important; font-weight: 600 !important; color: #ef4444 !important;">Terputus</span>
+                </div>
+              </div>
+
+              <!-- 5. Notifikasi -->
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Notifications')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Notifikasi</span>
+                </div>
+                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
-              </button>
+              </div>
 
-              <button class="config-row" onclick="openConfigModal('Notifications')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2.5">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Notifikasi</span>
+              <!-- 6. Tentang Aplikasi -->
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('About')" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Tentang Aplikasi</span>
                 </div>
-                <div class="config-right">
+                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
-              </button>
+              </div>
 
-              <button class="config-row" onclick="openConfigModal('About')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2.5">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="16" x2="12" y2="12" />
-                      <line x1="12" y1="8" x2="12.01" y2="8" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Tentang Aplikasi</span>
+              <!-- 7. Keluar Akun -->
+              <div class="config-row-card" role="button" tabindex="0" onclick="confirmLogout()" style="flex: 1 1 340px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 24px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #ef4444 !important;">Keluar Akun</span>
                 </div>
-                <div class="config-right">
+                <div style="color: #ef4444 !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
-              </button>
+              </div>
 
-              <button class="config-row" onclick="confirmLogout()" style="color: #ef4444;">
-                <div class="config-left">
-                  <div class="config-icon-container" style="color: inherit;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                      <polyline points="16 17 21 12 16 7" />
-                      <line x1="21" y1="12" x2="9" y2="12" />
-                    </svg>
-                  </div>
-                  <span class="config-title" style="font-weight: 700; color: inherit;">Keluar Akun</span>
-                </div>
-                <div class="config-right">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </div>
-              </button>
             </div>
           </div>
 
@@ -3263,6 +3437,7 @@
                 d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
             <span>Config</span>
+          </button>
         </div>
 
         <!-- ----------------- MODALS & POPUPS ----------------- -->
@@ -3454,6 +3629,164 @@
 
     // Notifications list
     let notifications = [];
+
+    // --- MODAL & CONFIG MANAGEMENT ---
+    let currentConfigType = '';
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('active');
+      }
+    }
+
+    function confirmLogout() {
+      const modal = document.getElementById('modal-confirm-logout');
+      if (modal) {
+        modal.classList.add('active');
+      }
+    }
+
+    function executeLogout() {
+      localStorage.removeItem('aquaponics_logged_in');
+      closeModal('modal-confirm-logout');
+      document.getElementById('login-screen').style.display = 'flex';
+      document.querySelector('.desktop-container').style.display = 'none';
+      if (typeof showToast === 'function') showToast('Berhasil keluar dari akun.');
+    }
+
+    function openConfigModal(type) {
+      currentConfigType = type;
+      const modal = document.getElementById('modal-config');
+      const titleEl = document.getElementById('config-modal-title');
+      const bodyEl = document.getElementById('config-modal-body');
+      const saveBtn = document.getElementById('btn-save-config');
+
+      if (!modal || !titleEl || !bodyEl) return;
+
+      modal.classList.add('active');
+      if (saveBtn) saveBtn.style.display = 'inline-flex';
+
+      if (type === 'WiFi') {
+        titleEl.innerText = 'Pengaturan WiFi ESP32';
+        const savedSsid = localStorage.getItem('cfg_wifi_ssid') || 'SmartAkuaponik_WiFi';
+        bodyEl.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+            <p style="font-size:0.85rem; color:var(--text-sub);">Atur kredensial WiFi untuk ESP32 Gateway di lapangan.</p>
+            <div>
+              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">SSID (Nama WiFi)</label>
+              <input type="text" id="cfg-wifi-ssid" value="${savedSsid}" placeholder="SSID WiFi..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Password WiFi</label>
+              <input type="password" id="cfg-wifi-pass" placeholder="Masukkan Password WiFi..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+          </div>
+        `;
+      } else if (type === 'Server') {
+        titleEl.innerText = 'Pengaturan Server & Gateway';
+        const savedFb = localStorage.getItem('cfg_server_fb') || (typeof FIREBASE_REST_URL !== 'undefined' ? FIREBASE_REST_URL : '');
+        const savedApi = localStorage.getItem('cfg_server_api') || (typeof LOCAL_API_URL !== 'undefined' ? LOCAL_API_URL : '');
+        bodyEl.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+            <p style="font-size:0.85rem; color:var(--text-sub);">Atur URL Firebase REST dan IP Local Python Gateway.</p>
+            <div>
+              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Firebase REST URL</label>
+              <input type="text" id="cfg-server-fb" value="${savedFb}" placeholder="https://..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Local Gateway API IP</label>
+              <input type="text" id="cfg-server-api" value="${savedApi}" placeholder="http://192.168.1.xxx:5000" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+          </div>
+        `;
+      } else if (type === 'Calibration') {
+        titleEl.innerText = 'Kalibrasi Sensor Akuaponik';
+        const offsetW = localStorage.getItem('cfg_cal_temp_w') || '0.0';
+        const offsetTds = localStorage.getItem('cfg_cal_tds') || '0';
+        bodyEl.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+            <p style="font-size:0.85rem; color:var(--text-sub);">Nilai offset kalibrasi untuk menyesuaikan pembacaan fisik sensor.</p>
+            <div>
+              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Offset Suhu Air (°C)</label>
+              <input type="number" step="0.1" id="cfg-cal-temp-w" value="${offsetW}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Offset TDS (ppm)</label>
+              <input type="number" step="1" id="cfg-cal-tds" value="${offsetTds}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+          </div>
+        `;
+      } else if (type === 'Schedules') {
+        titleEl.innerText = 'Jadwal Lampu & Pompa';
+        const lampStart = (telemetryData && telemetryData.lamp_schedule) ? telemetryData.lamp_schedule.start : '06:00';
+        const lampEnd = (telemetryData && telemetryData.lamp_schedule) ? telemetryData.lamp_schedule.end : '18:00';
+        bodyEl.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+            <p style="font-size:0.85rem; color:var(--text-sub);">Atur waktu otomatis untuk pencahayaan dan sirkulasi kolam.</p>
+            <div>
+              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Waktu Lampu Menyala (Auto)</label>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+                <input type="time" id="cfg-lamp-start" value="${lampStart}" style="padding:8px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); flex:1;">
+                <span>s/d</span>
+                <input type="time" id="cfg-lamp-end" value="${lampEnd}" style="padding:8px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); flex:1;">
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (type === 'Notifications') {
+        titleEl.innerText = 'Pengaturan Notifikasi Alert';
+        bodyEl.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+            <p style="font-size:0.85rem; color:var(--text-sub);">Aktifkan peringatan otomatis saat batas aman sensor terlampaui.</p>
+            <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.9rem; font-weight:600; color:var(--text-main); cursor:pointer;">
+              <span>Alert Suhu Air Panas (> 30°C)</span>
+              <input type="checkbox" checked style="width:18px; height:18px; accent-color:var(--primary);">
+            </label>
+            <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.9rem; font-weight:600; color:var(--text-main); cursor:pointer;">
+              <span>Alert Level Air Kritis (< 20%)</span>
+              <input type="checkbox" checked style="width:18px; height:18px; accent-color:var(--primary);">
+            </label>
+          </div>
+        `;
+      } else if (type === 'About') {
+        titleEl.innerText = 'Tentang Smart Akuaponik';
+        if (saveBtn) saveBtn.style.display = 'none';
+        bodyEl.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:10px; text-align:center;">
+            <div style="width:56px; height:56px; border-radius:18px; background:rgba(59,130,246,0.15); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h4 style="font-family:var(--font-outfit); font-size:1.15rem; font-weight:800; color:var(--text-main); margin-top:4px;">Smart Akuaponik Pro</h4>
+            <p style="font-size:0.82rem; color:var(--text-sub);">Sistem Pemantauan & Pemberian Pakan Otomatis Berbasis LoRa & Cloud IoT v2.5</p>
+            <div style="padding:10px; background:var(--bg-app); border-radius:12px; font-size:0.78rem; color:var(--text-sub); text-align:left; border:1px solid var(--border-glass);">
+              <div>• Gateway Protocol: LoRa 433MHz + ESP32</div>
+              <div>• Backend Sync: Firebase Realtime Database</div>
+              <div>• Offline Engine: Local Python REST Gateway</div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function saveConfiguration() {
+      if (currentConfigType === 'WiFi') {
+        const ssid = document.getElementById('cfg-wifi-ssid')?.value;
+        if (ssid) localStorage.setItem('cfg_wifi_ssid', ssid);
+        if (typeof showToast === 'function') showToast('Pengaturan WiFi berhasil disimpan!');
+      } else if (currentConfigType === 'Server') {
+        const fb = document.getElementById('cfg-server-fb')?.value;
+        const api = document.getElementById('cfg-server-api')?.value;
+        if (fb) localStorage.setItem('cfg_server_fb', fb);
+        if (api) localStorage.setItem('cfg_server_api', api);
+        if (typeof showToast === 'function') showToast('Pengaturan Server berhasil disimpan!');
+      } else if (currentConfigType === 'Calibration') {
+        if (typeof showToast === 'function') showToast('Kalibrasi sensor berhasil diperbarui!');
+      } else {
+        if (typeof showToast === 'function') showToast('Pengaturan berhasil disimpan!');
+      }
+      closeModal('modal-config');
+    }
 
     // --- INITIALIZATION ---
     window.onload = function () {
@@ -4984,19 +5317,31 @@
     }
 
     function confirmLogout() {
+      document.body.classList.add('modal-open');
       document.getElementById('modal-confirm-logout').classList.add('active');
     }
 
     function executeLogout() {
+      document.body.classList.remove('modal-open');
       localStorage.removeItem('aquaponics_logged_in');
       window.location.reload();
     }
 
-
-
     // --- DIALOG MODALS UTILS ---
+    function openModal(id) {
+      document.body.classList.add('modal-open');
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
     function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+
+      const anyActive = document.querySelector('.modal-overlay.active');
+      if (!anyActive) {
+        document.body.classList.remove('modal-open');
+      }
     }
 
     // --- NOTIFICATION SYSTEM (INSTAGRAM STYLE) ---
@@ -5329,7 +5674,7 @@
 
       // Ambil data status dan history langsung (Lokal dengan Auto Fallback ke Firebase)
       fetchLocalStatus(baseUrl);
-      localApiInterval = setInterval(() => fetchLocalStatus(baseUrl), 3000);
+      localApiInterval = setInterval(() => fetchLocalStatus(baseUrl), 1000);
 
       fetchLocalHistory(baseUrl, currentChartTab);
       localHistoryInterval = setInterval(() => fetchLocalHistory(baseUrl, currentChartTab), 10000);
@@ -5522,29 +5867,26 @@
     }
 
     function fetchLocalStatus(baseUrl) {
-      // 1. Coba ambil data dari Server API Lokal
-      fetch(`${baseUrl}/api/status`)
+      // 1. Ambil data real-time langsung dari Firebase Realtime Cloud (dengan Anti-Cache)
+      fetch(`${FIREBASE_REST_URL}/sensor_data.json?t=${Date.now()}`, { cache: 'no-store' })
         .then(res => res.json())
-        .then(data => {
-          if (data && data.temp_w !== undefined) {
-            processIncomingTelemetry(data, 'Lokal');
+        .then(fbData => {
+          if (fbData && (fbData.temp_w !== undefined || fbData.temp_a !== undefined)) {
+            processIncomingTelemetry(fbData, 'Firebase Realtime');
           } else {
-            throw new Error('Data lokal kosong');
+            throw new Error('Firebase data belum ada');
           }
         })
-        .catch(err => {
-          // 2. Jika Server Lokal tidak aktif, langsung ambil dari Firebase Realtime Cloud
-          fetch(`${FIREBASE_REST_URL}/sensor_data.json`, { cache: 'no-store' })
+        .catch(fbErr => {
+          // 2. Fallback ke Server API Lokal jika Firebase sedang bermasalah
+          fetch(`${baseUrl}/api/status?t=${Date.now()}`, { cache: 'no-store' })
             .then(res => res.json())
-            .then(fbData => {
-              if (fbData && (fbData.temp_w !== undefined || fbData.temp_a !== undefined)) {
-                processIncomingTelemetry(fbData, 'Firebase Realtime');
-              } else {
-                throw new Error('Firebase data belum ada');
+            .then(data => {
+              if (data && data.temp_w !== undefined) {
+                processIncomingTelemetry(data, 'Lokal');
               }
             })
-            .catch(fbErr => {
-              // Hanya ubah status ke Terputus jika BENAR-BENAR tidak ada sinyal telemetry masuk selama > 15 detik
+            .catch(err => {
               if (Date.now() - lastTelemetryTimestamp > 15000) {
                 const sideSync = document.getElementById('sidebar-sync-text');
                 const sideStatus = document.getElementById('sidebar-status-text');
