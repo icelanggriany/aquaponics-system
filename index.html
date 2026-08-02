@@ -2796,7 +2796,62 @@
                     <span>Lampu Tanaman</span>
                     <strong style="color:var(--text-sub)" id="info-lampu">OFF</strong>
                   </div>
+                  <div style="display:flex; justify-content:space-between;">
+                    <span>Aerator Air</span>
+                    <strong style="color:var(--green)" id="info-aerator">ON</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between;">
+                    <span>Email Alert Notifikasi</span>
+                    <strong style="color:var(--green)" id="info-email-status">Aktif</strong>
+                  </div>
                 </div>
+              </div>
+
+              <!-- Widget Monitoring Jadwal Pakan -->
+              <div class="feeder-card" style="margin-top: 16px;">
+                <div class="feeder-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                  <span style="display:flex; align-items:center; gap:8px; font-weight:700;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/>
+                    </svg>
+                    Monitoring Jadwal Pakan
+                  </span>
+                  <button onclick="switchScreen('control')" style="background:none; border:none; color:var(--primary); font-size:0.78rem; font-weight:700; cursor:pointer;">Kelola &rarr;</button>
+                </div>
+
+                <!-- Mode Otomatis View (Countdown Timer & Jadwal Berikutnya) -->
+                <div id="feed-monitor-auto-view" style="display:block;">
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+                    <div style="background:var(--primary-light); padding:10px 12px; border-radius:12px; text-align:center;">
+                      <span style="font-size:0.7rem; color:var(--primary); font-weight:600; display:block;">Pemberian Pakan</span>
+                      <strong style="font-size:0.95rem; color:var(--primary); display:block; margin-top:2px; font-family:var(--font-outfit);" id="val-feed-countdown">- Mnt Lagi</strong>
+                    </div>
+                    <div style="background:var(--bg-app); padding:10px 12px; border-radius:12px; border:1px solid var(--border-glass); text-align:center;">
+                      <span style="font-size:0.7rem; color:var(--text-sub); display:block;">Jadwal Berikutnya</span>
+                      <strong style="font-size:0.85rem; color:var(--text-main); display:block; margin-top:2px;" id="val-next-feed-auto">16:00 (2 Porsi)</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Mode Manual View (Jam Wajib Makan & Frekuensi Pakan Sehari) -->
+                <div id="feed-monitor-manual-view" style="display:none;">
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+                    <div style="background:rgba(249, 115, 22, 0.1); padding:10px 12px; border-radius:12px; text-align:center;">
+                      <span style="font-size:0.7rem; color:#f97316; font-weight:600; display:block;">Frekuensi Pakan</span>
+                      <strong style="font-size:0.88rem; color:#f97316; display:block; margin-top:2px;" id="val-feed-freq">2x Sehari</strong>
+                    </div>
+                    <div style="background:var(--bg-app); padding:10px 12px; border-radius:12px; border:1px solid var(--border-glass); text-align:center;">
+                      <span style="font-size:0.7rem; color:var(--text-sub); display:block;">Jam Wajib Makan</span>
+                      <strong style="font-size:0.82rem; color:var(--text-main); display:block; margin-top:2px;" id="val-mandatory-times">08:00 & 16:00</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tombol Beri Pakan Instan -->
+                <button onclick="triggerManualFeeding()" class="btn-primary" style="width:100%; padding:10px; font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20"/></svg>
+                  Beri Pakan Instan
+                </button>
               </div>
             </div> <!-- End Left Column Wrapper -->
 
@@ -2938,8 +2993,8 @@
                   </div>
                 </div>
 
-                <!-- Bento Card 4: Ketinggian Air (Liquid Radial Gauge Widget) -->
-                <div class="card-sensor bento-card">
+                <!-- Bento Card 4: Ketinggian Air (Liquid Radial Gauge Widget - Full Width Banner) -->
+                <div class="card-sensor bento-card" style="grid-column: span 2;">
                   <div class="bento-header">
                     <span class="bento-title">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -2951,22 +3006,27 @@
                     <div class="bento-badge badge-green">🌊</div>
                   </div>
 
-                  <!-- Liquid Radial Meter -->
-                  <div style="display: flex; align-items: center; gap: 14px; margin: 4px 0;">
-                    <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <svg width="68" height="68" viewBox="0 0 72 72">
-                        <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(16, 185, 129, 0.15)" stroke-width="7" />
-                        <circle id="bento-water-ring" cx="36" cy="36" r="30" fill="none" stroke="#10b981" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="40" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.8s ease;" />
-                      </svg>
-                      <div style="position: absolute; text-align: center;">
-                        <span style="font-size: 0.65rem; font-weight: 700; color: var(--green); display: block;">WATER</span>
+                  <!-- Liquid Radial Meter (Full Width Layout) -->
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 4px 0; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                      <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="68" height="68" viewBox="0 0 72 72">
+                          <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(16, 185, 129, 0.15)" stroke-width="7" />
+                          <circle id="bento-water-ring" cx="36" cy="36" r="30" fill="none" stroke="#10b981" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="40" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.8s ease;" />
+                        </svg>
+                        <div style="position: absolute; text-align: center;">
+                          <span style="font-size: 0.65rem; font-weight: 700; color: var(--green); display: block;">WATER</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span style="font-size: 1.85rem; font-weight: 800; color: #10b981; line-height: 1;" id="val-tinggi-air">-</span>
+                        <span style="font-size: 0.75rem; color: var(--text-sub); display: block; margin-top: 4px;">Ketinggian Air Kolam</span>
                       </div>
                     </div>
 
-                    <div>
-                      <span style="font-size: 1.8rem; font-weight: 800; color: #10b981; line-height: 1;" id="val-tinggi-air">-</span>
-                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;">Ketinggian Air</span>
-                      <span style="font-size: 0.72rem; font-weight: 700; color: var(--green);" id="val-water-status">Pompa Aman</span>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                      <span style="font-size: 0.75rem; font-weight: 700; color: var(--green); background: rgba(16,185,129,0.12); padding: 6px 12px; border-radius: 10px;" id="val-water-status">● Pompa Aman</span>
                     </div>
                   </div>
                 </div>
@@ -3838,9 +3898,80 @@
       initChart();
 
       // Render initial placeholders
-      updateUI();
+    function updateFeedMonitoringWidget() {
+      const autoView = document.getElementById('feed-monitor-auto-view');
+      const manualView = document.getElementById('feed-monitor-manual-view');
+      if (!autoView || !manualView) return;
 
-      // Real-time data starts as soon as Firebase initializes
+      const isAuto = (currentFeedMode === 'Auto');
+
+      if (isAuto) {
+        autoView.style.display = 'block';
+        manualView.style.display = 'none';
+
+        const countdownEl = document.getElementById('val-feed-countdown');
+        const nextAutoEl = document.getElementById('val-next-feed-auto');
+
+        if (!schedules || schedules.length === 0) {
+          if (countdownEl) countdownEl.innerText = 'Tidak Ada';
+          if (nextAutoEl) nextAutoEl.innerText = 'Belum Diatur';
+          return;
+        }
+
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+        const parsed = schedules.map(s => {
+          const parts = s.time.split(':').map(Number);
+          return { ...s, totalMin: parts[0] * 60 + (parts[1] || 0) };
+        }).sort((a, b) => a.totalMin - b.totalMin);
+
+        let nextItem = parsed.find(s => s.totalMin > currentMinutes);
+        let diffMinutes;
+
+        if (nextItem) {
+          diffMinutes = nextItem.totalMin - currentMinutes;
+        } else {
+          // Next feed is first schedule tomorrow
+          nextItem = parsed[0];
+          diffMinutes = (24 * 60 - currentMinutes) + nextItem.totalMin;
+        }
+
+        let countdownStr = '';
+        const hours = Math.floor(diffMinutes / 60);
+        const mins = diffMinutes % 60;
+
+        if (hours > 0 && mins > 0) {
+          countdownStr = `${hours} Jam ${mins} Mnt`;
+        } else if (hours > 0) {
+          countdownStr = `${hours} Jam Lagi`;
+        } else {
+          countdownStr = `${mins} Mnt Lagi`;
+        }
+
+        if (countdownEl) countdownEl.innerText = countdownStr;
+        if (nextAutoEl) nextAutoEl.innerText = `${nextItem.time} (${nextItem.portion} Porsi)`;
+
+      } else {
+        // Mode Manual
+        autoView.style.display = 'none';
+        manualView.style.display = 'block';
+
+        const freqEl = document.getElementById('val-feed-freq');
+        const timesEl = document.getElementById('val-mandatory-times');
+
+        const freqCount = schedules ? schedules.length : 0;
+        if (freqEl) freqEl.innerText = `${freqCount}x Sehari`;
+
+        if (timesEl) {
+          if (schedules && schedules.length > 0) {
+            timesEl.innerText = schedules.map(s => s.time).join(' & ');
+          } else {
+            timesEl.innerText = '08:00 & 16:00';
+          }
+        }
+      }
+    }nitializes
     };
 
     function updateClock() {
@@ -3952,6 +4083,19 @@
         const wPct = Math.min(100, Math.max(0, wVal));
         const offset = 188.5 - (188.5 * wPct / 100);
         waterRing.style.strokeDashoffset = offset;
+      }
+
+      const waterStatusEl = document.getElementById('val-water-status');
+      if (waterStatusEl && telemetryData.water_level !== null && telemetryData.water_level !== undefined) {
+        if (telemetryData.water_level < 20.0) {
+          waterStatusEl.innerText = '⚠️ Air Kritis (Sedikit)';
+          waterStatusEl.style.color = '#ef4444';
+          waterStatusEl.style.background = 'rgba(239, 68, 68, 0.12)';
+        } else {
+          waterStatusEl.innerText = '● Pompa Aman';
+          waterStatusEl.style.color = '#10b981';
+          waterStatusEl.style.background = 'rgba(16, 185, 129, 0.12)';
+        }
       }
 
       const humRing = document.getElementById('bento-hum-ring');
@@ -4140,6 +4284,10 @@
       document.getElementById('info-pompa').style.color = telemetryData.pump_b === 1 ? 'var(--green)' : 'var(--text-sub)';
       document.getElementById('info-lampu').innerText = telemetryData.lamp === 1 ? 'ON' : 'OFF';
       document.getElementById('info-lampu').style.color = telemetryData.lamp === 1 ? 'var(--green)' : 'var(--text-sub)';
+      if (document.getElementById('info-aerator')) {
+        document.getElementById('info-aerator').innerText = telemetryData.aerator === 1 ? 'ON' : 'OFF';
+        document.getElementById('info-aerator').style.color = telemetryData.aerator === 1 ? 'var(--green)' : 'var(--text-sub)';
+      }
       document.getElementById('info-mode-pakan').innerText = `${currentFeedMode} (${currentFeedMode === 'Auto' ? 'Jadwal' : 'Manual Beri'})`;
 
       // 5. Check for sensor telemetry threshold alerts
@@ -4508,22 +4656,40 @@
     // Schedules (Auto Feed)
     function renderSchedules() {
       const container = document.getElementById('schedule-list');
-      if (schedules.length === 0) {
-        container.innerHTML = '<div style="font-size:0.8rem; color:var(--text-sub); text-align:center; padding:10px;">Jadwal kosong.</div>';
-        return;
+      const homeContainer = document.getElementById('home-schedules-list');
+
+      if (container) {
+        if (schedules.length === 0) {
+          container.innerHTML = '<div style="font-size:0.8rem; color:var(--text-sub); text-align:center; padding:10px;">Jadwal kosong.</div>';
+        } else {
+          container.innerHTML = schedules.map(item => `
+            <div class="schedule-item">
+              <span class="schedule-time">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${item.time}
+              </span>
+              <span class="schedule-details">${item.portion} Porsi 
+                <button onclick="deleteSchedule('${item.time}')" style="background:none; border:none; color:#ef4444; margin-left:8px; cursor:pointer; font-weight:600;">Hapus</button>
+              </span>
+            </div>
+          `).join('');
+        }
       }
 
-      container.innerHTML = schedules.map(item => `
-        <div class="schedule-item">
-          <span class="schedule-time">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            ${item.time}
-          </span>
-          <span class="schedule-details">${item.portion} Porsi 
-            <button onclick="deleteSchedule('${item.time}')" style="background:none; border:none; color:#ef4444; margin-left:8px; cursor:pointer; font-weight:600;">Hapus</button>
-          </span>
-        </div>
-      `).join('');
+      if (homeContainer) {
+        if (schedules.length === 0) {
+          homeContainer.innerHTML = '<div style="font-size:0.8rem; color:var(--text-sub); text-align:center; padding:10px;">Belum ada jadwal pakan.</div>';
+        } else {
+          homeContainer.innerHTML = schedules.map((item, idx) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:${idx === 0 ? 'var(--primary-light)' : 'var(--bg-app)'}; padding:10px 14px; border-radius:12px; border:1px solid var(--border-glass);">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-family:var(--font-outfit); font-weight:800; font-size:1.02rem; color:${idx === 0 ? 'var(--primary)' : 'var(--text-main)'};">⏰ ${item.time} WIB</span>
+              </div>
+              <span style="font-size:0.78rem; font-weight:700; color:${idx === 0 ? 'var(--primary)' : 'var(--text-sub)'}; background:${idx === 0 ? '#ffffff' : 'transparent'}; padding:4px 10px; border-radius:8px; ${idx === 0 ? 'box-shadow:0 2px 6px rgba(0,0,0,0.04);' : ''}">${item.portion} Porsi</span>
+            </div>
+          `).join('');
+        }
+      }
     }
 
     let selectedHour = 8;
@@ -5789,6 +5955,7 @@
     }
 
     let lastTelemetryTimestamp = 0;
+    let realSessionHistory = [];
 
     function processIncomingTelemetry(data, modeName) {
       if (!data) return;
@@ -5799,6 +5966,26 @@
       telemetryData.temp_a = data.temp_a;
       telemetryData.hum = data.hum;
       telemetryData.water_level = data.water_level;
+
+      // Track real incoming hardware telemetry points for history charts
+      if (data.temp_w !== null && data.temp_w !== undefined) {
+        const timeLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const lastEntry = realSessionHistory[realSessionHistory.length - 1];
+        if (!lastEntry || (Date.now() - (lastEntry.ts || 0) >= 3000)) {
+          realSessionHistory.push({
+            ts: Date.now(),
+            time: timeLabel,
+            temp_w: data.temp_w,
+            tds: telemetryData.tds !== null ? telemetryData.tds : 0,
+            water_level: data.water_level !== null ? data.water_level : 0,
+            temp_a: data.temp_a !== null ? data.temp_a : 0,
+            hum: data.hum !== null ? data.hum : 0
+          });
+          if (realSessionHistory.length > 30) {
+            realSessionHistory.shift();
+          }
+        }
+      }
       
       const nowTime = Date.now();
       if (nowTime - lastManualChangeTime.lamp >= 5000) {
@@ -5915,34 +6102,29 @@
         let waterHistory = [];
         let tempAHistory = [];
         let humHistory = [];
-        
-        const curTemp = telemetryData.temp_w !== null ? telemetryData.temp_w : 28.4;
-        const curTDS = telemetryData.tds !== null ? telemetryData.tds : 151;
-        const curWater = telemetryData.water_level !== null ? telemetryData.water_level : 81.7;
-        const curTempA = telemetryData.temp_a !== null ? telemetryData.temp_a : 27.1;
-        const curHum = telemetryData.hum !== null ? telemetryData.hum : 77;
 
-        if (filterRange === 'harian') {
-          labels = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00', 'Sekarang'];
-          tempHistory = [26.5, 26.2, 26.8, 27.5, 29.2, 30.1, 28.8, 27.9, curTemp];
-          tdsHistory = [150, 152, 149, 151, 155, 153, 150, 152, curTDS];
-          waterHistory = [83.0, 82.8, 82.5, 82.0, 81.5, 81.0, 81.5, 81.8, curWater];
-          tempAHistory = [25.1, 24.8, 25.5, 26.8, 28.5, 29.2, 27.8, 26.5, curTempA];
-          humHistory = [85, 84, 80, 75, 70, 68, 74, 78, curHum];
-        } else if (filterRange === 'mingguan') {
-          labels = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-          tempHistory = [27.2, 27.8, 28.1, 27.5, 28.6, 29.0, curTemp];
-          tdsHistory = [148, 150, 153, 151, 149, 152, curTDS];
-          waterHistory = [84.0, 83.5, 83.0, 82.5, 82.0, 81.8, curWater];
-          tempAHistory = [26.0, 26.5, 27.1, 26.8, 27.5, 28.0, curTempA];
-          humHistory = [78, 76, 75, 79, 74, 72, curHum];
-        } else if (filterRange === 'bulanan') {
-          labels = ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4', 'Minggu Ini'];
-          tempHistory = [27.0, 27.5, 28.0, 28.2, curTemp];
-          tdsHistory = [145, 149, 151, 150, curTDS];
-          waterHistory = [85.0, 84.2, 83.1, 82.4, curWater];
-          tempAHistory = [25.8, 26.4, 27.0, 27.3, curTempA];
-          humHistory = [80, 77, 76, 75, curHum];
+        if (realSessionHistory.length > 0) {
+          labels = realSessionHistory.map(item => item.time);
+          tempHistory = realSessionHistory.map(item => item.temp_w);
+          tdsHistory = realSessionHistory.map(item => item.tds);
+          waterHistory = realSessionHistory.map(item => item.water_level);
+          tempAHistory = realSessionHistory.map(item => item.temp_a);
+          humHistory = realSessionHistory.map(item => item.hum);
+        } else if (telemetryData.temp_w !== null) {
+          const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          labels = [nowStr];
+          tempHistory = [telemetryData.temp_w];
+          tdsHistory = [telemetryData.tds || 0];
+          waterHistory = [telemetryData.water_level || 0];
+          tempAHistory = [telemetryData.temp_a || 0];
+          humHistory = [telemetryData.hum || 0];
+        } else {
+          labels = ['Menunggu Telemetri Real...'];
+          tempHistory = [];
+          tdsHistory = [];
+          waterHistory = [];
+          tempAHistory = [];
+          humHistory = [];
         }
 
         if (chartWaterInstance) {
