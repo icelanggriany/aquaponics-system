@@ -2610,32 +2610,43 @@
             </div> <!-- End Left Column Wrapper -->
 
             <div class="sensor-grid" style="margin-top: 0;">
-                <!-- Bento Card 1: Suhu Air Kolam (Pulse Heartbeat Sparkline Widget) -->
+                <!-- Bento Card 1: Suhu Air Kolam (Dynamic Color Wave Widget) -->
                 <div class="card-sensor bento-card">
                   <div class="bento-header">
                     <span class="bento-title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <svg id="bento-temp-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
                       </svg>
                       Suhu Air Kolam
                     </span>
-                    <div class="bento-badge badge-red">🌡️</div>
+                    <div class="bento-badge" id="bento-temp-badge" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">🌡️</div>
                   </div>
                   
-                  <!-- Pulse Heartbeat Graphic -->
-                  <div style="height: 44px; width: 100%; margin: 2px 0 6px 0; position: relative;">
-                    <svg width="100%" height="44" viewBox="0 0 200 44" fill="none" preserveAspectRatio="none">
-                      <path d="M0 22 L40 22 L50 8 L60 36 L70 16 L80 26 L90 22 L200 22" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25" />
-                      <path d="M0 22 L40 22 L50 8 L60 36 L70 16 L80 26 L90 22 L200 22" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="pulse-line" />
+                  <!-- Smooth Flowing Animated Temperature Wave Graphic -->
+                  <div style="height: 44px; width: 100%; margin: 2px 0 6px 0; position: relative; overflow: hidden;">
+                    <style>
+                      @keyframes temp-wave-flow {
+                        0% { transform: translateX(0); }
+                        100% { transform: translateX(-50%); }
+                      }
+                      .temp-wave-animated {
+                        animation: temp-wave-flow 4s linear infinite;
+                        width: 200%;
+                        display: block;
+                      }
+                    </style>
+                    <svg id="temp-wave-svg" height="44" viewBox="0 0 400 44" fill="none" class="temp-wave-animated" preserveAspectRatio="none">
+                      <path d="M0 22 C 25 10, 75 34, 100 22 C 125 10, 175 34, 200 22 C 225 10, 275 34, 300 22 C 325 10, 375 34, 400 22" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25" />
+                      <path d="M0 22 C 25 10, 75 34, 100 22 C 125 10, 175 34, 200 22 C 225 10, 275 34, 300 22 C 325 10, 375 34, 400 22" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </div>
 
                   <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                     <div>
-                      <span style="font-size: 1.85rem; font-weight: 800; color: #ef4444; line-height: 1;" id="val-suhu">-</span>
-                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;" id="val-suhu-status">Optimal (24 - 30°C)</span>
+                      <span style="font-size: 1.85rem; font-weight: 800; color: #10b981; line-height: 1;" id="val-suhu">-</span>
+                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;" id="val-suhu-status">Optimal (24 - 32°C)</span>
                     </div>
-                    <span style="font-size: 0.72rem; font-weight: 700; color: var(--green); background: rgba(16,185,129,0.12); padding: 4px 8px; border-radius: 8px;">● Stabil</span>
+                    <span style="font-size: 0.72rem; font-weight: 700; color: #10b981; background: rgba(16,185,129,0.12); padding: 4px 8px; border-radius: 8px;" id="val-suhu-pill">● Stabil</span>
                   </div>
                 </div>
 
@@ -2671,38 +2682,67 @@
                   </div>
                 </div>
 
-                <!-- Bento Card 3: Suhu & Kelembaban Udara (Equalizer Bar Sparkline Widget) -->
+                <!-- Bento Card 3: Suhu Udara Ambient (Orange Warmth Widget) -->
                 <div class="card-sensor bento-card">
                   <div class="bento-header">
                     <span class="bento-title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
                         <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2" />
                       </svg>
-                      Udara & Kelembaban
+                      Suhu Udara Ambient
                     </span>
-                    <div class="bento-badge badge-sky">☁️</div>
+                    <div class="bento-badge" style="background: rgba(249, 115, 22, 0.12); color: #f97316;">🌤️</div>
                   </div>
 
-                  <!-- Equalizer Vertical Bars -->
+                  <!-- Equalizer Vertical Warmth Bars -->
                   <div style="display: flex; align-items: flex-end; gap: 5px; height: 38px; margin: 4px 0 6px 0;">
-                    <div style="flex: 1; background: rgba(14, 165, 233, 0.2); height: 40%; border-radius: 4px;"></div>
-                    <div style="flex: 1; background: rgba(14, 165, 233, 0.4); height: 65%; border-radius: 4px;"></div>
-                    <div style="flex: 1; background: #0284c7; height: 90%; border-radius: 4px;"></div>
-                    <div style="flex: 1; background: rgba(14, 165, 233, 0.5); height: 75%; border-radius: 4px;"></div>
-                    <div style="flex: 1; background: rgba(14, 165, 233, 0.3); height: 50%; border-radius: 4px;"></div>
-                    <div style="flex: 1; background: rgba(14, 165, 233, 0.6); height: 85%; border-radius: 4px;"></div>
-                    <div style="flex: 1; background: #0284c7; height: 95%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(249, 115, 22, 0.2); height: 40%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(249, 115, 22, 0.4); height: 65%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: #f97316; height: 90%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(249, 115, 22, 0.5); height: 75%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(249, 115, 22, 0.3); height: 50%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: rgba(249, 115, 22, 0.6); height: 85%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: #f97316; height: 95%; border-radius: 4px;"></div>
                   </div>
 
                   <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                     <div>
-                      <span style="font-size: 1.6rem; font-weight: 800; color: #0284c7; line-height: 1;" id="val-suhu-udara">-</span>
-                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 2px;">Suhu Udara</span>
+                      <span style="font-size: 1.85rem; font-weight: 800; color: #f97316; line-height: 1;" id="val-suhu-udara">-</span>
+                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;">Rentang Nyaman (20 - 33°C)</span>
                     </div>
-                    <div style="text-align: right;">
-                      <span style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); line-height: 1;" id="val-humidity">-</span>
-                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 2px;">Kelembaban</span>
+                    <span style="font-size: 0.72rem; font-weight: 700; color: #f97316; background: rgba(249, 115, 22, 0.12); padding: 4px 8px; border-radius: 8px;">● Normal</span>
+                  </div>
+                </div>
+
+                <!-- Bento Card 4: Kelembaban Udara (Purple Circular Meter Widget) -->
+                <div class="card-sensor bento-card">
+                  <div class="bento-header">
+                    <span class="bento-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.5 19.5 17.5 19.5A5.5 5.5 0 0 0 22 14c0-3.04-2.46-5.5-5.5-5.5-.3 0-.6.03-.9.08A8 8 0 0 0 1 12.5C1 16.9 4.6 20.5 9 20.5c.2 0 .4 0 .6-.01" />
+                      </svg>
+                      Kelembaban Udara
+                    </span>
+                    <div class="bento-badge" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">☁️</div>
+                  </div>
+
+                  <!-- Radial Ring Meter for Humidity -->
+                  <div style="display: flex; align-items: center; gap: 14px; margin: 4px 0;">
+                    <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <svg width="68" height="68" viewBox="0 0 72 72">
+                        <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(139, 92, 246, 0.15)" stroke-width="7" />
+                        <circle id="bento-hum-ring" cx="36" cy="36" r="30" fill="none" stroke="#8b5cf6" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="45" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.8s ease;" />
+                      </svg>
+                      <div style="position: absolute; text-align: center;">
+                        <span style="font-size: 0.65rem; font-weight: 700; color: #8b5cf6; display: block;">%RH</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); line-height: 1;" id="val-humidity">-</span>
+                      <span style="font-size: 0.72rem; color: var(--text-sub); display: block; margin-top: 4px;">Target: 60% - 90%</span>
+                      <span style="font-size: 0.72rem; font-weight: 700; color: #8b5cf6;">Kelembaban Optimal</span>
                     </div>
                   </div>
                 </div>
@@ -3563,17 +3603,57 @@
         waterRing.style.strokeDashoffset = offset;
       }
 
+      const humRing = document.getElementById('bento-hum-ring');
+      if (humRing) {
+        const hVal = telemetryData.hum !== null ? telemetryData.hum : 0;
+        const hPct = Math.min(100, Math.max(0, hVal));
+        const offset = 188.5 - (188.5 * hPct / 100);
+        humRing.style.strokeDashoffset = offset;
+      }
+
+      const tempVal = document.getElementById('val-suhu');
       const tempStatus = document.getElementById('val-suhu-status');
-      if (tempStatus && telemetryData.temp_w !== null) {
-        if (telemetryData.temp_w > 30.0) {
-          tempStatus.innerText = "⚠️ Terlalu Panas";
-          tempStatus.style.color = "#ef4444";
+      const tempPill = document.getElementById('val-suhu-pill');
+      const tempIcon = document.getElementById('bento-temp-icon');
+      const tempBadge = document.getElementById('bento-temp-badge');
+      const waveSvg = document.getElementById('temp-wave-svg');
+
+      if (telemetryData.temp_w !== null && telemetryData.temp_w !== undefined) {
+        let mainColor = '#10b981'; // Green for Stabil / Normal
+        let bgAlpha = 'rgba(16, 185, 129, 0.12)';
+        let statusMsg = 'Optimal (24 - 32°C)';
+        let pillMsg = '● Stabil';
+
+        if (telemetryData.temp_w > 32.0) {
+          mainColor = '#ef4444'; // Red for Hot
+          bgAlpha = 'rgba(239, 68, 68, 0.12)';
+          statusMsg = '⚠️ Terlalu Panas';
+          pillMsg = '● Panas';
         } else if (telemetryData.temp_w < 24.0) {
-          tempStatus.innerText = "⚠️ Terlalu Dingin";
-          tempStatus.style.color = "#f97316";
-        } else {
-          tempStatus.innerText = "Optimal (24 - 30°C)";
-          tempStatus.style.color = "var(--text-sub)";
+          mainColor = '#3b82f6'; // Blue for Cold
+          bgAlpha = 'rgba(59, 130, 246, 0.12)';
+          statusMsg = '⚠️ Terlalu Dingin';
+          pillMsg = '● Dingin';
+        }
+
+        if (tempVal) tempVal.style.color = mainColor;
+        if (tempStatus) {
+          tempStatus.innerText = statusMsg;
+          tempStatus.style.color = mainColor;
+        }
+        if (tempPill) {
+          tempPill.innerText = pillMsg;
+          tempPill.style.color = mainColor;
+          tempPill.style.background = bgAlpha;
+        }
+        if (tempIcon) tempIcon.setAttribute('stroke', mainColor);
+        if (tempBadge) {
+          tempBadge.style.color = mainColor;
+          tempBadge.style.background = bgAlpha;
+        }
+        if (waveSvg) {
+          const paths = waveSvg.querySelectorAll('path');
+          paths.forEach(p => p.setAttribute('stroke', mainColor));
         }
       }
 
@@ -5136,7 +5216,7 @@
       const recipient = localStorage.getItem('aquaponics_recipient_email') || 'icelanggriany@gmail.com';
 
       const minTemp = parseFloat(data.temp_w_min || localStorage.getItem('aquaponics_temp_min')) || 24.0;
-      const maxTemp = parseFloat(data.temp_w_max || localStorage.getItem('aquaponics_temp_max')) || 30.0;
+      const maxTemp = parseFloat(data.temp_w_max || localStorage.getItem('aquaponics_temp_max')) || 32.0;
       const minTds = parseFloat(data.tds_min || localStorage.getItem('aquaponics_tds_min')) || 400;
       const maxTds = parseFloat(data.tds_max || localStorage.getItem('aquaponics_tds_max')) || 900;
       const minWater = parseFloat(data.water_level_min || localStorage.getItem('aquaponics_water_min')) || 50.0;
@@ -5270,27 +5350,8 @@
         renderSchedules();
       }
       
-      // Pengecekan keaktifan data berdasarkan timestamp
-      let isStale = false;
-      if (data.timestamp) {
-        let lastTime = 0;
-        if (typeof data.timestamp === 'number') {
-          if (data.timestamp < 1000000000000) {
-            // Angka millis() singkat dari ESP32 dikonversi ke waktu sekarang
-            lastTime = Date.now();
-          } else {
-            lastTime = data.timestamp;
-          }
-        } else {
-          lastTime = new Date(data.timestamp).getTime();
-        }
-
-        if (!isNaN(lastTime) && (Date.now() - lastTime > 45000)) {
-          isStale = true;
-        }
-      }
-      
-      telemetryData.status = (isStale || data.status === 'Mati') ? 'Mati' : 'Aktif';
+      // Pengecekan status keaktifan sistem
+      telemetryData.status = (data.status === 'Mati') ? 'Mati' : 'Aktif';
       updateUI();
       checkRealtimeAlerts(telemetryData);
 
