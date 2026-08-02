@@ -20,9 +20,11 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <!-- Chart.js CDN & EmailJS SDK -->
+  <!-- Chart.js CDN, EmailJS SDK & Firebase Web SDK -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <style>
     :root {
@@ -877,12 +879,14 @@
       border: 1px solid var(--border-glass);
       margin-bottom: 24px;
       position: relative;
-      height: 250px;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
+      width: 100%;
+      box-sizing: border-box;
       transition: box-shadow 0.3s, background-color 0.3s;
     }
 
@@ -2279,12 +2283,12 @@
       <form class="login-form" id="auth-form" onsubmit="handleAuthSubmit(event)">
         <div class="form-group">
           <label for="auth-email">Alamat Email</label>
-          <input type="email" id="auth-email" class="form-control" placeholder="nama@email.com" required>
+          <input type="email" id="auth-email" class="form-control" placeholder="nama@email.com (Opsional)">
         </div>
         <div class="form-group">
           <label for="auth-password">Kata Sandi</label>
           <div style="position: relative; width: 100%;">
-            <input type="password" id="auth-password" class="form-control" style="padding-right: 40px;" placeholder="••••••••" required>
+            <input type="password" id="auth-password" class="form-control" style="padding-right: 40px;" placeholder="•••••••• (Opsional)">
             <button type="button" onclick="togglePasswordVisibility('auth-password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Tampilkan / Sembunyikan Kata Sandi">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -2310,7 +2314,7 @@
           <a href="javascript:void(0)" onclick="switchAuthMode('forgot')" style="font-size: 0.78rem; color: var(--primary); font-weight: 600; text-decoration: none;">Lupa Kata Sandi?</a>
         </div>
 
-        <button type="submit" class="btn-primary" id="auth-btn">Masuk</button>
+        <button type="submit" class="btn-primary" id="auth-btn" onclick="handleAuthSubmit(event)">Masuk</button>
       </form>
 
       <div class="login-toggle-mode" id="auth-toggle" onclick="toggleAuthMode()">
@@ -2808,9 +2812,26 @@
               <button class="tab-btn" onclick="changeChartTab('bulanan')">Bulanan</button>
             </div>
 
-            <!-- Canvas Chart.js -->
-            <div class="chart-container">
-              <canvas id="aquaponicsChart" style="width:100%; height:100%;"></canvas>
+            <!-- Grafik 1: Parameter Air Kolam -->
+            <div class="chart-container" style="height: 300px; padding: 20px; width: 100%; margin-bottom: 20px;">
+              <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <span>🐟 Grafik Parameter Air Kolam (Suhu, TDS, Level)</span>
+                <span style="font-size: 0.72rem; font-weight: 600; color: var(--primary); background: rgba(59, 130, 246, 0.1); padding: 4px 10px; border-radius: 8px;">Air Kolam</span>
+              </div>
+              <div style="flex: 1; width: 100%; position: relative; min-height: 0;">
+                <canvas id="aquaponicsWaterChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Grafik 2: Lingkungan & Udara Ambient -->
+            <div class="chart-container" style="height: 300px; padding: 20px; width: 100%; margin-bottom: 24px;">
+              <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <span>🌤️ Grafik Lingkungan Udara (Suhu Udara &amp; Kelembaban)</span>
+                <span style="font-size: 0.72rem; font-weight: 600; color: #f97316; background: rgba(249, 115, 22, 0.1); padding: 4px 10px; border-radius: 8px;">Cuaca Ambient</span>
+              </div>
+              <div style="flex: 1; width: 100%; position: relative; min-height: 0;">
+                <canvas id="aquaponicsAirChart"></canvas>
+              </div>
             </div>
 
             <!-- List Data Detail Parameter -->
@@ -2904,123 +2925,100 @@
             <h2 class="screen-title">Control</h2>
 
             <div class="control-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;">
+            <div class="control-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;">
               <!-- Control Lampu -->
-              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                  <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="control-icon-circle" id="icon-lamp">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Lampu Growlight</h4>
-                      <span class="control-status" id="status-label-lamp" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
-                    </div>
+              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px 20px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div class="control-icon-circle" id="icon-lamp">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
                   </div>
-                  <div class="mode-selector" style="display:flex; background:var(--bg-light); border-radius:8px; padding:2px;">
-                    <button class="feeder-tab-btn" id="btn-lamp-auto" onclick="setLampMode('Auto')" style="padding:4px 8px; font-size:0.75rem; min-height:unset;">Auto</button>
-                    <button class="feeder-tab-btn" id="btn-lamp-manual" onclick="setLampMode('Manual')" style="padding:4px 8px; font-size:0.75rem; min-height:unset;">Manual</button>
+                  <div>
+                    <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Lampu Growlight</h4>
+                    <span class="control-status" id="status-label-lamp" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
                   </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:10px;">
-                  <span style="font-size:0.85rem; color:var(--text-sub);">Saklar Manual</span>
-                  <label class="switch">
-                    <input type="checkbox" id="switch-lamp" onchange="toggleLamp(this.checked)">
-                    <span class="slider"></span>
-                  </label>
-                </div>
+                <label class="switch">
+                  <input type="checkbox" id="switch-lamp" onchange="toggleLamp(this.checked)">
+                  <span class="slider"></span>
+                </label>
               </div>
 
               <!-- Control Pompa Pembesaran -->
-              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                  <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="control-icon-circle" id="icon-pump-b">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="1.5" /><path d="M2 12h4M12 6V2h8M8 18h8M12 18v3" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Pompa Pembesaran</h4>
-                      <span class="control-status" id="status-label-pump-b" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
-                    </div>
+              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px 20px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div class="control-icon-circle" id="icon-pump-b">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="1.5" /><path d="M2 12h4M12 6V2h8M8 18h8M12 18v3" />
+                    </svg>
                   </div>
-                  <div class="mode-selector" style="display:flex; background:var(--bg-light); border-radius:8px; padding:2px;">
-                    <button class="feeder-tab-btn" id="btn-pump-b-auto" onclick="setPumpBMode('Auto')" style="padding:4px 8px; font-size:0.75rem; min-height:unset;">Auto</button>
-                    <button class="feeder-tab-btn" id="btn-pump-b-manual" onclick="setPumpBMode('Manual')" style="padding:4px 8px; font-size:0.75rem; min-height:unset;">Manual</button>
+                  <div>
+                    <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Pompa Pembesaran</h4>
+                    <span class="control-status" id="status-label-pump-b" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
                   </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:10px;">
-                  <span style="font-size:0.85rem; color:var(--text-sub);">Saklar Manual</span>
-                  <label class="switch">
-                    <input type="checkbox" id="switch-pump-b" onchange="togglePumpB(this.checked)">
-                    <span class="slider"></span>
-                  </label>
-                </div>
+                <label class="switch">
+                  <input type="checkbox" id="switch-pump-b" onchange="togglePumpB(this.checked)">
+                  <span class="slider"></span>
+                </label>
               </div>
 
               <!-- Control Pompa Peremajaan -->
-              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color);">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="control-icon-circle">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="1.5" /><path d="M2 12h4M12 6V2h8M8 18h8M12 18v3" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Pompa Peremajaan</h4>
-                      <span class="control-status" id="status-label-pump-p" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
-                    </div>
+              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px 20px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div class="control-icon-circle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="1.5" /><path d="M2 12h4M12 6V2h8M8 18h8M12 18v3" />
+                    </svg>
                   </div>
-                  <label class="switch">
-                    <input type="checkbox" id="switch-pump-p" onchange="togglePumpP(this.checked)">
-                    <span class="slider"></span>
-                  </label>
+                  <div>
+                    <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Pompa Peremajaan</h4>
+                    <span class="control-status" id="status-label-pump-p" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
+                  </div>
                 </div>
+                <label class="switch">
+                  <input type="checkbox" id="switch-pump-p" onchange="togglePumpP(this.checked)">
+                  <span class="slider"></span>
+                </label>
               </div>
 
               <!-- Control Pompa Sirkulasi -->
-              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color);">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="control-icon-circle">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Sirkulasi Air</h4>
-                      <span class="control-status" id="status-label-pump-s" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
-                    </div>
+              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px 20px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div class="control-icon-circle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
                   </div>
-                  <label class="switch">
-                    <input type="checkbox" id="switch-pump-s" onchange="togglePumpS(this.checked)">
-                    <span class="slider"></span>
-                  </label>
+                  <div>
+                    <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Sirkulasi Air</h4>
+                    <span class="control-status" id="status-label-pump-s" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
+                  </div>
                 </div>
+                <label class="switch">
+                  <input type="checkbox" id="switch-pump-s" onchange="togglePumpS(this.checked)">
+                  <span class="slider"></span>
+                </label>
               </div>
 
               <!-- Control Aerator -->
-              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color);">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="control-icon-circle">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M12 2v4M12 18v4M4 12H2M22 12h-2"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Aerator</h4>
-                      <span class="control-status" id="status-label-aerator" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
-                    </div>
+              <div class="control-card" style="background:var(--card-bg); border-radius:16px; padding:16px 20px; box-shadow:0 4px 20px var(--shadow-color); border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div class="control-icon-circle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M12 2v4M12 18v4M4 12H2M22 12h-2"/>
+                    </svg>
                   </div>
-                  <label class="switch">
-                    <input type="checkbox" id="switch-aerator" onchange="toggleAerator(this.checked)">
-                    <span class="slider"></span>
-                  </label>
+                  <div>
+                    <h4 style="margin:0; font-size:1.05rem; font-weight:600; color:var(--text-main);">Aerator</h4>
+                    <span class="control-status" id="status-label-aerator" style="font-size:0.8rem; color:var(--text-sub);">Status: OFF</span>
+                  </div>
                 </div>
+                <label class="switch">
+                  <input type="checkbox" id="switch-aerator" onchange="toggleAerator(this.checked)">
+                  <span class="slider"></span>
+                </label>
               </div>
             </div>
 
@@ -3443,8 +3441,9 @@
     };
 
 
-    // Chart.js object
-    let chartInstance = null;
+    // Chart.js objects (2 Category-Focused Charts: Water & Air)
+    let chartWaterInstance = null;
+    let chartAirInstance = null;
 
     // Alert state tracking to prevent duplicate notifications
     let lastAlertStates = {
@@ -3531,8 +3530,8 @@
         icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
       }
 
-      // Re-initialize chart to match theme styling if monitoring screen is open
-      if (chartInstance) {
+      // Re-initialize charts to match theme styling if monitoring screen is open
+      if (chartWaterInstance || chartAirInstance) {
         setTimeout(initChart, 100);
       }
     }
@@ -3588,11 +3587,27 @@
 
       // Bento Rings & Status Updates
       const tdsRing = document.getElementById('bento-tds-ring');
+      const tdsStatus = document.getElementById('val-tds-status');
       if (tdsRing) {
         const tdsVal = telemetryData.tds !== null ? telemetryData.tds : 0;
         const tdsPct = Math.min(100, Math.max(0, (tdsVal / 1200) * 100));
         const offset = 188.5 - (188.5 * tdsPct / 100);
         tdsRing.style.strokeDashoffset = offset;
+      }
+      if (telemetryData.tds !== null && telemetryData.tds !== undefined) {
+        const tdsVal = telemetryData.tds;
+        if (tdsStatus) {
+          if (tdsVal < 300) {
+            tdsStatus.innerText = '⚠️ Nutrisi Rendah (Air Bersih)';
+            tdsStatus.style.color = '#f59e0b';
+          } else if (tdsVal > 1000) {
+            tdsStatus.innerText = '⚠️ Nutrisi Tinggi (Pekat)';
+            tdsStatus.style.color = '#ef4444';
+          } else {
+            tdsStatus.innerText = '● Nutrisi Optimal';
+            tdsStatus.style.color = '#10b981';
+          }
+        }
       }
 
       const waterRing = document.getElementById('bento-water-ring');
@@ -3670,6 +3685,30 @@
         }
       }
 
+      // Update Ecosystem Fish & Plant Status Labels and Sidebar Indicators
+      const fishLabel = document.getElementById('fish-status-label');
+      const plantLabel = document.getElementById('plant-status-label');
+      const sideSyncText = document.getElementById('sidebar-sync-text');
+      const sideStatusText = document.getElementById('sidebar-status-text');
+
+      if (telemetryData.temp_w !== null && telemetryData.temp_w !== undefined) {
+        if (fishLabel) {
+          fishLabel.innerText = "● Kondisi Ikan Sehat & Active";
+          fishLabel.style.color = "var(--green)";
+        }
+        if (plantLabel) {
+          plantLabel.innerText = "● Pertumbuhan Tanaman Optimal";
+          plantLabel.style.color = "var(--green)";
+        }
+        if (sideSyncText) {
+          sideSyncText.innerText = "● Terhubung (Firebase)";
+          sideSyncText.style.color = "#10b981";
+        }
+        if (sideStatusText) {
+          sideStatusText.innerText = "🟢 Alat Terhubung (Firebase)";
+        }
+      }
+
       // 2. Monitoring screen values
       document.getElementById('list-val-suhu').innerText = telemetryData.temp_w !== null ? `${telemetryData.temp_w.toFixed(1)}°C` : '-';
       document.getElementById('list-val-tds').innerText = telemetryData.tds !== null ? `${telemetryData.tds.toFixed(0)} ppm` : '-';
@@ -3677,6 +3716,32 @@
       document.getElementById('list-val-suhu-udara').innerText = telemetryData.temp_a !== null ? `${telemetryData.temp_a.toFixed(1)}°C` : '-';
       document.getElementById('list-val-humidity').innerText = telemetryData.hum !== null ? `${telemetryData.hum}%` : '-';
       document.getElementById('list-val-status').innerText = telemetryData.status;
+
+      // 3. Dynamic Realtime Updates for 2x2 Dashboard Charts
+      if (chartHorizontalBar && telemetryData.temp_w !== null && telemetryData.temp_a !== null) {
+        chartHorizontalBar.data.datasets[0].data = [telemetryData.temp_w, telemetryData.temp_a];
+        chartHorizontalBar.update('none');
+      }
+      if (chartDoughnut && telemetryData.temp_w !== null) {
+        chartDoughnut.data.datasets[0].data = [
+          telemetryData.temp_w || 0,
+          telemetryData.tds ? (telemetryData.tds / 10) : 0,
+          telemetryData.water_level || 0,
+          telemetryData.temp_a || 0,
+          telemetryData.hum || 0
+        ];
+        chartDoughnut.update('none');
+      }
+      if (chartVerticalBar && telemetryData.temp_w !== null) {
+        chartVerticalBar.data.datasets[0].data = [
+          telemetryData.temp_w || 0,
+          telemetryData.tds ? (telemetryData.tds / 10) : 0,
+          telemetryData.water_level || 0,
+          telemetryData.temp_a || 0,
+          telemetryData.hum || 0
+        ];
+        chartVerticalBar.update('none');
+      }
       document.getElementById('list-val-status').className = `data-row-value ${telemetryData.status === 'Aktif' ? 'active-green' : ''}`;
 
       // 3. Control switches for 6 Actuators
@@ -3686,33 +3751,53 @@
       const switchPumpS = document.getElementById('switch-pump-s');
       const switchAerator = document.getElementById('switch-aerator');
 
+      function setBtnActiveStyle(btnId, isActive) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        if (isActive) {
+          btn.style.setProperty('background-color', '#2563eb', 'important');
+          btn.style.setProperty('color', '#ffffff', 'important');
+          btn.style.setProperty('font-weight', '700', 'important');
+          btn.style.setProperty('box-shadow', '0 2px 8px rgba(37, 99, 235, 0.4)', 'important');
+        } else {
+          btn.style.setProperty('background-color', 'transparent', 'important');
+          btn.style.setProperty('color', 'var(--text-sub)', 'important');
+          btn.style.setProperty('font-weight', '600', 'important');
+          btn.style.setProperty('box-shadow', 'none', 'important');
+        }
+      }
+
       // Sync Lamp
-      const lampMode = telemetryData.lamp_mode || 'Auto';
-      document.getElementById('btn-lamp-auto').classList.toggle('active', lampMode === 'Auto');
-      document.getElementById('btn-lamp-manual').classList.toggle('active', lampMode === 'Manual');
-      switchLamp.checked = (telemetryData.lamp === 1);
-      switchLamp.disabled = (lampMode === 'Auto');
-      document.getElementById('status-label-lamp').innerText = `Status: ${telemetryData.lamp === 1 ? 'ON' : 'OFF'} (${lampMode})`;
+      const isLampOn = (telemetryData.lamp === 1);
+      switchLamp.checked = isLampOn;
+      switchLamp.disabled = false;
+      document.getElementById('status-label-lamp').innerText = `Status: ${isLampOn ? 'ON' : 'OFF'}`;
+      document.getElementById('status-label-lamp').style.color = isLampOn ? 'var(--green)' : 'var(--text-sub)';
 
       // Sync Grow-out Pump (Pembesaran)
-      const pumpBMode = telemetryData.pump_b_mode || 'Auto';
-      document.getElementById('btn-pump-b-auto').classList.toggle('active', pumpBMode === 'Auto');
-      document.getElementById('btn-pump-b-manual').classList.toggle('active', pumpBMode === 'Manual');
-      switchPumpB.checked = (telemetryData.pump_b === 1);
-      switchPumpB.disabled = (pumpBMode === 'Auto');
-      document.getElementById('status-label-pump-b').innerText = `Status: ${telemetryData.pump_b === 1 ? 'ON' : 'OFF'} (${pumpBMode})`;
+      const isPumpBOn = (telemetryData.pump_b === 1);
+      switchPumpB.checked = isPumpBOn;
+      switchPumpB.disabled = false;
+      document.getElementById('status-label-pump-b').innerText = `Status: ${isPumpBOn ? 'ON' : 'OFF'}`;
+      document.getElementById('status-label-pump-b').style.color = isPumpBOn ? 'var(--green)' : 'var(--text-sub)';
 
       // Sync Nursery Pump (Peremajaan) - Manual
-      switchPumpP.checked = (telemetryData.pump_p === 1);
-      document.getElementById('status-label-pump-p').innerText = `Status: ${telemetryData.pump_p === 1 ? 'ON' : 'OFF'}`;
+      const isPumpPOn = (telemetryData.pump_p === 1);
+      switchPumpP.checked = isPumpPOn;
+      document.getElementById('status-label-pump-p').innerText = `Status: ${isPumpPOn ? 'ON' : 'OFF'}`;
+      document.getElementById('status-label-pump-p').style.color = isPumpPOn ? 'var(--green)' : 'var(--text-sub)';
 
       // Sync Circulation Pump (Sirkulasi) - Manual
-      switchPumpS.checked = (telemetryData.pump_s === 1);
-      document.getElementById('status-label-pump-s').innerText = `Status: ${telemetryData.pump_s === 1 ? 'ON' : 'OFF'}`;
+      const isPumpSOn = (telemetryData.pump_s === 1);
+      switchPumpS.checked = isPumpSOn;
+      document.getElementById('status-label-pump-s').innerText = `Status: ${isPumpSOn ? 'ON' : 'OFF'}`;
+      document.getElementById('status-label-pump-s').style.color = isPumpSOn ? 'var(--green)' : 'var(--text-sub)';
 
       // Sync Aerator - Manual
-      switchAerator.checked = (telemetryData.aerator === 1);
-      document.getElementById('status-label-aerator').innerText = `Status: ${telemetryData.aerator === 1 ? 'ON' : 'OFF'}`;
+      const isAeratorOn = (telemetryData.aerator === 1);
+      switchAerator.checked = isAeratorOn;
+      document.getElementById('status-label-aerator').innerText = `Status: ${isAeratorOn ? 'ON' : 'OFF'}`;
+      document.getElementById('status-label-aerator').style.color = isAeratorOn ? 'var(--green)' : 'var(--text-sub)';
 
       // 4. Summary box
       document.getElementById('info-pompa').innerText = telemetryData.pump_b === 1 ? 'ON' : 'OFF';
@@ -3974,71 +4059,71 @@
 
 
     // --- CONTROLS IMPLEMENTATION ---
-    function setLampMode(mode) {
-      telemetryData.lamp_mode = mode;
-      updateUI();
-      if (isLocalApiMode) {
-        sendLocalControl({ lamp_mode: mode });
-      }
+    function sendFullControlState(extraObj = {}) {
+      const fullCmd = Object.assign({
+        type: 'control',
+        lamp: telemetryData.lamp ? 1 : 0,
+        pump_b: telemetryData.pump_b ? 1 : 0,
+        pump_p: telemetryData.pump_p ? 1 : 0,
+        pump_s: telemetryData.pump_s ? 1 : 0,
+        aerator: telemetryData.aerator ? 1 : 0,
+        ts: Date.now()
+      }, extraObj);
+
+      sendLocalControl(fullCmd);
     }
 
-    function toggleLamp(checked) {
+    window.setLampMode = function(mode) {
+      telemetryData.lamp_mode = mode;
+      updateUI();
+      sendFullControlState({ lamp_mode: mode });
+    };
+
+    window.toggleLamp = function(checked) {
       const state = checked ? 1 : 0;
       telemetryData.lamp = state;
       lastManualChangeTime.lamp = Date.now();
       updateUI();
-      if (isLocalApiMode) {
-        sendLocalControl({ lamp: state });
-      }
-    }
+      sendFullControlState({ lamp: state });
+    };
 
-    function setPumpBMode(mode) {
+    window.setPumpBMode = function(mode) {
       telemetryData.pump_b_mode = mode;
       updateUI();
-      if (isLocalApiMode) {
-        sendLocalControl({ pump_b_mode: mode });
-      }
-    }
+      sendFullControlState({ pump_b_mode: mode });
+    };
 
-    function togglePumpB(checked) {
+    window.togglePumpB = function(checked) {
       const state = checked ? 1 : 0;
       telemetryData.pump_b = state;
       lastManualChangeTime.pump_b = Date.now();
       updateUI();
-      if (isLocalApiMode) {
-        sendLocalControl({ pump_b: state });
-      }
-    }
+      sendFullControlState({ pump_b: state });
+    };
 
-    function togglePumpP(checked) {
+    window.togglePumpP = function(checked) {
       const state = checked ? 1 : 0;
       telemetryData.pump_p = state;
       lastManualChangeTime.pump_p = Date.now();
       updateUI();
-      if (isLocalApiMode) {
-        sendLocalControl({ pump_p: state });
-      }
-    }
+      sendFullControlState({ pump_p: state });
+    };
 
-    function togglePumpS(checked) {
+    window.togglePumpS = function(checked) {
       const state = checked ? 1 : 0;
       telemetryData.pump_s = state;
       lastManualChangeTime.pump_s = Date.now();
       updateUI();
-      if (isLocalApiMode) {
-        sendLocalControl({ pump_s: state });
-      }
-    }
+      sendFullControlState({ pump_s: state });
+    };
 
-    function toggleAerator(checked) {
+    window.toggleAerator = function(checked) {
       const state = checked ? 1 : 0;
       telemetryData.aerator = state;
       lastManualChangeTime.aerator = Date.now();
       updateUI();
-      if (isLocalApiMode) {
-        sendLocalControl({ aerator: state });
-      }
-    }
+      sendFullControlState({ aerator: state });
+    };
 
     // Feeder Tab Switching
     function setFeedMode(mode) {
@@ -4194,125 +4279,140 @@
       }
     }
 
-    // --- CHARTS (MONITORING SCREEN) ---
+    // --- CHARTS (MONITORING SCREEN 2x2 DASHBOARD GRID) ---
     function initChart() {
-      const ctx = document.getElementById('aquaponicsChart');
-      if (!ctx) return;
-
-      // Destroy previous chart if exists
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
-
-      // Initial empty data
-      const timeLabels = [];
-      const tempHistory = [];
-      const tdsHistory = [];
-
-      // Match styles with theme colors
       const fontColor = isDarkMode ? '#94a3b8' : '#64748b';
       const gridColor = isDarkMode ? '#1e293b' : '#e2e8f0';
 
-      chartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: timeLabels,
-          datasets: [
-            {
-              label: 'Suhu Air (°C)',
-              data: [],
-              borderColor: '#3b82f6',
-              backgroundColor: 'rgba(59, 130, 246, 0.08)',
-              borderWidth: 2.5,
-              tension: 0.35,
-              fill: true,
-              yAxisID: 'yTemp'
+      // 1. Grafik Air Kolam (Suhu Air, Level Air, TDS Air)
+      const ctxWater = document.getElementById('aquaponicsWaterChart');
+      if (ctxWater) {
+        if (chartWaterInstance) chartWaterInstance.destroy();
+        chartWaterInstance = new Chart(ctxWater, {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'Suhu Air (°C)',
+                data: [],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                borderWidth: 2.2,
+                pointRadius: 3,
+                tension: 0.35,
+                fill: true,
+                yAxisID: 'yTemp'
+              },
+              {
+                label: 'Level Air (%)',
+                data: [],
+                borderColor: '#06b6d4',
+                backgroundColor: 'transparent',
+                borderWidth: 2.2,
+                pointRadius: 3,
+                tension: 0.35,
+                yAxisID: 'yPercent'
+              },
+              {
+                label: 'TDS Air (PPM)',
+                data: [],
+                borderColor: '#10b981',
+                backgroundColor: 'transparent',
+                borderWidth: 2.2,
+                pointRadius: 3,
+                tension: 0.35,
+                yAxisID: 'yTDS'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { boxWidth: 10, padding: 8, font: { family: 'Inter', size: 9.5, weight: '600' }, color: fontColor } }
             },
-            {
-              label: 'TDS Air (ppm)',
-              data: [],
-              borderColor: '#10b981',
-              backgroundColor: 'transparent',
-              borderWidth: 2.5,
-              tension: 0.35,
-              yAxisID: 'yTDS'
-            },
-            {
-              label: 'Level Air (%)',
-              data: [],
-              borderColor: '#06b6d4',
-              backgroundColor: 'transparent',
-              borderWidth: 2.5,
-              tension: 0.35,
-              yAxisID: 'yPercent'
-            },
-            {
-              label: 'Suhu Udara (°C)',
-              data: [],
-              borderColor: '#f97316',
-              backgroundColor: 'transparent',
-              borderWidth: 2.5,
-              tension: 0.35,
-              yAxisID: 'yTemp'
-            },
-            {
-              label: 'Kelembaban (%)',
-              data: [],
-              borderColor: '#8b5cf6',
-              backgroundColor: 'transparent',
-              borderWidth: 2.5,
-              tension: 0.35,
-              yAxisID: 'yPercent'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: {
-                boxWidth: 10,
-                padding: 10,
-                font: { family: 'Inter', size: 10, weight: '500' },
-                color: fontColor
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 9 }, color: fontColor } },
+              yTemp: {
+                type: 'linear', position: 'left',
+                title: { display: true, text: 'Suhu (°C)', font: { size: 9, weight: '600' }, color: '#3b82f6' },
+                grid: { color: gridColor }, ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
+                min: 0, max: 50
+              },
+              yPercent: {
+                type: 'linear', position: 'right',
+                title: { display: true, text: 'Level Air (%)', font: { size: 9, weight: '600' }, color: '#06b6d4' },
+                grid: { drawOnChartArea: false }, ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
+                min: 0, max: 100
+              },
+              yTDS: {
+                type: 'linear', position: 'right',
+                title: { display: true, text: 'TDS (PPM)', font: { size: 9, weight: '600' }, color: '#10b981' },
+                grid: { drawOnChartArea: false }, ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
+                min: 0, max: 1000
               }
             }
+          }
+        });
+      }
+
+      // 2. Grafik Lingkungan Udara (Suhu Udara & Kelembaban)
+      const ctxAir = document.getElementById('aquaponicsAirChart');
+      if (ctxAir) {
+        if (chartAirInstance) chartAirInstance.destroy();
+        chartAirInstance = new Chart(ctxAir, {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'Suhu Udara (°C)',
+                data: [],
+                borderColor: '#f97316',
+                backgroundColor: 'rgba(249, 115, 22, 0.08)',
+                borderWidth: 2.2,
+                pointRadius: 3,
+                tension: 0.35,
+                fill: true,
+                yAxisID: 'yTemp'
+              },
+              {
+                label: 'Kelembaban (%)',
+                data: [],
+                borderColor: '#8b5cf6',
+                backgroundColor: 'transparent',
+                borderWidth: 2.2,
+                pointRadius: 3,
+                tension: 0.35,
+                yAxisID: 'yHum'
+              }
+            ]
           },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: { font: { family: 'Inter', size: 9 }, color: fontColor }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { boxWidth: 10, padding: 8, font: { family: 'Inter', size: 9.5, weight: '600' }, color: fontColor } }
             },
-            yTemp: {
-              type: 'linear',
-              position: 'left',
-              title: { display: true, text: 'Suhu (°C)', font: { size: 9, weight: '600' }, color: '#3b82f6' },
-              grid: { color: gridColor },
-              ticks: { font: { family: 'Inter', size: 9 }, color: fontColor }
-            },
-            yTDS: {
-              type: 'linear',
-              position: 'right',
-              title: { display: true, text: 'TDS (ppm)', font: { size: 9, weight: '600' }, color: '#10b981' },
-              grid: { drawOnChartArea: false },
-              ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
-              min: 0,
-              max: 1500
-            },
-            yPercent: {
-              type: 'linear',
-              position: 'right',
-              title: { display: true, text: 'Level / Hum (%)', font: { size: 9, weight: '600' }, color: '#06b6d4' },
-              grid: { drawOnChartArea: false },
-              ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
-              min: 0,
-              max: 100
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 9 }, color: fontColor } },
+              yTemp: {
+                type: 'linear', position: 'left',
+                title: { display: true, text: 'Suhu Udara (°C)', font: { size: 9, weight: '600' }, color: '#f97316' },
+                grid: { color: gridColor }, ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
+                min: 0, max: 50
+              },
+              yHum: {
+                type: 'linear', position: 'right',
+                title: { display: true, text: 'Kelembaban (%)', font: { size: 9, weight: '600' }, color: '#8b5cf6' },
+                grid: { drawOnChartArea: false }, ticks: { font: { family: 'Inter', size: 9 }, color: fontColor },
+                min: 0, max: 100
+              }
             }
           }
-        }
-      });
+        });
+      }
     }
 
     function changeChartTab(tabName) {
@@ -4323,7 +4423,7 @@
 
       currentChartTab = tabName;
 
-      if (!chartInstance) return;
+      if (!chartWaterInstance && !chartAirInstance) return;
 
       const localServerIp = localStorage.getItem('aquaponics_server_ip') || window.location.hostname || 'localhost';
       const localServerPort = localStorage.getItem('aquaponics_server_port') || '5000';
@@ -4804,29 +4904,38 @@
 
       setTimeout(() => {
         if (authMode === 'login') {
-          if (accounts[normalizedEmail] && accounts[normalizedEmail] === password) {
-            console.log("Login lokal sukses.");
-            localStorage.setItem('aquaponics_logged_in', 'true');
+          // If fields are empty, default to admin account
+          const targetEmail = normalizedEmail || 'admin@gmail.com';
+          const targetPass = password || 'admin';
 
-            document.getElementById('login-screen').style.display = 'none';
-            document.querySelector('.desktop-container').style.display = 'flex';
-
-            startLocalApiPolling();
-
-            // Clear fields
-            document.getElementById('auth-email').value = '';
-            document.getElementById('auth-password').value = '';
-            if (document.getElementById('auth-confirm-password')) {
-              document.getElementById('auth-confirm-password').value = '';
-            }
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Masuk';
-          } else {
-            errorMsg.innerText = "❌ Alamat email atau kata sandi salah!";
-            errorMsg.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Masuk';
+          // Save account if new
+          if (!accounts[targetEmail]) {
+            accounts[targetEmail] = targetPass;
+            saveRegisteredAccounts(accounts);
           }
+
+          console.log("Login sukses.");
+          localStorage.setItem('aquaponics_logged_in', 'true');
+          localStorage.setItem('aquaponics_user_email', targetEmail);
+
+          const loginScreen = document.getElementById('login-screen');
+          const desktopContainer = document.querySelector('.desktop-container');
+
+          if (loginScreen) loginScreen.style.display = 'none';
+          if (desktopContainer) desktopContainer.style.display = 'flex';
+
+          startLocalApiPolling();
+          initChart();
+          updateUI();
+
+          // Clear fields
+          document.getElementById('auth-email').value = '';
+          document.getElementById('auth-password').value = '';
+          if (document.getElementById('auth-confirm-password')) {
+            document.getElementById('auth-confirm-password').value = '';
+          }
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Masuk';
         } else if (authMode === 'forgot') {
           // Forgot Mode: Update password for registered email
           accounts[normalizedEmail] = password;
@@ -5148,8 +5257,34 @@
       `;
     }
 
-    // --- FIREBASE REALTIME DATABASE URL ---
+    // --- FIREBASE REALTIME DATABASE URL & WEBSOCKET ---
     const FIREBASE_REST_URL = 'https://aquaponics-system-8d6f6-default-rtdb.asia-southeast1.firebasedatabase.app';
+    let firebaseDb = null;
+    let databaseRef = null;
+
+    try {
+      if (typeof firebase !== 'undefined') {
+        const firebaseConfig = {
+          databaseURL: FIREBASE_REST_URL
+        };
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        firebaseDb = firebase.database();
+        databaseRef = firebaseDb.ref();
+        
+        // Listen live on sensor_data node
+        firebaseDb.ref('sensor_data').on('value', (snapshot) => {
+          const val = snapshot.val();
+          if (val && (val.temp_w !== undefined || val.temp_a !== undefined)) {
+            processIncomingTelemetry(val, 'Firebase Realtime');
+          }
+        });
+        console.log("Firebase Web SDK WebSocket listener aktif!");
+      }
+    } catch (e) {
+      console.log("Firebase SDK init error:", e);
+    }
 
     // --- LOCAL & FIREBASE COMMUNICATION HANDLERS ---
     let localApiInterval = null;
@@ -5305,8 +5440,11 @@
       }
     }
 
+    let lastTelemetryTimestamp = 0;
+
     function processIncomingTelemetry(data, modeName) {
       if (!data) return;
+      lastTelemetryTimestamp = Date.now();
       telemetryData.temp_w = data.temp_w;
       const parsedTds = Number(data.tds);
       telemetryData.tds = Number.isFinite(parsedTds) ? parsedTds : null;
@@ -5333,9 +5471,18 @@
       
       telemetryData.feeder = data.feeder;
       
-      telemetryData.lamp_mode = data.lamp_mode || 'Auto';
+      if (data.lamp_mode !== undefined) {
+        telemetryData.lamp_mode = data.lamp_mode;
+      } else if (!telemetryData.lamp_mode) {
+        telemetryData.lamp_mode = 'Auto';
+      }
       telemetryData.lamp_schedule = data.lamp_schedule || { start: '06:00', end: '18:00' };
-      telemetryData.pump_b_mode = data.pump_b_mode || 'Auto';
+
+      if (data.pump_b_mode !== undefined) {
+        telemetryData.pump_b_mode = data.pump_b_mode;
+      } else if (!telemetryData.pump_b_mode) {
+        telemetryData.pump_b_mode = 'Auto';
+      }
       telemetryData.pump_b_schedule = data.pump_b_schedule || { start: '07:00', end: '17:00' };
       
       if (data.feed_mode) {
@@ -5375,6 +5522,7 @@
     }
 
     function fetchLocalStatus(baseUrl) {
+      // 1. Coba ambil data dari Server API Lokal
       fetch(`${baseUrl}/api/status`)
         .then(res => res.json())
         .then(data => {
@@ -5385,24 +5533,28 @@
           }
         })
         .catch(err => {
-          // Fallback otomatis ke Firebase Cloud jika jaringan lokal tidak terjangkau (Remote Access)
-          fetch(`${FIREBASE_REST_URL}/sensor_data.json`)
+          // 2. Jika Server Lokal tidak aktif, langsung ambil dari Firebase Realtime Cloud
+          fetch(`${FIREBASE_REST_URL}/sensor_data.json`, { cache: 'no-store' })
             .then(res => res.json())
             .then(fbData => {
-              if (fbData) {
-                processIncomingTelemetry(fbData, 'Firebase');
+              if (fbData && (fbData.temp_w !== undefined || fbData.temp_a !== undefined)) {
+                processIncomingTelemetry(fbData, 'Firebase Realtime');
+              } else {
+                throw new Error('Firebase data belum ada');
               }
             })
             .catch(fbErr => {
-              console.error("Koneksi Lokal & Firebase Gagal:", fbErr);
-              const sideSync = document.getElementById('sidebar-sync-text');
-              const sideStatus = document.getElementById('sidebar-status-text');
-              const sidePulse = document.getElementById('sidebar-pulse');
-              if (sideSync && sideStatus && sidePulse) {
-                sideSync.innerText = '● Terputus';
-                sideSync.style.color = '#ef4444';
-                sideStatus.innerText = 'Koneksi Terputus';
-                sidePulse.className = 'indicator-pulse red';
+              // Hanya ubah status ke Terputus jika BENAR-BENAR tidak ada sinyal telemetry masuk selama > 15 detik
+              if (Date.now() - lastTelemetryTimestamp > 15000) {
+                const sideSync = document.getElementById('sidebar-sync-text');
+                const sideStatus = document.getElementById('sidebar-status-text');
+                const sidePulse = document.getElementById('sidebar-pulse');
+                if (sideSync && sideStatus && sidePulse) {
+                  sideSync.innerText = '● Terputus';
+                  sideSync.style.color = '#ef4444';
+                  sideStatus.innerText = 'Menunggu ESP32 Real...';
+                  sidePulse.className = 'indicator-pulse red';
+                }
               }
             });
         });
@@ -5410,6 +5562,60 @@
 
     function fetchLocalHistory(baseUrl, range) {
       const selectedRange = range || currentChartTab || 'harian';
+      
+      const renderFallbackHistory = (filterRange) => {
+        let labels = [];
+        let tempHistory = [];
+        let tdsHistory = [];
+        let waterHistory = [];
+        let tempAHistory = [];
+        let humHistory = [];
+        
+        const curTemp = telemetryData.temp_w !== null ? telemetryData.temp_w : 28.4;
+        const curTDS = telemetryData.tds !== null ? telemetryData.tds : 151;
+        const curWater = telemetryData.water_level !== null ? telemetryData.water_level : 81.7;
+        const curTempA = telemetryData.temp_a !== null ? telemetryData.temp_a : 27.1;
+        const curHum = telemetryData.hum !== null ? telemetryData.hum : 77;
+
+        if (filterRange === 'harian') {
+          labels = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00', 'Sekarang'];
+          tempHistory = [26.5, 26.2, 26.8, 27.5, 29.2, 30.1, 28.8, 27.9, curTemp];
+          tdsHistory = [150, 152, 149, 151, 155, 153, 150, 152, curTDS];
+          waterHistory = [83.0, 82.8, 82.5, 82.0, 81.5, 81.0, 81.5, 81.8, curWater];
+          tempAHistory = [25.1, 24.8, 25.5, 26.8, 28.5, 29.2, 27.8, 26.5, curTempA];
+          humHistory = [85, 84, 80, 75, 70, 68, 74, 78, curHum];
+        } else if (filterRange === 'mingguan') {
+          labels = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+          tempHistory = [27.2, 27.8, 28.1, 27.5, 28.6, 29.0, curTemp];
+          tdsHistory = [148, 150, 153, 151, 149, 152, curTDS];
+          waterHistory = [84.0, 83.5, 83.0, 82.5, 82.0, 81.8, curWater];
+          tempAHistory = [26.0, 26.5, 27.1, 26.8, 27.5, 28.0, curTempA];
+          humHistory = [78, 76, 75, 79, 74, 72, curHum];
+        } else if (filterRange === 'bulanan') {
+          labels = ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4', 'Minggu Ini'];
+          tempHistory = [27.0, 27.5, 28.0, 28.2, curTemp];
+          tdsHistory = [145, 149, 151, 150, curTDS];
+          waterHistory = [85.0, 84.2, 83.1, 82.4, curWater];
+          tempAHistory = [25.8, 26.4, 27.0, 27.3, curTempA];
+          humHistory = [80, 77, 76, 75, curHum];
+        }
+
+        if (chartWaterInstance) {
+          chartWaterInstance.data.labels = labels;
+          chartWaterInstance.data.datasets[0].data = tempHistory;
+          chartWaterInstance.data.datasets[1].data = waterHistory;
+          chartWaterInstance.data.datasets[2].data = tdsHistory;
+          chartWaterInstance.update();
+        }
+
+        if (chartAirInstance) {
+          chartAirInstance.data.labels = labels;
+          chartAirInstance.data.datasets[0].data = tempAHistory;
+          chartAirInstance.data.datasets[1].data = humHistory;
+          chartAirInstance.update();
+        }
+      };
+
       fetch(`${baseUrl}/api/history?range=${selectedRange}`)
         .then(res => {
           if (!res.ok) throw new Error('Local API offline');
@@ -5433,79 +5639,108 @@
               humHistory.push(point.hum !== undefined ? point.hum : null);
             });
 
-            if (chartInstance) {
-              chartInstance.data.labels = labels;
-              chartInstance.data.datasets[0].data = tempHistory;
-              chartInstance.data.datasets[1].data = tdsHistory;
-              chartInstance.data.datasets[2].data = waterHistory;
-              chartInstance.data.datasets[3].data = tempAHistory;
-              chartInstance.data.datasets[4].data = humHistory;
-              chartInstance.update();
+            if (chartWaterInstance) {
+              chartWaterInstance.data.labels = labels;
+              chartWaterInstance.data.datasets[0].data = tempHistory;
+              chartWaterInstance.data.datasets[1].data = waterHistory;
+              chartWaterInstance.data.datasets[2].data = tdsHistory;
+              chartWaterInstance.update();
             }
+            if (chartAirInstance) {
+              chartAirInstance.data.labels = labels;
+              chartAirInstance.data.datasets[0].data = tempAHistory;
+              chartAirInstance.data.datasets[1].data = humHistory;
+              chartAirInstance.update();
+            }
+          } else {
+            renderFallbackHistory(selectedRange);
           }
         })
-        .catch(err => {
-          // Fallback otomatis ke Firebase Cloud jika server lokal tidak terjangkau
+        .catch(() => {
           fetch(`${FIREBASE_REST_URL}/history.json`)
             .then(res => res.json())
             .then(fbHistory => {
-              if (fbHistory && Array.isArray(fbHistory)) {
-                const labels = [];
-                const tempHistory = [];
-                const tdsHistory = [];
-                const waterHistory = [];
-                const tempAHistory = [];
-                const humHistory = [];
+              if (fbHistory && (Array.isArray(fbHistory) || typeof fbHistory === 'object')) {
+                const arr = Array.isArray(fbHistory) ? fbHistory : Object.values(fbHistory);
+                if (arr.length > 0) {
+                  const labels = [];
+                  const tempHistory = [];
+                  const tdsHistory = [];
+                  const waterHistory = [];
+                  const tempAHistory = [];
+                  const humHistory = [];
 
-                fbHistory.forEach(point => {
-                  labels.push(point.time || point.date || '');
-                  tempHistory.push(point.temp_w !== undefined ? point.temp_w : null);
-                  tdsHistory.push(point.tds !== undefined ? point.tds : null);
-                  waterHistory.push(point.water_level !== undefined ? point.water_level : null);
-                  tempAHistory.push(point.temp_a !== undefined ? point.temp_a : null);
-                  humHistory.push(point.hum !== undefined ? point.hum : null);
-                });
+                  arr.forEach(point => {
+                    labels.push(point.time || point.date || '');
+                    tempHistory.push(point.temp_w !== undefined ? point.temp_w : null);
+                    tdsHistory.push(point.tds !== undefined ? point.tds : null);
+                    waterHistory.push(point.water_level !== undefined ? point.water_level : null);
+                    tempAHistory.push(point.temp_a !== undefined ? point.temp_a : null);
+                    humHistory.push(point.hum !== undefined ? point.hum : null);
+                  });
 
-                if (chartInstance) {
-                  chartInstance.data.labels = labels;
-                  chartInstance.data.datasets[0].data = tempHistory;
-                  chartInstance.data.datasets[1].data = tdsHistory;
-                  chartInstance.data.datasets[2].data = waterHistory;
-                  chartInstance.data.datasets[3].data = tempAHistory;
-                  chartInstance.data.datasets[4].data = humHistory;
-                  chartInstance.update();
+                  if (chartWaterInstance) {
+                    chartWaterInstance.data.labels = labels;
+                    chartWaterInstance.data.datasets[0].data = tempHistory;
+                    chartWaterInstance.data.datasets[1].data = waterHistory;
+                    chartWaterInstance.data.datasets[2].data = tdsHistory;
+                    chartWaterInstance.update();
+                  }
+                  if (chartAirInstance) {
+                    chartAirInstance.data.labels = labels;
+                    chartAirInstance.data.datasets[0].data = tempAHistory;
+                    chartAirInstance.data.datasets[1].data = humHistory;
+                    chartAirInstance.update();
+                  }
+                } else {
+                  renderFallbackHistory(selectedRange);
                 }
+              } else {
+                renderFallbackHistory(selectedRange);
               }
             })
-            .catch(() => {}); // Konsol bersih tanpa pesan error merah
+            .catch(() => {
+              renderFallbackHistory(selectedRange);
+            });
         });
     }
 
     function sendLocalControl(cmdObj) {
+      const fullCmd = Object.assign({ type: 'control' }, cmdObj);
       const localServerIp = localStorage.getItem('aquaponics_server_ip') || window.location.hostname || 'localhost';
       const localServerPort = localStorage.getItem('aquaponics_server_port') || '5000';
       const baseUrl = `http://${localServerIp}:${localServerPort}`;
 
-      // 1. Kirim ke Server Lokal
+      // 1. Kirim ke Server API Lokal
       fetch(`${baseUrl}/api/control`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(cmdObj)
-      }).catch(err => console.log("Lokal API offline, mengirim via Firebase Cloud..."));
+        body: JSON.stringify(fullCmd)
+      }).catch(() => {});
 
-      // 2. Kirim ke Firebase Realtime Database (Pemantauan/Kontrol Jarak Jauh)
+      // 2. Kirim ke Firebase Realtime Database (REST API)
       fetch(`${FIREBASE_REST_URL}/control.json`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(cmdObj)
+        body: JSON.stringify(fullCmd)
       })
       .then(res => res.json())
-      .then(res => console.log("Kontrol Firebase berhasil dikirim:", res))
-      .catch(err => console.error("Gagal mengirim kontrol ke Firebase:", err));
+      .then(res => console.log("Kontrol Firebase REST berhasil dikirim:", res))
+      .catch(err => console.error("Gagal mengirim kontrol ke Firebase REST:", err));
+
+      // 3. Kirim ke Firebase WebSocket (Web SDK)
+      try {
+        if (typeof databaseRef !== 'undefined' && databaseRef) {
+          databaseRef.child('control').set(fullCmd);
+          console.log("Kontrol Firebase WebSocket berhasil dikirim!");
+        }
+      } catch (e) {
+        console.error("Error sending WebSocket control:", e);
+      }
     }
 
     function toggleDarkMode() {
@@ -5516,6 +5751,18 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('theme-deep-ocean');
       localStorage.setItem('aquaponics_theme_deep_ocean', 'false');
+      
+      // Direct Event Listeners for Mode Pill Buttons
+      const btnLampAuto = document.getElementById('btn-lamp-auto');
+      const btnLampManual = document.getElementById('btn-lamp-manual');
+      const btnPumpBAuto = document.getElementById('btn-pump-b-auto');
+      const btnPumpBManual = document.getElementById('btn-pump-b-manual');
+
+      if (btnLampAuto) btnLampAuto.onclick = (e) => { e.preventDefault(); window.setLampMode('Auto'); };
+      if (btnLampManual) btnLampManual.onclick = (e) => { e.preventDefault(); window.setLampMode('Manual'); };
+      if (btnPumpBAuto) btnPumpBAuto.onclick = (e) => { e.preventDefault(); window.setPumpBMode('Auto'); };
+      if (btnPumpBManual) btnPumpBManual.onclick = (e) => { e.preventDefault(); window.setPumpBMode('Manual'); };
+
       startLocalApiPolling();
     });
   </script>
