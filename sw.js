@@ -1,37 +1,30 @@
-const CACHE_NAME = 'smart-akuaponik-v9';
+const CACHE_NAME = 'smart-akuaponik-v26-fresh';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './aquaponics_login_art.png',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js',
-  'https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js'
+  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap',
+  'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
-// Install Service Worker and cache essential assets
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[Service Worker] Caching App Shell and Dependencies');
-        return cache.addAll(ASSETS_TO_CACHE);
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE).catch(err => console.log('Cache addAll error ignored:', err));
+    })
   );
 });
 
-// Activate event: Clean up old caches
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map(cache => {
+        cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('[Service Worker] Clearing Old Cache:', cache);
             return caches.delete(cache);
           }
         })
@@ -40,35 +33,23 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event: Network-first falling back to cache
-self.addEventListener('fetch', event => {
-  // Skip cross-origin, non-GET, or API requests
+self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('/api/')) return;
-
+  const url = new URL(event.request.url);
+  if (url.pathname.includes('/api/') || url.hostname.includes('firebaseio.com') || url.hostname.includes('firebasedatabase.app')) {
+    return;
+  }
   event.respondWith(
     fetch(event.request)
-      .then(response => {
-        // If valid network response, clone and update cache
-        if (response && response.status === 200) {
-          const responseCopy = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseCopy);
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
           });
         }
-        return response;
+        return networkResponse;
       })
-      .catch(() => {
-        // If network fails, serve from cache
-        return caches.match(event.request).then(cachedResponse => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // Fallback if both fail (e.g. offline and asset not cached)
-          if (event.request.headers.get('accept').includes('text/html')) {
-            return caches.match('./index.html');
-          }
-        });
-      })
+      .catch(() => caches.match(event.request))
   );
 });
