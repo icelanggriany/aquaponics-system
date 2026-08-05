@@ -3430,8 +3430,8 @@
                   </svg>
                   <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Integrasi Firebase</span>
                 </div>
-                <div style="display: flex !important; align-items: center !important; gap: 8px !important; color: #ef4444 !important;">
-                  <span id="firebase-status-badge" style="font-size: 0.8rem !important; font-weight: 600 !important; color: #ef4444 !important;">Terputus</span>
+                <div style="display: flex !important; align-items: center !important; gap: 8px !important; color: #10b981 !important;">
+                  <span id="firebase-status-badge" style="font-size: 0.8rem !important; font-weight: 600 !important; color: #10b981 !important;">Tersambung</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3840,10 +3840,10 @@
       } else if (type === 'Firebase') {
         titleEl.innerText = '4. Integrasi Firebase ⭐';
         const fbProjectId = localStorage.getItem('cfg_fb_project_id') || 'aquaponics-system-8d6f6';
-        const fbApiKey = localStorage.getItem('cfg_fb_api_key') || 'AIzaSy...';
+        const fbApiKey = localStorage.getItem('cfg_fb_api_key') || 'AIzaSyDAnrIQ6_gihFgcep-Pu3dz3IqxCWBOcDo';
         const fbDbUrl = localStorage.getItem('cfg_fb_db_url') || 'https://aquaponics-system-8d6f6-default-rtdb.asia-southeast1.firebasedatabase.app';
-        const fbStorage = localStorage.getItem('cfg_fb_storage') || 'aquaponics-system-8d6f6.appspot.com';
-        const fbSenderId = localStorage.getItem('cfg_fb_sender_id') || '1234567890';
+        const fbStorage = localStorage.getItem('cfg_fb_storage') || 'aquaponics-system-8d6f6.firebasestorage.app';
+        const fbSenderId = localStorage.getItem('cfg_fb_sender_id') || '666440506386';
         bodyEl.innerHTML = `
           <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
             <div style="background:rgba(245,158,11,0.1); border-left:4px solid #f59e0b; padding:10px 14px; border-radius:8px; font-size:0.82rem; color:var(--text-main); line-height:1.5;">
@@ -3876,27 +3876,40 @@
           </div>
         `;
       } else if (type === 'Notifications') {
-        titleEl.innerText = '5. Pengaturan Notifikasi HP';
-        const notifEnabled = localStorage.getItem('cfg_notif_enabled') !== 'false';
-        const fcmKey = localStorage.getItem('cfg_notif_fcm_key') || '';
-        const notifTopic = localStorage.getItem('cfg_notif_topic') || 'sensor_alert';
+        titleEl.innerText = '5. Notifikasi Email (EmailJS / email.js)';
+        const emailEnabled = localStorage.getItem('cfg_email_enabled') !== 'false';
+        const serviceId = localStorage.getItem('cfg_emailjs_service_id') || 'service_4e9rkbf';
+        const templateId = localStorage.getItem('cfg_emailjs_template_id') || 'template_p2vuw8k';
+        const publicKey = localStorage.getItem('cfg_emailjs_public_key') || '4v1gUffZm6c9CtGXH';
+        const recipient = localStorage.getItem('cfg_recipient_email') || 'icelanggriany@gmail.com';
         bodyEl.innerHTML = `
           <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
             <div style="background:rgba(16,185,129,0.08); border-left:4px solid var(--green); padding:10px 14px; border-radius:8px; font-size:0.82rem; color:var(--text-main); line-height:1.5;">
-              <strong>🔔 Fungsi:</strong> Kalau sensor melebihi batas aman, HP kamu bakal bunyi / menerima peringatan otomatis.
+              <strong>📩 Fungsi:</strong> Mengirim peringatan otomatis langsung ke email Anda via <code>email.js</code> (EmailJS) saat sensor melebihi batas aman.
             </div>
             <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.9rem; font-weight:700; color:var(--text-main); cursor:pointer; background:var(--bg-app); padding:12px 14px; border-radius:12px; border:1px solid var(--border-glass);">
-              <span>Enable Notifikasi HP (On / Off)</span>
-              <input type="checkbox" id="cfg-notif-enabled" ${notifEnabled ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--primary);">
+              <span>Enable Notifikasi Email (On / Off)</span>
+              <input type="checkbox" id="cfg-email-enabled" ${emailEnabled ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--primary);">
             </label>
             <div>
-              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">FCM Server Key (Cloud Messaging)</label>
-              <input type="password" id="cfg-notif-fcm-key" value="${fcmKey}" placeholder="Ambil dari Firebase Console > Project Settings > Cloud Messaging" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.85rem;">
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Service ID EmailJS</label>
+              <input type="text" id="cfg-emailjs-service-id" value="${serviceId}" placeholder="service_4e9rkbf" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.85rem;">
             </div>
             <div>
-              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Topik Notifikasi</label>
-              <input type="text" id="cfg-notif-topic" value="${notifTopic}" placeholder="sensor_alert" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.85rem;">
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Template ID EmailJS</label>
+              <input type="text" id="cfg-emailjs-template-id" value="${templateId}" placeholder="template_p2vuw8k" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.85rem;">
             </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Public Key EmailJS</label>
+              <input type="text" id="cfg-emailjs-public-key" value="${publicKey}" placeholder="4v1gUffZm6c9CtGXH" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.85rem;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Email Penerima Alert</label>
+              <input type="email" id="cfg-email-recipient" value="${recipient}" placeholder="icelanggriany@gmail.com" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.85rem;">
+            </div>
+            <button type="button" onclick="sendTestEmail()" style="background:rgba(37,99,235,0.08); border:1px solid var(--primary); color:var(--primary); padding:10px 14px; border-radius:10px; font-size:0.85rem; font-weight:700; cursor:pointer; margin-top:4px; transition:0.2s;">
+              ✉️ Kirim Email Uji Coba (Test EmailJS)
+            </button>
           </div>
         `;
       } else if (type === 'About') {
@@ -3971,16 +3984,25 @@
         }
         if (typeof showToast === 'function') showToast('Integrasi Firebase berhasil tersambung!');
       } else if (currentConfigType === 'Notifications') {
-        const enabled = document.getElementById('cfg-notif-enabled')?.checked;
-        const fcm = document.getElementById('cfg-notif-fcm-key')?.value;
-        const topic = document.getElementById('cfg-notif-topic')?.value;
-        localStorage.setItem('cfg_notif_enabled', enabled ? 'true' : 'false');
-        if (fcm) localStorage.setItem('cfg_notif_fcm_key', fcm);
-        if (topic) localStorage.setItem('cfg_notif_topic', topic);
-        if (typeof showToast === 'function') showToast('Pengaturan Notifikasi berhasil disimpan!');
+        const enabled = document.getElementById('cfg-email-enabled')?.checked;
+        const serviceId = document.getElementById('cfg-emailjs-service-id')?.value;
+        const templateId = document.getElementById('cfg-emailjs-template-id')?.value;
+        const publicKey = document.getElementById('cfg-emailjs-public-key')?.value;
+        const recipient = document.getElementById('cfg-email-recipient')?.value;
+
+        localStorage.setItem('cfg_email_enabled', enabled ? 'true' : 'false');
+        if (serviceId) localStorage.setItem('cfg_emailjs_service_id', serviceId);
+        if (templateId) localStorage.setItem('cfg_emailjs_template_id', templateId);
+        if (publicKey) localStorage.setItem('cfg_emailjs_public_key', publicKey);
+        if (recipient) localStorage.setItem('cfg_recipient_email', recipient);
+
+        if (typeof showToast === 'function') showToast('Pengaturan Notifikasi EmailJS berhasil disimpan!');
       } else {
         if (typeof showToast === 'function') showToast('Pengaturan berhasil disimpan!');
       }
+
+      // Sync ALL configurations to Firebase Realtime Database Cloud (/config.json)
+      syncAllConfigToFirebase();
       closeModal('modal-config');
     }
 
@@ -3997,11 +4019,132 @@
       if (tds) tds.value = '0';
       if (ta) ta.value = '0.0';
       if (w) w.value = '0.0';
+      
+      syncAllConfigToFirebase();
       if (typeof showToast === 'function') showToast('Kalibrasi dikembalikan ke default pabrik!');
+    }
+
+    function sendTestEmail() {
+      const serviceId = document.getElementById('cfg-emailjs-service-id')?.value || localStorage.getItem('cfg_emailjs_service_id') || 'service_4e9rkbf';
+      const templateId = document.getElementById('cfg-emailjs-template-id')?.value || localStorage.getItem('cfg_emailjs_template_id') || 'template_p2vuw8k';
+      const publicKey = document.getElementById('cfg-emailjs-public-key')?.value || localStorage.getItem('cfg_emailjs_public_key') || '4v1gUffZm6c9CtGXH';
+      const recipient = document.getElementById('cfg-email-recipient')?.value || localStorage.getItem('cfg_recipient_email') || 'icelanggriany@gmail.com';
+
+      if (typeof emailjs === 'undefined') {
+        alert("SDK email.js (EmailJS) belum dimuat. Harap periksa koneksi internet Anda.");
+        return;
+      }
+
+      if (typeof showToast === 'function') showToast('Mengirim Email Uji Coba via email.js...');
+      emailjs.init(publicKey);
+      emailjs.send(serviceId, templateId, {
+        name: "Smart Aquaponik System",
+        to_email: recipient,
+        email: recipient,
+        subject: "✅ [Smart Aquaponik] Test Email Berhasil!",
+        message: "Selamat! Sistem Notifikasi email.js (EmailJS) Akuaponik Anda telah dikonfigurasi dan berfungsi dengan baik.",
+        time: new Date().toLocaleString()
+      })
+      .then(() => {
+        alert(`✅ Email Uji Coba BERHASIL dikirim ke ${recipient}! Cek inbox/spam email Anda.`);
+      })
+      .catch(err => {
+        console.error("Test EmailJS Error:", err);
+        alert("⚠️ Gagal mengirim email. Periksa Service ID, Template ID, dan Public Key email.js Anda.");
+      });
+    }
+
+    function syncAllConfigToFirebase() {
+      const fullConfig = {
+        wifi: {
+          ssid: localStorage.getItem('cfg_wifi_ssid') || 'SmartAkuaponik_WiFi',
+          pass: localStorage.getItem('cfg_wifi_pass') || ''
+        },
+        server: {
+          url: localStorage.getItem('cfg_server_url') || 'http://192.168.1.15',
+          port: localStorage.getItem('cfg_server_port') || '5000',
+          token: localStorage.getItem('cfg_server_token') || ''
+        },
+        calibration: {
+          temp_w_offset: parseFloat(localStorage.getItem('cfg_cal_temp_w') || '0.0'),
+          tds_offset: parseFloat(localStorage.getItem('cfg_cal_tds') || '0'),
+          temp_a_offset: parseFloat(localStorage.getItem('cfg_cal_temp_a') || '0.0'),
+          water_level_offset: parseFloat(localStorage.getItem('cfg_cal_water') || '0.0')
+        },
+        firebase: {
+          project_id: localStorage.getItem('cfg_fb_project_id') || 'aquaponics-system-8d6f6',
+          api_key: localStorage.getItem('cfg_fb_api_key') || 'AIzaSyDAnrIQ6_gihFgcep-Pu3dz3IqxCWBOcDo',
+          db_url: localStorage.getItem('cfg_fb_db_url') || 'https://aquaponics-system-8d6f6-default-rtdb.asia-southeast1.firebasedatabase.app',
+          storage_bucket: localStorage.getItem('cfg_fb_storage') || 'aquaponics-system-8d6f6.firebasestorage.app',
+          messaging_sender_id: localStorage.getItem('cfg_fb_sender_id') || '666440506386'
+        },
+        notifications: {
+          enabled: localStorage.getItem('cfg_notif_enabled') !== 'false',
+          fcm_key: localStorage.getItem('cfg_notif_fcm_key') || '',
+          topic: localStorage.getItem('cfg_notif_topic') || 'sensor_alert'
+        },
+        updated_at: new Date().toISOString()
+      };
+
+      fetch(`${FIREBASE_REST_URL}/config.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fullConfig)
+      })
+      .then(res => res.json())
+      .then(res => console.log("✅ Config tersimpan ke Firebase (/config.json):", res))
+      .catch(err => console.error("Gagal sync config ke Firebase:", err));
+
+      try {
+        if (typeof databaseRef !== 'undefined' && databaseRef) {
+          databaseRef.child('config').set(fullConfig);
+        }
+      } catch (e) {}
+    }
+
+    function loadConfigFromFirebase() {
+      fetch(`${FIREBASE_REST_URL}/config.json?t=${Date.now()}`, { cache: 'no-store' })
+        .then(res => res.json())
+        .then(data => {
+          if (data && typeof data === 'object') {
+            if (data.wifi) {
+              if (data.wifi.ssid) localStorage.setItem('cfg_wifi_ssid', data.wifi.ssid);
+              if (data.wifi.pass) localStorage.setItem('cfg_wifi_pass', data.wifi.pass);
+            }
+            if (data.server) {
+              if (data.server.url) localStorage.setItem('cfg_server_url', data.server.url);
+              if (data.server.port) localStorage.setItem('cfg_server_port', data.server.port);
+              if (data.server.token) localStorage.setItem('cfg_server_token', data.server.token);
+            }
+            if (data.calibration) {
+              if (data.calibration.temp_w_offset !== undefined) localStorage.setItem('cfg_cal_temp_w', data.calibration.temp_w_offset);
+              if (data.calibration.tds_offset !== undefined) localStorage.setItem('cfg_cal_tds', data.calibration.tds_offset);
+              if (data.calibration.temp_a_offset !== undefined) localStorage.setItem('cfg_cal_temp_a', data.calibration.temp_a_offset);
+              if (data.calibration.water_level_offset !== undefined) localStorage.setItem('cfg_cal_water', data.calibration.water_level_offset);
+            }
+            if (data.firebase) {
+              if (data.firebase.project_id) localStorage.setItem('cfg_fb_project_id', data.firebase.project_id);
+              if (data.firebase.api_key) localStorage.setItem('cfg_fb_api_key', data.firebase.api_key);
+              if (data.firebase.db_url) localStorage.setItem('cfg_fb_db_url', data.firebase.db_url);
+              if (data.firebase.storage_bucket) localStorage.setItem('cfg_fb_storage', data.firebase.storage_bucket);
+              if (data.firebase.messaging_sender_id) localStorage.setItem('cfg_fb_sender_id', data.firebase.messaging_sender_id);
+            }
+            if (data.notifications) {
+              if (data.notifications.enabled !== undefined) localStorage.setItem('cfg_notif_enabled', data.notifications.enabled ? 'true' : 'false');
+              if (data.notifications.fcm_key) localStorage.setItem('cfg_notif_fcm_key', data.notifications.fcm_key);
+              if (data.notifications.topic) localStorage.setItem('cfg_notif_topic', data.notifications.topic);
+            }
+            console.log("✅ Config dimuat dari Firebase Cloud (/config.json)");
+          }
+        })
+        .catch(err => console.log("Menggunakan config lokal."));
     }
 
     // --- INITIALIZATION ---
     window.onload = function () {
+      // Sync & Load configuration from Firebase Cloud (/config.json)
+      loadConfigFromFirebase();
+
       // Load notifications
       loadNotifications();
 
@@ -5084,182 +5227,7 @@
     }
 
     // --- CONFIG MODALS LOADING ---
-    function openConfigModal(type) {
-      const modal = document.getElementById('modal-config');
-      const title = document.getElementById('config-modal-title');
-      const body = document.getElementById('config-modal-body');
-      const saveBtn = document.getElementById('btn-save-config');
-
-      title.innerText = type === 'Notifications' ? 'Pengaturan Notifikasi Email' : `Config: ${type}`;
-      saveBtn.style.display = 'block';
-
-      if (type === 'WiFi') {
-        const ssid = localStorage.getItem('aquaponics_wifi_ssid') || 'Akuaponik_SSID';
-        const pass = localStorage.getItem('aquaponics_wifi_pass') || '********';
-        body.innerHTML = `
-          <div class="form-group">
-            <label>SSID (Nama WiFi)</label>
-            <input type="text" id="wifi-ssid" class="form-control" value="${ssid}">
-          </div>
-          <div class="form-group">
-            <label>Password WiFi</label>
-            <div style="position: relative; width: 100%;">
-              <input type="password" id="wifi-pass" class="form-control" style="padding-right: 40px;" value="${pass}">
-              <button type="button" onclick="togglePasswordVisibility('wifi-pass', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Tampilkan / Sembunyikan Kata Sandi">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-          </div>
-        `;
-      }
-      else if (type === 'Server') {
-        const ip = localStorage.getItem('aquaponics_server_ip') || '192.168.1.15';
-        const port = localStorage.getItem('aquaponics_server_port') || '8080';
-        body.innerHTML = `
-          <div class="form-group">
-            <label>IP Gateway Server</label>
-            <input type="text" id="server-ip" class="form-control" value="${ip}">
-          </div>
-          <div class="form-group">
-            <label>Port Komunikasi</label>
-            <input type="number" id="server-port" class="form-control" value="${port}">
-          </div>
-        `;
-      }
-      else if (type === 'Calibration') {
-        const ppm = localStorage.getItem('aquaponics_cal_tds_ppm') || '1000';
-        const volts = localStorage.getItem('aquaponics_cal_tds_v') || '1.50';
-        body.innerHTML = `
-          <p style="margin-bottom: 12px; font-size:0.8rem;">Kalibrasi sensor TDS Anda menggunakan larutan kalibrasi standar (misal 707 ppm atau 1000 ppm).</p>
-          <div class="form-group">
-            <label>Nilai Larutan Standar (ppm)</label>
-            <input type="number" id="cal-tds-ppm" class="form-control" value="${ppm}">
-          </div>
-          <div class="form-group">
-            <label>Tegangan Terbaca (V) saat Kalibrasi</label>
-            <input type="number" step="0.01" id="cal-tds-v" class="form-control" value="${volts}">
-          </div>
-        `;
-      }
-      else if (type === 'Notifications') {
-        const notifEmailEnabled = telemetryData.email_notif_enabled !== undefined ? telemetryData.email_notif_enabled : (localStorage.getItem('aquaponics_email_enabled') !== 'false');
-        const serviceId = telemetryData.emailjs_service_id || localStorage.getItem('aquaponics_emailjs_service_id') || 'service_4e9rkbf';
-        const templateId = telemetryData.emailjs_template_id || localStorage.getItem('aquaponics_emailjs_template_id') || 'template_p2vuw8k';
-        const publicKey = telemetryData.emailjs_public_key || localStorage.getItem('aquaponics_emailjs_public_key') || '4v1gUffZm6c9CtGXH';
-        const recipientEmail = telemetryData.recipient_email || localStorage.getItem('aquaponics_recipient_email') || 'icelanggriany@gmail.com';
-        
-        const tdsMin = telemetryData.tds_min || 400;
-        const tdsMax = telemetryData.tds_max || 900;
-        const tempMin = telemetryData.temp_w_min || 24.0;
-        const tempMax = telemetryData.temp_w_max || 30.0;
-        const waterMin = telemetryData.water_level_min || 50.0;
-
-        body.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:12px; font-size:0.8rem; text-align:left;">
-            <label style="display:flex; align-items:center; gap:10px; font-weight:700; color:var(--text-main); font-size:0.88rem; background:var(--primary-light); padding:12px 14px; border-radius:14px; border:1px solid var(--border-glass);">
-              <input type="checkbox" id="email-notif-enabled" ${notifEmailEnabled ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer;"> Aktifkan Notifikasi Email Otomatis (EmailJS)
-            </label>
-            
-            <h4 style="margin:4px 0 2px 0; font-size:0.85rem; font-weight:700; color:var(--primary);">Kredensial EmailJS</h4>
-            <div style="background:var(--bg-app); padding:14px; border-radius:16px; border:1px solid var(--border-glass); display:flex; flex-direction:column; gap:8px;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label style="font-size:0.75rem; color:var(--text-sub); font-weight:600;">Service ID EmailJS</label>
-                <input type="text" id="emailjs-service-id" class="form-control" value="${serviceId}" placeholder="service_4e9rkbf">
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label style="font-size:0.75rem; color:var(--text-sub); font-weight:600;">Template ID EmailJS</label>
-                <input type="text" id="emailjs-template-id" class="form-control" value="${templateId}" placeholder="template_p2vuw8k">
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label style="font-size:0.75rem; color:var(--text-sub); font-weight:600;">Public Key (User ID) EmailJS</label>
-                <input type="text" id="emailjs-public-key" class="form-control" value="${publicKey}" placeholder="4v1gUffZm6c9CtGXH">
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom:2px;">
-              <label style="font-size:0.78rem; color:var(--text-main); font-weight:700;">Email Penerima Notifikasi (Recipient Email)</label>
-              <input type="email" id="email-recipient" class="form-control" value="${recipientEmail}" placeholder="icelanggriany@gmail.com">
-            </div>
-
-            <h4 style="margin:6px 0 2px 0; font-size:0.85rem; font-weight:700; color:var(--primary);">Batas Safe Zone Sensor (Thresholds)</h4>
-            <div style="display:flex; gap:10px;">
-              <div style="flex:1;">
-                <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">TDS Min (ppm)</label>
-                <input type="number" id="email-tds-min" class="form-control" value="${tdsMin}">
-              </div>
-              <div style="flex:1;">
-                <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">TDS Max (ppm)</label>
-                <input type="number" id="email-tds-max" class="form-control" value="${tdsMax}">
-              </div>
-            </div>
-            <div style="display:flex; gap:10px;">
-              <div style="flex:1;">
-                <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">Suhu Air Min (°C)</label>
-                <input type="number" step="0.5" id="email-temp-min" class="form-control" value="${tempMin}">
-              </div>
-              <div style="flex:1;">
-                <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">Suhu Air Max (°C)</label>
-                <input type="number" step="0.5" id="email-temp-max" class="form-control" value="${tempMax}">
-              </div>
-            </div>
-            <div class="form-group" style="margin-bottom:2px;">
-              <label style="font-size:0.72rem; color:var(--text-sub); font-weight:600;">Level Air Min (%)</label>
-              <input type="number" id="email-water-min" class="form-control" value="${waterMin}">
-            </div>
-          </div>
-        `;
-      }
-      else if (type === 'Schedules') {
-        const lampStart = telemetryData.lamp_schedule ? telemetryData.lamp_schedule.start : '06:00';
-        const lampEnd = telemetryData.lamp_schedule ? telemetryData.lamp_schedule.end : '18:00';
-        const pumpStart = telemetryData.pump_b_schedule ? telemetryData.pump_b_schedule.start : '07:00';
-        const pumpEnd = telemetryData.pump_b_schedule ? telemetryData.pump_b_schedule.end : '17:00';
-        body.innerHTML = `
-          <p style="margin-bottom:12px; font-size:0.8rem; color:var(--text-main);">Atur jadwal nyala/mati otomatis untuk Lampu Growlight dan Pompa Pembesaran:</p>
-          
-          <h4 style="margin:12px 0 6px 0; font-size:0.85rem; font-weight:700; color:var(--text-main);">Jadwal Lampu Growlight</h4>
-          <div style="display:flex; gap:10px; margin-bottom:12px;">
-            <div style="flex:1;">
-              <label style="font-size:0.75rem; color:var(--text-sub);">Waktu Mulai (ON)</label>
-              <input type="time" id="sched-lamp-start" class="form-control" value="${lampStart}">
-            </div>
-            <div style="flex:1;">
-              <label style="font-size:0.75rem; color:var(--text-sub);">Waktu Selesai (OFF)</label>
-              <input type="time" id="sched-lamp-end" class="form-control" value="${lampEnd}">
-            </div>
-          </div>
-
-          <h4 style="margin:12px 0 6px 0; font-size:0.85rem; font-weight:700; color:var(--text-main);">Jadwal Pompa Pembesaran</h4>
-          <div style="display:flex; gap:10px; margin-bottom:12px;">
-            <div style="flex:1;">
-              <label style="font-size:0.75rem; color:var(--text-sub);">Waktu Mulai (ON)</label>
-              <input type="time" id="sched-pump-start" class="form-control" value="${pumpStart}">
-            </div>
-            <div style="flex:1;">
-              <label style="font-size:0.75rem; color:var(--text-sub);">Waktu Selesai (OFF)</label>
-              <input type="time" id="sched-pump-end" class="form-control" value="${pumpEnd}">
-            </div>
-          </div>
-        `;
-      }
-      else if (type === 'About') {
-        saveBtn.style.display = 'none';
-        body.innerHTML = `
-          <div style="text-align:center; padding: 10px 0;">
-            <div style="font-family:var(--font-outfit); font-size:1.2rem; font-weight:800; color:var(--primary); margin-bottom:4px;">Akuaponik Smart IoT</div>
-            <div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:16px;">Versi Aplikasi v1.0.0</div>
-            <p style="font-size:0.8rem; line-height:1.5; color:var(--text-main);">Sistem monitoring dan kontrol kolam terpadu menggunakan transmisi nirkabel LoRa (Long Range) dan Gateway Server.</p>
-            <div style="margin-top:20px; font-size:0.72rem; color:var(--text-sub);">Didesain khusus untuk optimalisasi pertanian masa depan.</div>
-          </div>
-        `;
-      }
-
-      modal.setAttribute('data-current-type', type);
-      modal.classList.add('active');
-    }
+    // (Note: openConfigModal is defined above with full modern layout)
 
     function toggleEmailProviderUI(provider) {
       const secEmailJS = document.getElementById('section-emailjs');
@@ -5927,8 +5895,19 @@
 
     try {
       if (typeof firebase !== 'undefined') {
+        const apiKey = localStorage.getItem('cfg_fb_api_key') || 'AIzaSyDAnrIQ6_gihFgcep-Pu3dz3IqxCWBOcDo';
+        const projId = localStorage.getItem('cfg_fb_project_id') || 'aquaponics-system-8d6f6';
+        const dbUrl = localStorage.getItem('cfg_fb_db_url') || FIREBASE_REST_URL;
+        const storage = localStorage.getItem('cfg_fb_storage') || 'aquaponics-system-8d6f6.firebasestorage.app';
+        const senderId = localStorage.getItem('cfg_fb_sender_id') || '666440506386';
+
         const firebaseConfig = {
-          databaseURL: FIREBASE_REST_URL
+          apiKey: apiKey,
+          authDomain: projId + '.firebaseapp.com',
+          databaseURL: dbUrl,
+          projectId: projId,
+          storageBucket: storage,
+          messagingSenderId: senderId
         };
         if (!firebase.apps.length) {
           firebase.initializeApp(firebaseConfig);

@@ -1,6 +1,6 @@
 # Panduan Lengkap Wiring Kabel & Sensor: Sistem Akuaponik IoT
 
-Panduan ini menjelaskan secara mendetail cara menghubungkan seluruh komponen elektronik, sensor, modul nirkabel LoRa, dan aktuator relai ke **ESP32** (Transmitter) dan **Raspberry Pi 3** (Receiver/Gateway).
+Panduan ini menjelaskan secara mendetail cara menghubungkan seluruh komponen elektronik, sensor, modul nirkabel LoRa, dan aktuator relai ke **ESP32** (Transmitter) dan **ESP32 Gateway / Server** (Receiver).
 
 ---
 
@@ -41,12 +41,12 @@ graph TD
     Relay -->|Channel 6| Feeder[Feeder Pakan]
 ```
 
-### 2. Blok Raspberry Pi 3 (Receiver/Gateway)
+### 2. Blok ESP32 Receiver Gateway / Server
 ```mermaid
 graph TD
-    RPi[Raspberry Pi 3]
-    RPi -->|UART| LoRa_RX[LoRa E220-900T22D 915MHz]
-    RPi -->|Internet| Firebase[(Firebase Database)]
+    ESP32_GW[ESP32 Gateway / PC Server]
+    ESP32_GW -->|UART| LoRa_RX[LoRa E220-900T22D 915MHz]
+    ESP32_GW -->|WiFi / Internet| Firebase[(Firebase Database)]
 ```
 
 ---
@@ -181,26 +181,20 @@ Modul relay bertindak sebagai saklar elektronik untuk beban tegangan tinggi (220
 
 ---
 
-## 🔌 Detail Wiring Sisi Raspberry Pi 3 (Receiver Node)
+## 🔌 Detail Wiring Sisi ESP32 Receiver Gateway Node
 
-### Koneksi Modul LoRa E220-900T22D (915MHz) ke Raspberry Pi 3
-Hubungkan pin modul LoRa ke pin header GPIO Raspberry Pi 3 menggunakan kabel jumper Female-to-Female sesuai pinout UART berikut.
+### Koneksi Modul LoRa E220-900T22D (915MHz) ke ESP32 Gateway
+Hubungkan pin modul LoRa ke pin GPIO ESP32 Gateway sesuai pinout UART2 berikut:
 
-| Pin LoRa E220 | Pin Fisik RPi 3 (Physical Pin #) | GPIO BCM (Sistem/Python) | GPIO WiringPi / Pi4J (Gambar) | Keterangan / Fungsi |
-| :--- | :--- | :--- | :--- | :--- |
-| **VCC** | **Pin 1, 2, atau 4** | - | - | Catu daya modul (3.3V atau 5.0V) |
-| **GND** | **Pin 6, 9, 14, 20, 25, 30, 34, atau 39** | - | - | Ground bersama |
-| **TXD** | **Pin 10** | **GPIO 15** | **GPIO 16 (RxD)** | UART RXD pada Raspberry Pi |
-| **RXD** | **Pin 8** | **GPIO 14** | **GPIO 15 (TxD)** | UART TXD pada Raspberry Pi |
-| **AUX** | **Pin 18** | **GPIO 24** | **GPIO 5** | Status indicator busy/idle |
-| **M0** | **Pin 15** | **GPIO 22** | **GPIO 3** | Mode control pin 0 |
-| **M1** | **Pin 16** | **GPIO 23** | **GPIO 4** | Mode control pin 1 |
-
-> [!IMPORTANT]
-> **Perbedaan Penomoran GPIO (BCM vs. WiringPi/Pi4J):**
-> - **Penomoran BCM (Broadcom)** digunakan secara internal oleh pustaka Python seperti `RPi.GPIO` di dalam skrip [gateway.py](file:///c:/Users/User/.gemini/antigravity-ide/scratch/aquaponics-system/raspberry_pi/gateway.py).
-> - **Penomoran WiringPi / Pi4J** adalah penomoran yang tertera pada diagram pinout yang Anda berikan (label besar di kolom kiri/kanan seperti GPIO 3, GPIO 4, dll.).
-> - Selalu rujuk **Pin Fisik RPi 3 (Physical Pin #)** di tengah diagram untuk menghindari salah koneksi kabel fisik.
+| Pin LoRa E220 | Pin ESP32 Gateway | Keterangan / Fungsi |
+| :--- | :--- | :--- |
+| **VCC** | **3.3V / 5V** | Catu daya modul |
+| **GND** | **GND** | Ground bersama |
+| **TXD** | **GPIO 16 (RX2)** | UART RXD pada ESP32 Gateway |
+| **RXD** | **GPIO 17 (TX2)** | UART TXD pada ESP32 Gateway |
+| **AUX** | **GPIO 4** | Status indicator busy/idle |
+| **M0** | **GPIO 2** | Mode control pin 0 |
+| **M1** | **GPIO 15** | Mode control pin 1 |
 
 ---
 
@@ -245,8 +239,8 @@ Jika Anda ingin menggunakan **Arduino Uno** sebagai transmitter pengganti ESP32,
 
 Untuk memastikan sistem berjalan 24 jam nonstop tanpa gangguan ketidakstabilan atau reset mendadak (*brownout*):
 
-1. **Raspberry Pi 3**:
-   - Gunakan adaptor daya minimal **5V 2.5A** khusus Raspberry Pi yang berkualitas baik. Colokkan langsung ke port micro-USB RPi.
+1. **ESP32 Gateway / Server Node**:
+   - Gunakan adaptor daya USB minimal **5V 2A** yang berkualitas baik.
 2. **ESP32 / Arduino Uno Node (Transmitter)**:
    - Gunakan adaptor charger smartphone USB **5V 2A** berkualitas tinggi. Hubungkan menggunakan kabel micro-USB ke port USB ESP32 atau port USB Arduino Uno.
    - **Penting**: Modul relay 4-channel menarik arus yang cukup besar saat semua relay aktif secara bersamaan. Jika mikrokontroler sering mengalami restart saat relay menyala, disarankan untuk memberi daya eksternal 5V pada modul relay dengan melepas jumper VCC-JDVCC pada modul relay dan menyambungkan power supply 5V eksternal ke pin JD-VCC dan GND relay.

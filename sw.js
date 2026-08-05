@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-akuaponik-v27-fresh';
+const CACHE_NAME = 'smart-akuaponik-v29-firebase-connected';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
