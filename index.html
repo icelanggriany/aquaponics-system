@@ -1423,19 +1423,6 @@
       background-color: rgba(241, 245, 249, 0.65);
     }
 
-    /* Modal Config Overlay (No Background Blur except logout) */
-    #modal-config {
-      background-color: rgba(15, 23, 42, 0.35) !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-    }
-
-    body:not(.dark-mode) #modal-config {
-      background-color: rgba(15, 23, 42, 0.25) !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-    }
-
     .modal-overlay.active {
       display: flex;
     }
@@ -2353,72 +2340,59 @@
       visibility: visible !important;
     }
 
-    .config-grid-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      width: 100%;
-      box-sizing: border-box;
+    .config-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 16px 20px !important;
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-glass) !important;
+      border-radius: 18px !important;
+      box-shadow: var(--shadow) !important;
+      cursor: pointer !important;
+      width: 100% !important;
+      text-align: left !important;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      outline: none !important;
     }
 
-    .config-row-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 22px;
-      width: 100%;
-      box-sizing: border-box;
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-glass);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      outline: none;
-      min-height: 60px;
-    }
-
-    .config-row-card:hover {
-      /* No color change on hover */
-      opacity: 0.95;
-    }
-
-    .config-row-card.danger-card {
-      grid-column: 1 / -1;
-      border-color: rgba(239, 68, 68, 0.25);
+    .config-row:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 24px rgba(31, 38, 135, 0.12) !important;
+      border-color: var(--primary) !important;
     }
 
     .config-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      display: flex !important;
+      align-items: center !important;
+      gap: 14px !important;
     }
 
     .config-icon-container {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background-color: rgba(59, 130, 246, 0.12);
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 12px !important;
+      background-color: rgba(59, 130, 246, 0.12) !important;
+      color: var(--primary) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
     }
 
     .config-title {
-      font-family: var(--font-inter);
-      font-size: 0.96rem;
-      font-weight: 600;
-      color: var(--text-main);
+      font-family: var(--font-inter) !important;
+      font-size: 0.98rem !important;
+      font-weight: 600 !important;
+      color: var(--text-main) !important;
     }
 
     .config-right {
-      color: var(--text-sub);
-      display: flex;
-      align-items: center;
+      color: var(--text-sub) !important;
+      display: flex !important;
+      align-items: center !important;
     }
 
     /* Mobile Smartphone Layout Responsiveness */
@@ -2512,20 +2486,6 @@
         margin-top: 0 !important;
         margin-bottom: 0 !important;
       }
-      #feed-monitor-auto-view > div > div,
-      #feed-monitor-manual-view > div > div {
-        padding: 8px 6px !important;
-      }
-      #val-feed-countdown {
-        font-size: 0.82rem !important;
-        line-height: 1.25 !important;
-        font-weight: 800 !important;
-      }
-      #val-next-feed-auto {
-        font-size: 0.78rem !important;
-        line-height: 1.25 !important;
-        font-weight: 700 !important;
-      }
       #gateway-status-card {
         order: 4 !important;
         margin-top: 0 !important;
@@ -2537,13 +2497,6 @@
       }
       #gateway-status-card #val-status {
         font-size: 0.95rem !important;
-      }
-      .config-grid-container {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
-      }
-      .config-row-card.danger-card {
-        grid-column: span 1 !important;
       }
     }
 
@@ -2901,8 +2854,8 @@
                 <div id="feed-monitor-auto-view" style="display:block;">
                   <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
                     <div style="background:var(--primary-light); padding:10px 12px; border-radius:12px; text-align:center;">
-                      <span style="font-size:0.7rem; color:var(--primary); font-weight:700; display:block;">Pemberian Pakan</span>
-                      <strong style="font-size:0.92rem; color:#2563eb; display:block; margin-top:2px; font-family:var(--font-outfit); font-weight:800; line-height:1.2; word-break:break-word;" id="val-feed-countdown">- Mnt Lagi</strong>
+                      <span style="font-size:0.7rem; color:var(--primary); font-weight:600; display:block;">Pemberian Pakan</span>
+                      <strong style="font-size:0.95rem; color:var(--primary); display:block; margin-top:2px; font-family:var(--font-outfit);" id="val-feed-countdown">- Mnt Lagi</strong>
                     </div>
                     <div style="background:var(--bg-app); padding:10px 12px; border-radius:12px; border:1px solid var(--border-glass); text-align:center;">
                       <span style="font-size:0.7rem; color:var(--text-sub); display:block;">Jadwal Berikutnya</span>
@@ -3410,24 +3363,22 @@
 
           <!-- 4. CONFIG SCREEN -->
           <div id="screen-config" class="app-screen">
-            <h2 class="screen-title">Config</h2>
+            <h2 class="screen-title" style="font-family: var(--font-outfit) !important; font-size: 1.8rem !important; font-weight: 800 !important; color: var(--text-main) !important; margin-bottom: 20px !important; display: block !important;">Config</h2>
 
-            <div class="config-grid-container">
+            <div class="config-grid-container" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important; gap: 16px !important; width: 100% !important;">
               
               <!-- 1. Pengaturan WiFi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('WiFi')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-                      <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-                      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-                      <circle cx="12" cy="20" r="1" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Pengaturan WiFi</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('WiFi')" style="display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; box-shadow: var(--shadow) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important; transition: transform 0.2s, box-shadow 0.2s !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+                    <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                    <circle cx="12" cy="20" r="1" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Pengaturan WiFi</span>
                 </div>
-                <div class="config-right">
+                <div style="color: var(--text-sub) !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3435,19 +3386,17 @@
               </div>
 
               <!-- 2. Pengaturan Server -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Server')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
-                      <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
-                      <line x1="6" y1="6" x2="6.01" y2="6" />
-                      <line x1="6" y1="18" x2="6.01" y2="18" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Pengaturan Server</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Server')" style="display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; box-shadow: var(--shadow) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important; transition: transform 0.2s, box-shadow 0.2s !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                    <line x1="6" y1="6" x2="6.01" y2="6" />
+                    <line x1="6" y1="18" x2="6.01" y2="18" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Pengaturan Server</span>
                 </div>
-                <div class="config-right">
+                <div style="color: var(--text-sub) !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3455,18 +3404,16 @@
               </div>
 
               <!-- 3. Kalibrasi Sensor -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Calibration')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <circle cx="12" cy="12" r="6" />
-                      <circle cx="12" cy="12" r="2" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Kalibrasi Sensor</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Calibration')" style="display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; box-shadow: var(--shadow) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important; transition: transform 0.2s, box-shadow 0.2s !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="6" />
+                    <circle cx="12" cy="12" r="2" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Kalibrasi Sensor</span>
                 </div>
-                <div class="config-right">
+                <div style="color: var(--text-sub) !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3474,19 +3421,17 @@
               </div>
 
               <!-- 4. Integrasi Firebase -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Firebase')">
-                <div class="config-left">
-                  <div class="config-icon-container" style="background-color: rgba(249, 115, 22, 0.12); color: #f97316;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                      <line x1="12" y1="9" x2="12" y2="13" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Integrasi Firebase</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Firebase')" style="display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; box-shadow: var(--shadow) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important; transition: transform 0.2s, box-shadow 0.2s !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Integrasi Firebase</span>
                 </div>
-                <div class="config-right" style="gap: 8px;">
-                  <span id="firebase-status-badge" style="font-size: 0.8rem; font-weight: 600; color: #ef4444;">Terputus</span>
+                <div style="display: flex !important; align-items: center !important; gap: 8px !important; color: #ef4444 !important;">
+                  <span id="firebase-status-badge" style="font-size: 0.8rem !important; font-weight: 600 !important; color: #ef4444 !important;">Terputus</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3494,17 +3439,15 @@
               </div>
 
               <!-- 5. Notifikasi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Notifications')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Notifikasi</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Notifications')" style="display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; box-shadow: var(--shadow) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important; transition: transform 0.2s, box-shadow 0.2s !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Notifikasi</span>
                 </div>
-                <div class="config-right">
+                <div style="color: var(--text-sub) !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3512,18 +3455,16 @@
               </div>
 
               <!-- 6. Tentang Aplikasi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('About')">
-                <div class="config-left">
-                  <div class="config-icon-container">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="16" x2="12" y2="12" />
-                      <line x1="12" y1="8" x2="12.01" y2="8" />
-                    </svg>
-                  </div>
-                  <span class="config-title">Tentang Aplikasi</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('About')" style="display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; box-shadow: var(--shadow) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important; transition: transform 0.2s, box-shadow 0.2s !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Tentang Aplikasi</span>
                 </div>
-                <div class="config-right">
+                <div style="color: var(--text-sub) !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3531,18 +3472,16 @@
               </div>
 
               <!-- 7. Keluar Akun -->
-              <div class="config-row-card danger-card" role="button" tabindex="0" onclick="confirmLogout()">
-                <div class="config-left">
-                  <div class="config-icon-container" style="background-color: rgba(239, 68, 68, 0.12); color: #ef4444;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                      <polyline points="16 17 21 12 16 7" />
-                      <line x1="21" y1="12" x2="9" y2="12" />
-                    </svg>
-                  </div>
-                  <span class="config-title" style="color: #ef4444;">Keluar Akun</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="confirmLogout()" style="grid-column: 1 / -1 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; box-shadow: var(--shadow) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important; transition: transform 0.2s, box-shadow 0.2s !important;">
+                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #ef4444 !important;">Keluar Akun</span>
                 </div>
-                <div class="config-right" style="color: #ef4444;">
+                <div style="color: #ef4444 !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3822,101 +3761,165 @@
       if (saveBtn) saveBtn.style.display = 'inline-flex';
 
       if (type === 'WiFi') {
-        titleEl.innerText = 'Pengaturan WiFi ESP32';
+        titleEl.innerText = '1. Pengaturan WiFi';
         const savedSsid = localStorage.getItem('cfg_wifi_ssid') || 'SmartAkuaponik_WiFi';
+        const savedPass = localStorage.getItem('cfg_wifi_pass') || '';
         bodyEl.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
-            <p style="font-size:0.85rem; color:var(--text-sub);">Atur kredensial WiFi untuk ESP32 Gateway di lapangan.</p>
-            <div>
-              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">SSID (Nama WiFi)</label>
-              <input type="text" id="cfg-wifi-ssid" value="${savedSsid}" placeholder="SSID WiFi..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+          <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
+            <div style="background:rgba(37,99,235,0.08); border-left:4px solid var(--primary); padding:10px 14px; border-radius:8px; font-size:0.82rem; color:var(--text-main); line-height:1.5;">
+              <strong>🎯 Tujuan:</strong> Menghubungkan alat ESP32 ke jaringan internet WiFi agar alat bisa online dan mengirim data ke Firebase/Server secara real-time.
             </div>
             <div>
-              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Password WiFi</label>
-              <input type="password" id="cfg-wifi-pass" placeholder="Masukkan Password WiFi..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">SSID (Nama WiFi)</label>
+              <input type="text" id="cfg-wifi-ssid" value="${savedSsid}" placeholder="Masukkan Nama WiFi kamu..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.9rem;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Password WiFi</label>
+              <input type="password" id="cfg-wifi-pass" value="${savedPass}" placeholder="Masukkan Password WiFi..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.9rem;">
             </div>
           </div>
         `;
       } else if (type === 'Server') {
-        titleEl.innerText = 'Pengaturan Server & Gateway';
-        const savedFb = localStorage.getItem('cfg_server_fb') || (typeof FIREBASE_REST_URL !== 'undefined' ? FIREBASE_REST_URL : '');
-        const savedApi = localStorage.getItem('cfg_server_api') || (typeof LOCAL_API_URL !== 'undefined' ? LOCAL_API_URL : '');
+        titleEl.innerText = '2. Pengaturan Server';
+        const savedUrl = localStorage.getItem('cfg_server_url') || 'http://192.168.1.15';
+        const savedPort = localStorage.getItem('cfg_server_port') || '5000';
+        const savedToken = localStorage.getItem('cfg_server_token') || '';
         bodyEl.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
-            <p style="font-size:0.85rem; color:var(--text-sub);">Atur URL Firebase REST dan IP Local Python Gateway.</p>
-            <div>
-              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Firebase REST URL</label>
-              <input type="text" id="cfg-server-fb" value="${savedFb}" placeholder="https://..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+          <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
+            <div style="background:rgba(245,158,11,0.08); border-left:4px solid var(--orange); padding:10px 14px; border-radius:8px; font-size:0.82rem; color:var(--text-main); line-height:1.5;">
+              <strong>ℹ️ Catatan:</strong> Pengaturan ini untuk Anda yang memiliki server sendiri selain Firebase. Kalau kamu full pakai Firebase, bagian ini bisa dikosongkan.
             </div>
             <div>
-              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Local Gateway API IP</label>
-              <input type="text" id="cfg-server-api" value="${savedApi}" placeholder="http://192.168.1.xxx:5000" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">URL Server / API Endpoint</label>
+              <input type="text" id="cfg-server-url" value="${savedUrl}" placeholder="https://api.kamu.com/data" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.9rem;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Port Server</label>
+              <input type="text" id="cfg-server-port" value="${savedPort}" placeholder="Contoh: 80, 443, atau 5000" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.9rem;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Token / API Key</label>
+              <input type="password" id="cfg-server-token" value="${savedToken}" placeholder="Kunci keamanan autentikasi server..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.9rem;">
             </div>
           </div>
         `;
       } else if (type === 'Calibration') {
-        titleEl.innerText = 'Kalibrasi Sensor Akuaponik';
-        const offsetW = localStorage.getItem('cfg_cal_temp_w') || '0.0';
-        const offsetTds = localStorage.getItem('cfg_cal_tds') || '0';
+        titleEl.innerText = '3. Kalibrasi Sensor';
+        const calTempW = localStorage.getItem('cfg_cal_temp_w') || '0.0';
+        const calTds = localStorage.getItem('cfg_cal_tds') || '0';
+        const calTempA = localStorage.getItem('cfg_cal_temp_a') || '0.0';
+        const calWater = localStorage.getItem('cfg_cal_water') || '0.0';
         bodyEl.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
-            <p style="font-size:0.85rem; color:var(--text-sub);">Nilai offset kalibrasi untuk menyesuaikan pembacaan fisik sensor.</p>
-            <div>
-              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Offset Suhu Air (°C)</label>
-              <input type="number" step="0.1" id="cfg-cal-temp-w" value="${offsetW}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+          <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
+            <div style="background:rgba(59,130,246,0.08); border-left:4px solid var(--primary); padding:10px 14px; border-radius:8px; font-size:0.82rem; color:var(--text-main); line-height:1.5;">
+              <strong>⚖️ Fungsi:</strong> Mengatur akurasi sensor fisik jika data tidak akurat. (Misal sensor suhu selisih 2°C, diisi <code>-2</code>).
             </div>
-            <div>
-              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Offset TDS (ppm)</label>
-              <input type="number" step="1" id="cfg-cal-tds" value="${offsetTds}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div>
+                <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Offset Suhu Air (°C)</label>
+                <input type="number" step="0.1" id="cfg-cal-temp-w" value="${calTempW}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+              </div>
+              <div>
+                <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Offset TDS (ppm)</label>
+                <input type="number" step="1" id="cfg-cal-tds" value="${calTds}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+              </div>
+              <div>
+                <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Offset Suhu Udara (°C)</label>
+                <input type="number" step="0.1" id="cfg-cal-temp-a" value="${calTempA}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+              </div>
+              <div>
+                <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Offset Level Air (cm)</label>
+                <input type="number" step="0.1" id="cfg-cal-water" value="${calWater}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+              </div>
             </div>
+            <button type="button" onclick="resetCalibrationDefaults()" style="background:rgba(239,68,68,0.08); border:1px solid #ef4444; color:#ef4444; padding:10px 14px; border-radius:10px; font-size:0.85rem; font-weight:700; cursor:pointer; margin-top:4px; transition:0.2s;">
+              🔄 Reset Kalibrasi ke Default Pabrik
+            </button>
           </div>
         `;
-      } else if (type === 'Schedules') {
-        titleEl.innerText = 'Jadwal Lampu & Pompa';
-        const lampStart = (telemetryData && telemetryData.lamp_schedule) ? telemetryData.lamp_schedule.start : '06:00';
-        const lampEnd = (telemetryData && telemetryData.lamp_schedule) ? telemetryData.lamp_schedule.end : '18:00';
+      } else if (type === 'Firebase') {
+        titleEl.innerText = '4. Integrasi Firebase ⭐';
+        const fbProjectId = localStorage.getItem('cfg_fb_project_id') || 'aquaponics-system-8d6f6';
+        const fbApiKey = localStorage.getItem('cfg_fb_api_key') || 'AIzaSy...';
+        const fbDbUrl = localStorage.getItem('cfg_fb_db_url') || 'https://aquaponics-system-8d6f6-default-rtdb.asia-southeast1.firebasedatabase.app';
+        const fbStorage = localStorage.getItem('cfg_fb_storage') || 'aquaponics-system-8d6f6.appspot.com';
+        const fbSenderId = localStorage.getItem('cfg_fb_sender_id') || '1234567890';
         bodyEl.innerHTML = `
           <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
-            <p style="font-size:0.85rem; color:var(--text-sub);">Atur waktu otomatis untuk pencahayaan dan sirkulasi kolam.</p>
+            <div style="background:rgba(245,158,11,0.1); border-left:4px solid #f59e0b; padding:10px 14px; border-radius:8px; font-size:0.82rem; color:var(--text-main); line-height:1.5;">
+              <strong>📍 Ambil kredensial dari:</strong><br>
+              <code>Firebase Console > Project Settings > General > Your apps > Web</code>
+            </div>
             <div>
-              <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Waktu Lampu Menyala (Auto)</label>
-              <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
-                <input type="time" id="cfg-lamp-start" value="${lampStart}" style="padding:8px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); flex:1;">
-                <span>s/d</span>
-                <input type="time" id="cfg-lamp-end" value="${lampEnd}" style="padding:8px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); flex:1;">
-              </div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Project ID</label>
+              <input type="text" id="cfg-fb-project-id" value="${fbProjectId}" placeholder="nama-project-firebase" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Web API Key</label>
+              <input type="text" id="cfg-fb-api-key" value="${fbApiKey}" placeholder="AIzaSy..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Database URL</label>
+              <input type="text" id="cfg-fb-db-url" value="${fbDbUrl}" placeholder="https://nama-project.firebaseio.com" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Storage Bucket</label>
+              <input type="text" id="cfg-fb-storage" value="${fbStorage}" placeholder="nama-project.appspot.com" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Messaging Sender ID</label>
+              <input type="text" id="cfg-fb-sender-id" value="${fbSenderId}" placeholder="1234567890" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px;">
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-sub); margin-top:2px;">
+              ✅ Setelah diisi dan disave, status akan berubah menjadi <strong>Tersambung</strong> dan data sensor otomatis masuk ke Realtime DB.
             </div>
           </div>
         `;
       } else if (type === 'Notifications') {
-        titleEl.innerText = 'Pengaturan Notifikasi Alert';
+        titleEl.innerText = '5. Pengaturan Notifikasi HP';
+        const notifEnabled = localStorage.getItem('cfg_notif_enabled') !== 'false';
+        const fcmKey = localStorage.getItem('cfg_notif_fcm_key') || '';
+        const notifTopic = localStorage.getItem('cfg_notif_topic') || 'sensor_alert';
         bodyEl.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
-            <p style="font-size:0.85rem; color:var(--text-sub);">Aktifkan peringatan otomatis saat batas aman sensor terlampaui.</p>
-            <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.9rem; font-weight:600; color:var(--text-main); cursor:pointer;">
-              <span>Alert Suhu Air Panas (> 30°C)</span>
-              <input type="checkbox" checked style="width:18px; height:18px; accent-color:var(--primary);">
+          <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
+            <div style="background:rgba(16,185,129,0.08); border-left:4px solid var(--green); padding:10px 14px; border-radius:8px; font-size:0.82rem; color:var(--text-main); line-height:1.5;">
+              <strong>🔔 Fungsi:</strong> Kalau sensor melebihi batas aman, HP kamu bakal bunyi / menerima peringatan otomatis.
+            </div>
+            <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.9rem; font-weight:700; color:var(--text-main); cursor:pointer; background:var(--bg-app); padding:12px 14px; border-radius:12px; border:1px solid var(--border-glass);">
+              <span>Enable Notifikasi HP (On / Off)</span>
+              <input type="checkbox" id="cfg-notif-enabled" ${notifEnabled ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--primary);">
             </label>
-            <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.9rem; font-weight:600; color:var(--text-main); cursor:pointer;">
-              <span>Alert Level Air Kritis (< 20%)</span>
-              <input type="checkbox" checked style="width:18px; height:18px; accent-color:var(--primary);">
-            </label>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">FCM Server Key (Cloud Messaging)</label>
+              <input type="password" id="cfg-notif-fcm-key" value="${fcmKey}" placeholder="Ambil dari Firebase Console > Project Settings > Cloud Messaging" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.85rem;">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Topik Notifikasi</label>
+              <input type="text" id="cfg-notif-topic" value="${notifTopic}" placeholder="sensor_alert" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border-glass); background:var(--bg-app); color:var(--text-main); margin-top:4px; font-size:0.85rem;">
+            </div>
           </div>
         `;
       } else if (type === 'About') {
-        titleEl.innerText = 'Tentang Smart Akuaponik';
+        titleEl.innerText = '6. Tentang Aplikasi';
         if (saveBtn) saveBtn.style.display = 'none';
         bodyEl.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:10px; text-align:center;">
-            <div style="width:56px; height:56px; border-radius:18px; background:rgba(59,130,246,0.15); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto;">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
+            <div style="display:flex; align-items:center; gap:14px; padding:14px; background:var(--bg-app); border-radius:16px; border:1px solid var(--border-glass);">
+              <div style="width:48px; height:48px; border-radius:14px; background:rgba(59,130,246,0.15); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div>
+                <h4 style="margin:0; font-family:var(--font-outfit); font-size:1.05rem; font-weight:800; color:var(--text-main);">Smart Akuaponik Pro</h4>
+                <span style="font-size:0.78rem; color:var(--text-sub);">Versi Firmware: v1.0.0 | ID Alat: ESP32-AQUAPONICS-01</span>
+              </div>
             </div>
-            <h4 style="font-family:var(--font-outfit); font-size:1.15rem; font-weight:800; color:var(--text-main); margin-top:4px;">Smart Akuaponik Pro</h4>
-            <p style="font-size:0.82rem; color:var(--text-sub);">Sistem Pemantauan & Pemberian Pakan Otomatis Berbasis LoRa & Cloud IoT v2.5</p>
-            <div style="padding:10px; background:var(--bg-app); border-radius:12px; font-size:0.78rem; color:var(--text-sub); text-align:left; border:1px solid var(--border-glass);">
-              <div>• Gateway Protocol: LoRa 433MHz + ESP32</div>
-              <div>• Backend Sync: Firebase Realtime Database</div>
-              <div>• Offline Engine: Local Python REST Gateway</div>
+            <div style="background:var(--bg-app); border:1px solid var(--border-glass); border-radius:14px; padding:14px;">
+              <h5 style="margin:0 0 8px 0; color:var(--primary); font-size:0.88rem; font-weight:800;">📋 Urutan Wajib Pengisian Agar Sistem Berjalan:</h5>
+              <ol style="margin:0; padding-left:18px; font-size:0.82rem; color:var(--text-main); line-height:1.7;">
+                <li><strong>1. Pengaturan WiFi</strong> → Biar alat terhubung ke internet dan online dulu.</li>
+                <li><strong>2. Integrasi Firebase</strong> → Biar data telemetri otomatis masuk ke Cloud.</li>
+                <li><strong>3. Notifikasi</strong> → Aktifkan jika ingin menerima alarm & alert di HP.</li>
+              </ol>
             </div>
           </div>
         `;
@@ -3926,20 +3929,75 @@
     function saveConfiguration() {
       if (currentConfigType === 'WiFi') {
         const ssid = document.getElementById('cfg-wifi-ssid')?.value;
+        const pass = document.getElementById('cfg-wifi-pass')?.value;
         if (ssid) localStorage.setItem('cfg_wifi_ssid', ssid);
+        if (pass) localStorage.setItem('cfg_wifi_pass', pass);
         if (typeof showToast === 'function') showToast('Pengaturan WiFi berhasil disimpan!');
       } else if (currentConfigType === 'Server') {
-        const fb = document.getElementById('cfg-server-fb')?.value;
-        const api = document.getElementById('cfg-server-api')?.value;
-        if (fb) localStorage.setItem('cfg_server_fb', fb);
-        if (api) localStorage.setItem('cfg_server_api', api);
+        const url = document.getElementById('cfg-server-url')?.value;
+        const port = document.getElementById('cfg-server-port')?.value;
+        const token = document.getElementById('cfg-server-token')?.value;
+        if (url) localStorage.setItem('cfg_server_url', url);
+        if (port) localStorage.setItem('cfg_server_port', port);
+        if (token) localStorage.setItem('cfg_server_token', token);
         if (typeof showToast === 'function') showToast('Pengaturan Server berhasil disimpan!');
       } else if (currentConfigType === 'Calibration') {
+        const tw = document.getElementById('cfg-cal-temp-w')?.value;
+        const tds = document.getElementById('cfg-cal-tds')?.value;
+        const ta = document.getElementById('cfg-cal-temp-a')?.value;
+        const w = document.getElementById('cfg-cal-water')?.value;
+        if (tw) localStorage.setItem('cfg_cal_temp_w', tw);
+        if (tds) localStorage.setItem('cfg_cal_tds', tds);
+        if (ta) localStorage.setItem('cfg_cal_temp_a', ta);
+        if (w) localStorage.setItem('cfg_cal_water', w);
         if (typeof showToast === 'function') showToast('Kalibrasi sensor berhasil diperbarui!');
+      } else if (currentConfigType === 'Firebase') {
+        const projId = document.getElementById('cfg-fb-project-id')?.value;
+        const apiKey = document.getElementById('cfg-fb-api-key')?.value;
+        const dbUrl = document.getElementById('cfg-fb-db-url')?.value;
+        const storage = document.getElementById('cfg-fb-storage')?.value;
+        const senderId = document.getElementById('cfg-fb-sender-id')?.value;
+        if (projId) localStorage.setItem('cfg_fb_project_id', projId);
+        if (apiKey) localStorage.setItem('cfg_fb_api_key', apiKey);
+        if (dbUrl) localStorage.setItem('cfg_fb_db_url', dbUrl);
+        if (storage) localStorage.setItem('cfg_fb_storage', storage);
+        if (senderId) localStorage.setItem('cfg_fb_sender_id', senderId);
+
+        // Update status badge on Config screen
+        const badge = document.getElementById('firebase-status-badge');
+        if (badge) {
+          badge.innerText = 'Tersambung';
+          badge.style.color = '#10b981';
+        }
+        if (typeof showToast === 'function') showToast('Integrasi Firebase berhasil tersambung!');
+      } else if (currentConfigType === 'Notifications') {
+        const enabled = document.getElementById('cfg-notif-enabled')?.checked;
+        const fcm = document.getElementById('cfg-notif-fcm-key')?.value;
+        const topic = document.getElementById('cfg-notif-topic')?.value;
+        localStorage.setItem('cfg_notif_enabled', enabled ? 'true' : 'false');
+        if (fcm) localStorage.setItem('cfg_notif_fcm_key', fcm);
+        if (topic) localStorage.setItem('cfg_notif_topic', topic);
+        if (typeof showToast === 'function') showToast('Pengaturan Notifikasi berhasil disimpan!');
       } else {
         if (typeof showToast === 'function') showToast('Pengaturan berhasil disimpan!');
       }
       closeModal('modal-config');
+    }
+
+    function resetCalibrationDefaults() {
+      localStorage.setItem('cfg_cal_temp_w', '0.0');
+      localStorage.setItem('cfg_cal_tds', '0');
+      localStorage.setItem('cfg_cal_temp_a', '0.0');
+      localStorage.setItem('cfg_cal_water', '0.0');
+      const tw = document.getElementById('cfg-cal-temp-w');
+      const tds = document.getElementById('cfg-cal-tds');
+      const ta = document.getElementById('cfg-cal-temp-a');
+      const w = document.getElementById('cfg-cal-water');
+      if (tw) tw.value = '0.0';
+      if (tds) tds.value = '0';
+      if (ta) ta.value = '0.0';
+      if (w) w.value = '0.0';
+      if (typeof showToast === 'function') showToast('Kalibrasi dikembalikan ke default pabrik!');
     }
 
     // --- INITIALIZATION ---
@@ -5062,7 +5120,7 @@
         const port = localStorage.getItem('aquaponics_server_port') || '8080';
         body.innerHTML = `
           <div class="form-group">
-            <label>IP IoT Gateway</label>
+            <label>IP Gateway Server</label>
             <input type="text" id="server-ip" class="form-control" value="${ip}">
           </div>
           <div class="form-group">
@@ -5193,7 +5251,7 @@
           <div style="text-align:center; padding: 10px 0;">
             <div style="font-family:var(--font-outfit); font-size:1.2rem; font-weight:800; color:var(--primary); margin-bottom:4px;">Akuaponik Smart IoT</div>
             <div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:16px;">Versi Aplikasi v1.0.0</div>
-            <p style="font-size:0.8rem; line-height:1.5; color:var(--text-main);">Sistem monitoring dan kontrol kolam terpadu menggunakan transmisi nirkabel LoRa (Long Range) dan IoT Gateway.</p>
+            <p style="font-size:0.8rem; line-height:1.5; color:var(--text-main);">Sistem monitoring dan kontrol kolam terpadu menggunakan transmisi nirkabel LoRa (Long Range) dan Gateway Server.</p>
             <div style="margin-top:20px; font-size:0.72rem; color:var(--text-sub);">Didesain khusus untuk optimalisasi pertanian masa depan.</div>
           </div>
         `;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-akuaponik-v33-fresh';
+const CACHE_NAME = 'smart-akuaponik-v27-fresh';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

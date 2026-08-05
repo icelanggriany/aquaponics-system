@@ -17,17 +17,21 @@
     "feed_mode": "Auto",
     "schedules_list": [
         {
-            "portion": 1,
-            "time": "08:00"
+            "time": "08:00",
+            "portion": 1
         },
         {
-            "portion": 2,
-            "time": "16:00"
+            "time": "16:00",
+            "portion": 2
         }
     ],
-    "serial_port": "AUTO",
-    "use_simulation": true,
+    "serial_port": "COM3",
+    "use_simulation": false,
     "email_notif_enabled": true,
+    "email_provider": "emailjs",
+    "emailjs_service_id": "service_4e9rkbf",
+    "emailjs_template_id": "",
+    "emailjs_public_key": "",
     "smtp_server": "smtp.gmail.com",
     "smtp_port": 587,
     "sender_email": "icelanggriany@gmail.com",
