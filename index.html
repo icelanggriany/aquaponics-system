@@ -2465,7 +2465,7 @@
         order: 3 !important;
         margin-top: 4px !important;
       }
-      #info-sistem-card {
+      #gateway-status-card {
         order: 4 !important;
         margin-top: 0 !important;
       }
@@ -2809,38 +2809,8 @@
                 </div>
               </div>
               
-              <!-- Panel Ringkasan di Beranda (Informasi Sistem) -->
-              <div class="feeder-card" id="info-sistem-card" style="margin-top: 0;">
-                <div class="feeder-header" style="display:flex; justify-content:space-between; align-items:center;">
-                  <span>Informasi Sistem</span>
-                  <span id="sync-indicator" style="font-size: 0.72rem; color: var(--green); font-weight: 600;">● Terkoneksi</span>
-                </div>
-                <div style="font-size:0.8rem; color:var(--text-sub); display:flex; flex-direction:column; gap:10px;">
-                  <div style="display:flex; justify-content:space-between;">
-                    <span>Mode Pakan</span>
-                    <strong style="color:var(--text-main)" id="info-mode-pakan">Auto (Jadwal)</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                    <span>Pompa Utama</span>
-                    <strong style="color:var(--green)" id="info-pompa">ON</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                    <span>Lampu Tanaman</span>
-                    <strong style="color:var(--text-sub)" id="info-lampu">OFF</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                    <span>Aerator Air</span>
-                    <strong style="color:var(--green)" id="info-aerator">ON</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                    <span>Email Alert Notifikasi</span>
-                    <strong style="color:var(--green)" id="info-email-status">Aktif</strong>
-                  </div>
-                </div>
-              </div>
-
               <!-- Widget Monitoring Jadwal Pakan -->
-              <div class="feeder-card" id="feed-monitoring-card" style="margin-top: 16px;">
+              <div class="feeder-card" id="feed-monitoring-card" style="margin-top: 0;">
                 <div class="feeder-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
                   <span style="display:flex; align-items:center; gap:8px; font-weight:700;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2884,6 +2854,20 @@
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20"/></svg>
                   Beri Pakan Instan
                 </button>
+              </div>
+
+              <!-- Status Perangkat & IoT Gateway -->
+              <div class="feeder-card" id="gateway-status-card" style="margin-top: 0; padding: 16px 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="bento-badge badge-green" id="status-icon-container">●</div>
+                    <div>
+                      <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-main);">Status Perangkat & IoT Gateway</span>
+                      <span style="font-size: 0.74rem; color: var(--text-sub); display: block;">Transmisi Data Realtime Terhubung</span>
+                    </div>
+                  </div>
+                  <span style="font-size: 1.1rem; font-weight: 800; color: var(--green);" id="val-status">Aktif</span>
+                </div>
               </div>
             </div> <!-- End Left Column Wrapper -->
 
@@ -3059,20 +3043,6 @@
                         <span class="sensor-subtext-mobile" style="font-size: 0.75rem; color: var(--text-sub); display: block; margin-top: 4px;">Ketinggian Air Kolam</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <!-- Bento Card 5: Status Sistem & Python Gateway (Wide Banner) -->
-                <div class="card-sensor bento-card" style="grid-column: span 2;">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                      <div class="bento-badge badge-green" id="status-icon-container">●</div>
-                      <div>
-                        <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-main);">Status Perangkat & IoT Gateway</span>
-                        <span style="font-size: 0.74rem; color: var(--text-sub); display: block;">Transmisi Data Realtime Terhubung</span>
-                      </div>
-                    </div>
-                    <span style="font-size: 1.1rem; font-weight: 800; color: var(--green);" id="val-status">Aktif</span>
                   </div>
                 </div>
               </div>
