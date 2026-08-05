@@ -1423,6 +1423,19 @@
       background-color: rgba(241, 245, 249, 0.65);
     }
 
+    /* Modal Config Overlay (No Background Blur except logout) */
+    #modal-config {
+      background-color: rgba(15, 23, 42, 0.35) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    body:not(.dark-mode) #modal-config {
+      background-color: rgba(15, 23, 42, 0.25) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
     .modal-overlay.active {
       display: flex;
     }
@@ -2340,59 +2353,72 @@
       visibility: visible !important;
     }
 
-    .config-row {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      padding: 16px 20px !important;
-      background-color: var(--bg-card) !important;
-      border: 1px solid var(--border-glass) !important;
-      border-radius: 18px !important;
-      box-shadow: var(--shadow) !important;
-      cursor: pointer !important;
-      width: 100% !important;
-      text-align: left !important;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-      outline: none !important;
+    .config-grid-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    .config-row:hover {
-      transform: translateY(-2px) !important;
-      box-shadow: 0 8px 24px rgba(31, 38, 135, 0.12) !important;
-      border-color: var(--primary) !important;
+    .config-row-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      outline: none;
+      min-height: 60px;
+    }
+
+    .config-row-card:hover {
+      /* No color change on hover */
+      opacity: 0.95;
+    }
+
+    .config-row-card.danger-card {
+      grid-column: 1 / -1;
+      border-color: rgba(239, 68, 68, 0.25);
     }
 
     .config-left {
-      display: flex !important;
-      align-items: center !important;
-      gap: 14px !important;
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
 
     .config-icon-container {
-      width: 42px !important;
-      height: 42px !important;
-      border-radius: 12px !important;
-      background-color: rgba(59, 130, 246, 0.12) !important;
-      color: var(--primary) !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      flex-shrink: 0 !important;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background-color: rgba(59, 130, 246, 0.12);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
     .config-title {
-      font-family: var(--font-inter) !important;
-      font-size: 0.98rem !important;
-      font-weight: 600 !important;
-      color: var(--text-main) !important;
+      font-family: var(--font-inter);
+      font-size: 0.96rem;
+      font-weight: 600;
+      color: var(--text-main);
     }
 
     .config-right {
-      color: var(--text-sub) !important;
-      display: flex !important;
-      align-items: center !important;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
     }
 
     /* Mobile Smartphone Layout Responsiveness */
@@ -2511,6 +2537,13 @@
       }
       #gateway-status-card #val-status {
         font-size: 0.95rem !important;
+      }
+      .config-grid-container {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+      .config-row-card.danger-card {
+        grid-column: span 1 !important;
       }
     }
 
@@ -3377,22 +3410,24 @@
 
           <!-- 4. CONFIG SCREEN -->
           <div id="screen-config" class="app-screen">
-            <h2 class="screen-title" style="font-family: var(--font-outfit) !important; font-size: 1.8rem !important; font-weight: 800 !important; color: #0f172a !important; margin-bottom: 20px !important; display: block !important;">Config</h2>
+            <h2 class="screen-title">Config</h2>
 
-            <div class="config-grid-container" style="display: flex !important; flex-wrap: wrap !important; gap: 14px !important; width: 100% !important; max-width: 960px !important;">
+            <div class="config-grid-container">
               
               <!-- 1. Pengaturan WiFi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('WiFi')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
-                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-                    <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-                    <circle cx="12" cy="20" r="1" />
-                  </svg>
-                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Pengaturan WiFi</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('WiFi')">
+                <div class="config-left">
+                  <div class="config-icon-container">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+                      <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+                      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                      <circle cx="12" cy="20" r="1" />
+                    </svg>
+                  </div>
+                  <span class="config-title">Pengaturan WiFi</span>
                 </div>
-                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
+                <div class="config-right">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3400,17 +3435,19 @@
               </div>
 
               <!-- 2. Pengaturan Server -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Server')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
-                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
-                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
-                    <line x1="6" y1="6" x2="6.01" y2="6" />
-                    <line x1="6" y1="18" x2="6.01" y2="18" />
-                  </svg>
-                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Pengaturan Server</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Server')">
+                <div class="config-left">
+                  <div class="config-icon-container">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                      <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                      <line x1="6" y1="6" x2="6.01" y2="6" />
+                      <line x1="6" y1="18" x2="6.01" y2="18" />
+                    </svg>
+                  </div>
+                  <span class="config-title">Pengaturan Server</span>
                 </div>
-                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
+                <div class="config-right">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3418,16 +3455,18 @@
               </div>
 
               <!-- 3. Kalibrasi Sensor -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Calibration')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
-                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="12" r="6" />
-                    <circle cx="12" cy="12" r="2" />
-                  </svg>
-                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Kalibrasi Sensor</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Calibration')">
+                <div class="config-left">
+                  <div class="config-icon-container">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="6" />
+                      <circle cx="12" cy="12" r="2" />
+                    </svg>
+                  </div>
+                  <span class="config-title">Kalibrasi Sensor</span>
                 </div>
-                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
+                <div class="config-right">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3435,17 +3474,19 @@
               </div>
 
               <!-- 4. Integrasi Firebase -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Firebase')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
-                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Integrasi Firebase</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Firebase')">
+                <div class="config-left">
+                  <div class="config-icon-container" style="background-color: rgba(249, 115, 22, 0.12); color: #f97316;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </div>
+                  <span class="config-title">Integrasi Firebase</span>
                 </div>
-                <div style="display: flex !important; align-items: center !important; gap: 8px !important; color: #ef4444 !important;">
-                  <span id="firebase-status-badge" style="font-size: 0.8rem !important; font-weight: 600 !important; color: #ef4444 !important;">Terputus</span>
+                <div class="config-right" style="gap: 8px;">
+                  <span id="firebase-status-badge" style="font-size: 0.8rem; font-weight: 600; color: #ef4444;">Terputus</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3453,15 +3494,17 @@
               </div>
 
               <!-- 5. Notifikasi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Notifications')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
-                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                  </svg>
-                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Notifikasi</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('Notifications')">
+                <div class="config-left">
+                  <div class="config-icon-container">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                  </div>
+                  <span class="config-title">Notifikasi</span>
                 </div>
-                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
+                <div class="config-right">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3469,16 +3512,18 @@
               </div>
 
               <!-- 6. Tentang Aplikasi -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('About')" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
-                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="16" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12.01" y2="8" />
-                  </svg>
-                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #0f172a !important;">Tentang Aplikasi</span>
+              <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('About')">
+                <div class="config-left">
+                  <div class="config-icon-container">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="16" x2="12" y2="12" />
+                      <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                  </div>
+                  <span class="config-title">Tentang Aplikasi</span>
                 </div>
-                <div style="color: #64748b !important; display: flex !important; align-items: center !important;">
+                <div class="config-right">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -3486,16 +3531,18 @@
               </div>
 
               <!-- 7. Keluar Akun -->
-              <div class="config-row-card" role="button" tabindex="0" onclick="confirmLogout()" style="flex: 1 1 360px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 20px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important;">
-                <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                  </svg>
-                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: #ef4444 !important;">Keluar Akun</span>
+              <div class="config-row-card danger-card" role="button" tabindex="0" onclick="confirmLogout()">
+                <div class="config-left">
+                  <div class="config-icon-container" style="background-color: rgba(239, 68, 68, 0.12); color: #ef4444;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                  </div>
+                  <span class="config-title" style="color: #ef4444;">Keluar Akun</span>
                 </div>
-                <div style="color: #ef4444 !important; display: flex !important; align-items: center !important;">
+                <div class="config-right" style="color: #ef4444;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -5015,7 +5062,7 @@
         const port = localStorage.getItem('aquaponics_server_port') || '8080';
         body.innerHTML = `
           <div class="form-group">
-            <label>IP Gateway Raspberry Pi</label>
+            <label>IP IoT Gateway</label>
             <input type="text" id="server-ip" class="form-control" value="${ip}">
           </div>
           <div class="form-group">
@@ -5146,7 +5193,7 @@
           <div style="text-align:center; padding: 10px 0;">
             <div style="font-family:var(--font-outfit); font-size:1.2rem; font-weight:800; color:var(--primary); margin-bottom:4px;">Akuaponik Smart IoT</div>
             <div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:16px;">Versi Aplikasi v1.0.0</div>
-            <p style="font-size:0.8rem; line-height:1.5; color:var(--text-main);">Sistem monitoring dan kontrol kolam terpadu menggunakan transmisi nirkabel LoRa (Long Range) dan Raspberry Pi 3 Gateway.</p>
+            <p style="font-size:0.8rem; line-height:1.5; color:var(--text-main);">Sistem monitoring dan kontrol kolam terpadu menggunakan transmisi nirkabel LoRa (Long Range) dan IoT Gateway.</p>
             <div style="margin-top:20px; font-size:0.72rem; color:var(--text-sub);">Didesain khusus untuk optimalisasi pertanian masa depan.</div>
           </div>
         `;
