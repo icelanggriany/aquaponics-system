@@ -4460,21 +4460,11 @@
         }
       }
 
-      // Update Ecosystem Fish & Plant Status Labels and Sidebar Indicators
-      const fishLabel = document.getElementById('fish-status-label');
-      const plantLabel = document.getElementById('plant-status-label');
+      // Update Sidebar Indicators
       const sideSyncText = document.getElementById('sidebar-sync-text');
       const sideStatusText = document.getElementById('sidebar-status-text');
 
       if (telemetryData.temp_w !== null && telemetryData.temp_w !== undefined) {
-        if (fishLabel) {
-          fishLabel.innerText = "● Kondisi Ikan Sehat & Active";
-          fishLabel.style.color = "var(--green)";
-        }
-        if (plantLabel) {
-          plantLabel.innerText = "● Pertumbuhan Tanaman Optimal";
-          plantLabel.style.color = "var(--green)";
-        }
         if (sideSyncText) {
           sideSyncText.innerText = "● Terhubung (Firebase)";
           sideSyncText.style.color = "#10b981";
@@ -4593,16 +4583,25 @@
     }
 
     function updateEcosystemVisuals() {
-      // 1. Water Level visual update
+      // 1. Water Level visual & Color update
       const waterEl = document.getElementById('aquarium-water');
+      const level = telemetryData.water_level !== null ? telemetryData.water_level : 0;
       if (waterEl) {
-        const level = telemetryData.water_level !== null ? telemetryData.water_level : 0;
         // Map 0-100% to 15% - 90% height inside the visual aquarium container
         const heightPercent = Math.max(15, Math.min(90, level));
         waterEl.style.height = `${heightPercent}%`;
+
+        // Dinamiskan warna air berdasarkan level air
+        if (level < 35.0) {
+          waterEl.style.background = 'linear-gradient(180deg, rgba(239, 68, 68, 0.4) 0%, rgba(185, 28, 28, 0.65) 100%)';
+        } else if (level < 50.0) {
+          waterEl.style.background = 'linear-gradient(180deg, rgba(245, 158, 11, 0.4) 0%, rgba(180, 83, 9, 0.65) 100%)';
+        } else {
+          waterEl.style.background = 'linear-gradient(180deg, rgba(56, 189, 248, 0.35) 0%, rgba(14, 165, 233, 0.55) 100%)';
+        }
       }
 
-      // 2. Fish condition logic (depends on temp_w and tds)
+      // 2. Fish condition logic (depends directly on temp_w and water_level)
       const fishWrapper = document.getElementById('fish-wrapper');
       const fishSvg = document.getElementById('fish-svg');
       const fishBody = document.getElementById('fish-body');
@@ -4612,57 +4611,60 @@
       if (fishWrapper && fishSvg && fishBody && fishTail && fishLabel) {
         const temp = telemetryData.temp_w;
         const tds = telemetryData.tds;
-        
-        let isStressed = false;
-        let stressReason = "";
+        const wLevel = telemetryData.water_level;
 
-        if (temp !== null) {
-          if (temp > 32.0) {
-            isStressed = true;
-            stressReason = "Suhu Air Panas!";
-          } else if (temp < 24.0) {
-            isStressed = true;
-            stressReason = "Suhu Air Dingin!";
-          }
-        }
-        if (tds !== null && tds > 1000) {
-          isStressed = true;
-          stressReason = "TDS Sangat Tinggi!";
-        }
-
-        if (telemetryData.water_level !== null && telemetryData.water_level < 40.0) {
-          isStressed = true;
-          stressReason = "Tinggi Air Kritis!";
-        }
-
-        if (isStressed) {
-          // Gourami is stressed (upside down, red/grayish, shaking tail)
-          fishWrapper.className = 'fish-stressed';
-          fishBody.setAttribute('fill', '#ef4444'); // stress red
-          fishTail.setAttribute('fill', '#ef4444');
-          fishTail.className.baseVal = 'tail-stressed';
-          fishLabel.innerText = `Ikan Stress: ${stressReason}`;
-          fishLabel.style.color = '#ef4444'; // red
-        } else if (temp === null && tds === null) {
+        if (temp === null && wLevel === null) {
           // No data / offline
           fishWrapper.className = '';
-          fishBody.setAttribute('fill', '#94a3b8'); // offline gray
+          fishBody.setAttribute('fill', '#94a3b8');
           fishTail.setAttribute('fill', '#94a3b8');
           fishTail.className.baseVal = '';
           fishLabel.innerText = "Mencari Alat...";
           fishLabel.style.color = 'var(--text-sub)';
-        } else {
-          // Gourami is healthy (swimming happily, gray slate, wagging tail)
+        } else if (wLevel !== null && wLevel < 35.0) {
+          // Air Sangat Kritis (<35%)
+          fishWrapper.className = 'fish-stressed';
+          fishBody.setAttribute('fill', '#ef4444');
+          fishTail.setAttribute('fill', '#ef4444');
+          fishTail.className.baseVal = 'tail-stressed';
+          fishLabel.innerText = `🔴 Level Air Kritis (${wLevel.toFixed(1)}%)! Ikan Stres Ruang`;
+          fishLabel.style.color = '#ef4444';
+        } else if (wLevel !== null && wLevel < 50.0) {
+          // Air Rendah (<50%)
           fishWrapper.className = 'fish-happy';
-          fishBody.setAttribute('fill', '#64748b'); // healthy gray slate
-          fishTail.setAttribute('fill', '#475569'); // dark tail
+          fishBody.setAttribute('fill', '#f59e0b');
+          fishTail.setAttribute('fill', '#d97706');
           fishTail.className.baseVal = 'tail-happy';
-          fishLabel.innerText = "Ikan Nyaman & Sehat";
-          fishLabel.style.color = '#10b981'; // green
+          fishLabel.innerText = `⚠️ Level Air Rendah (${wLevel.toFixed(1)}%): Waspada Tekanan Air`;
+          fishLabel.style.color = '#f59e0b';
+        } else if (temp !== null && temp > 32.0) {
+          // Suhu Terlalu Panas (>32°C)
+          fishWrapper.className = 'fish-stressed';
+          fishBody.setAttribute('fill', '#ef4444');
+          fishTail.setAttribute('fill', '#ef4444');
+          fishTail.className.baseVal = 'tail-stressed';
+          fishLabel.innerText = `🔴 Suhu Panas (${temp.toFixed(1)}°C)! Ikan Stres Suhu`;
+          fishLabel.style.color = '#ef4444';
+        } else if (temp !== null && temp < 24.0) {
+          // Suhu Terlalu Dingin (<24°C)
+          fishWrapper.className = 'fish-happy';
+          fishBody.setAttribute('fill', '#3b82f6');
+          fishTail.setAttribute('fill', '#1d4ed8');
+          fishTail.className.baseVal = 'tail-happy';
+          fishLabel.innerText = `⚠️ Suhu Dingin (${temp.toFixed(1)}°C): Metabolisme Melambat`;
+          fishLabel.style.color = '#3b82f6';
+        } else {
+          // Air Normal & Suhu Ideal (24-32°C & Water Level >= 50%)
+          fishWrapper.className = 'fish-happy';
+          fishBody.setAttribute('fill', '#64748b');
+          fishTail.setAttribute('fill', '#475569');
+          fishTail.className.baseVal = 'tail-happy';
+          fishLabel.innerText = temp !== null ? `● Air Normal (${temp.toFixed(1)}°C): Ikan Sehat & Aktif 🐟` : "● Kondisi Ikan Sehat & Aktif 🐟";
+          fishLabel.style.color = '#10b981';
         }
       }
 
-      // 3. Plant condition logic (depends on tds)
+      // 3. Plant condition logic (depends on tds and water_level)
       const plantGroup = document.getElementById('plant-growth-group');
       const plantStem = document.getElementById('plant-stem');
       const leafLeft = document.getElementById('leaf-left');
@@ -4677,6 +4679,7 @@
 
       if (plantGroup && plantStem && leafLeft && leafRight && leafTop && plantLabel) {
         const tds = telemetryData.tds;
+        const wLevel = telemetryData.water_level;
 
         // Clear previous condition classes
         leafLeft.className.baseVal = '';
@@ -4686,107 +4689,60 @@
         if (sparkle1) sparkle1.className = 'sparkle';
         if (sparkle2) sparkle2.className = 'sparkle';
 
-        if (tds === null) {
+        if (tds === null && wLevel === null) {
           // Offline
           plantGroup.className.baseVal = '';
-          plantStem.setAttribute('stroke', '#94a3b8'); // gray
+          plantStem.setAttribute('stroke', '#94a3b8');
           leafLeft.setAttribute('fill', '#cbd5e1');
-          leafLeft.style.transform = '';
           leafRight.setAttribute('fill', '#cbd5e1');
-          leafRight.style.transform = '';
           leafTop.setAttribute('fill', '#cbd5e1');
-          leafTop.style.transform = '';
-          if (leafFrontL) {
-            leafFrontL.setAttribute('fill', '#cbd5e1');
-            leafFrontL.style.transform = '';
-          }
-          if (leafFrontR) {
-            leafFrontR.setAttribute('fill', '#cbd5e1');
-            leafFrontR.style.transform = '';
-          }
-          if (hydroRoots) {
-            hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#cbd5e1'));
-          }
+          if (hydroRoots) hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#cbd5e1'));
           plantLabel.innerText = "Mencari Alat...";
           plantLabel.style.color = 'var(--text-sub)';
-        } else if (tds < 300) {
-          // Nutrient deficiency (wilted, yellow leaves, rotten roots)
-          plantGroup.className.baseVal = ''; // no sway
-          
-          plantStem.setAttribute('stroke', '#d97706'); // yellow-green
+        } else if (wLevel !== null && wLevel < 50.0) {
+          // Pasokan air kolam rendah
+          plantGroup.className.baseVal = '';
+          plantStem.setAttribute('stroke', '#d97706');
           leafLeft.setAttribute('fill', '#d97706');
-          leafLeft.style.transform = 'rotate(-30deg)';
           leafRight.setAttribute('fill', '#d97706');
-          leafRight.style.transform = 'rotate(30deg)';
           leafTop.setAttribute('fill', '#d97706');
-          leafTop.style.transform = 'translateY(4px) rotate(15deg)';
-          if (leafFrontL) {
-            leafFrontL.setAttribute('fill', '#d97706');
-            leafFrontL.style.transform = 'rotate(-15deg)';
-          }
-          if (leafFrontR) {
-            leafFrontR.setAttribute('fill', '#d97706');
-            leafFrontR.style.transform = 'rotate(15deg)';
-          }
-          if (hydroRoots) {
-            hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#78350f')); // rotten brown roots
-          }
-          
-          plantLabel.innerText = "Kekurangan Nutrisi (TDS Rendah)";
-          plantLabel.style.color = '#f97316'; // orange/yellow
-        } else if (tds > 1000) {
-          // Too high TDS (burnt, dark brown leaves, rotten roots)
-          plantGroup.className.baseVal = ''; // no sway
-          
-          plantStem.setAttribute('stroke', '#451a03'); // dark brown
+          if (hydroRoots) hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#b45309'));
+          plantLabel.innerText = `⚠️ Air Kolam Rendah (${wLevel.toFixed(1)}%): Sirkulasi Terganggu`;
+          plantLabel.style.color = '#f59e0b';
+        } else if (tds !== null && tds < 300) {
+          // Nutrient deficiency
+          plantGroup.className.baseVal = '';
+          plantStem.setAttribute('stroke', '#d97706');
+          leafLeft.setAttribute('fill', '#d97706');
+          leafRight.setAttribute('fill', '#d97706');
+          leafTop.setAttribute('fill', '#d97706');
+          if (hydroRoots) hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#78350f'));
+          plantLabel.innerText = `⚠️ Nutrisi Rendah (${tds} PPM): Pertumbuhan Lambat`;
+          plantLabel.style.color = '#f59e0b';
+        } else if (tds !== null && tds > 1000) {
+          // Too high TDS
+          plantGroup.className.baseVal = '';
+          plantStem.setAttribute('stroke', '#451a03');
           leafLeft.setAttribute('fill', '#451a03');
-          leafLeft.style.transform = 'rotate(-10deg)';
           leafRight.setAttribute('fill', '#451a03');
-          leafRight.style.transform = 'rotate(10deg)';
           leafTop.setAttribute('fill', '#451a03');
-          leafTop.style.transform = '';
-          if (leafFrontL) {
-            leafFrontL.setAttribute('fill', '#451a03');
-            leafFrontL.style.transform = 'rotate(-5deg)';
-          }
-          if (leafFrontR) {
-            leafFrontR.setAttribute('fill', '#451a03');
-            leafFrontR.style.transform = 'rotate(5deg)';
-          }
-          if (hydroRoots) {
-            hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#451a03')); // burnt dark roots
-          }
-          
-          plantLabel.innerText = "Nutrisi Berlebih (TDS Tinggi)";
-          plantLabel.style.color = '#ef4444'; // red
+          if (hydroRoots) hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#451a03'));
+          plantLabel.innerText = `🔴 Nutrisi Pekat (${tds} PPM): Perlu Pengenceran`;
+          plantLabel.style.color = '#ef4444';
         } else {
-          // Healthy plant (swaying, vibrant green leaves, clean white roots)
+          // Healthy plant
           plantGroup.className.baseVal = 'plant-sway';
-          
-          plantStem.setAttribute('stroke', '#059669'); // emerald
-          leafLeft.setAttribute('fill', '#10b981'); // vibrant green
-          leafLeft.style.transform = '';
+          plantStem.setAttribute('stroke', '#059669');
+          leafLeft.setAttribute('fill', '#10b981');
           leafRight.setAttribute('fill', '#10b981');
-          leafRight.style.transform = '';
           leafTop.setAttribute('fill', '#059669');
-          leafTop.style.transform = '';
-          if (leafFrontL) {
-            leafFrontL.setAttribute('fill', '#34d399');
-            leafFrontL.style.transform = '';
-          }
-          if (leafFrontR) {
-            leafFrontR.setAttribute('fill', '#34d399');
-            leafFrontR.style.transform = '';
-          }
-          if (hydroRoots) {
-            hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#f1f5f9')); // healthy roots
-          }
-          
+          if (leafFrontL) leafFrontL.setAttribute('fill', '#34d399');
+          if (leafFrontR) leafFrontR.setAttribute('fill', '#34d399');
+          if (hydroRoots) hydroRoots.querySelectorAll('path').forEach(r => r.setAttribute('stroke', '#f1f5f9'));
           if (sparkle1) sparkle1.className = 'sparkle sparkle-active';
           if (sparkle2) sparkle2.className = 'sparkle sparkle-active';
-
-          plantLabel.innerText = "Tanaman Subur & Sehat";
-          plantLabel.style.color = '#10b981'; // green
+          plantLabel.innerText = "● Pertumbuhan Tanaman Subur & Optimal 🌱";
+          plantLabel.style.color = '#10b981';
         }
       }
     }
@@ -5651,33 +5607,33 @@
       if (stored) {
         try {
           notifications = JSON.parse(stored);
+          // Hapus item notifikasi lama dari kemarin (id 1 & 2)
+          notifications = notifications.filter(n => n.id !== 1 && n.id !== 2);
         } catch (e) {
           console.error("Gagal parse notifications dari localStorage", e);
           notifications = [];
         }
-      } else {
-        // Seed default notifications if empty
-        notifications = [
-          {
-            id: 1,
-            title: 'Sistem Dimulai',
-            message: 'Sistem monitoring IoT aquaponics berhasil diinisialisasi.',
-            timestamp: Date.now() - 3600000 * 2, // 2 jam yang lalu
-            type: 'info',
-            isNew: false
-          },
-          {
-            id: 2,
-            title: 'Koneksi Normal',
-            message: 'Koneksi ke sistem berjalan dengan baik.',
-            timestamp: Date.now() - 60000 * 5, // 5 menit yang lalu
-            type: 'success',
-            isNew: true
-          }
-        ];
+      }
+      
+      // Tambahkan notifikasi realtime sesi baru di paling atas untuk HARI INI
+      const welcomeMsg = {
+        id: Date.now(),
+        title: 'Sistem Monitoring Terhubung 🚀',
+        message: 'Aplikasi Smart Akuaponik berhasil terhubung ke Firebase Cloud & Sensor Hardware.',
+        timestamp: Date.now(),
+        type: 'success',
+        isNew: true
+      };
+      
+      // Hindari duplikasi pesan welcome dalam 3 detik
+      if (notifications.length === 0 || (Date.now() - (notifications[0].timestamp || 0) > 3000)) {
+        notifications.unshift(welcomeMsg);
+        if (notifications.length > 30) notifications.pop();
         saveNotifications();
       }
+
       updateNotificationBadge();
+      renderNotifications();
     }
 
     function saveNotifications() {
@@ -5694,6 +5650,48 @@
           badge.style.display = 'none';
         }
       }
+    }
+
+    function showToastPopup(type, title, message) {
+      let container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position: fixed; top: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+        document.body.appendChild(container);
+      }
+      
+      const toast = document.createElement('div');
+      toast.style.cssText = 'pointer-events: auto; min-width: 280px; max-width: 380px; padding: 14px 18px; border-radius: 14px; background: rgba(15, 23, 42, 0.92); color: #ffffff; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; gap: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateX(50px);';
+      
+      let borderLeft = '#3b82f6';
+      let iconSvg = 'ℹ️';
+      if (type === 'critical') { borderLeft = '#ef4444'; iconSvg = '🔴'; }
+      else if (type === 'warning') { borderLeft = '#f59e0b'; iconSvg = '⚠️'; }
+      else if (type === 'success') { borderLeft = '#10b981'; iconSvg = '✅'; }
+
+      toast.style.borderLeft = `5px solid ${borderLeft}`;
+
+      toast.innerHTML = `
+        <div style="font-size: 20px;">${iconSvg}</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 2px; color: #f8fafc;">${title}</div>
+          <div style="font-size: 12px; color: #cbd5e1; line-height: 1.3;">${message}</div>
+        </div>
+      `;
+      
+      container.appendChild(toast);
+      
+      requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+      });
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(50px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
     }
 
     function addNotification(type, title, message) {
@@ -5715,9 +5713,10 @@
       
       saveNotifications();
       updateNotificationBadge();
-      
-      // Re-render all notifications lists
       renderNotifications();
+      
+      // Tampilkan popup Toast melayang di website
+      showToastPopup(type, title, message);
     }
 
     function openNotificationDrawer() {
@@ -5760,35 +5759,50 @@
     }
 
     function groupNotificationsByDate(notifs) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayTime = today.getTime();
-      
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
-      const yesterdayTime = yesterday.getTime();
-      
+      const now = new Date();
+      const todayY = now.getFullYear();
+      const todayM = now.getMonth();
+      const todayD = now.getDate();
+
+      const yest = new Date();
+      yest.setDate(yest.getDate() - 1);
+      const yestY = yest.getFullYear();
+      const yestM = yest.getMonth();
+      const yestD = yest.getDate();
+
       const grouped = {
         today: [],
         yesterday: [],
         older: []
       };
-      
+
       notifs.forEach(n => {
-        const notifDate = new Date(n.timestamp);
-        notifDate.setHours(0, 0, 0, 0);
-        const notifTime = notifDate.getTime();
-        
-        if (notifTime === todayTime) {
+        let d;
+        if (typeof n.timestamp === 'number') {
+          d = new Date(n.timestamp);
+        } else if (typeof n.timestamp === 'string') {
+          d = new Date(n.timestamp.replace(' ', 'T'));
+        } else {
+          d = new Date();
+        }
+
+        if (isNaN(d.getTime())) {
+          d = new Date();
+        }
+
+        const nY = d.getFullYear();
+        const nM = d.getMonth();
+        const nD = d.getDate();
+
+        if (nY === todayY && nM === todayM && nD === todayD) {
           grouped.today.push(n);
-        } else if (notifTime === yesterdayTime) {
+        } else if (nY === yestY && nM === yestM && nD === yestD) {
           grouped.yesterday.push(n);
         } else {
-          grouped.older.push(n);
+          grouped.today.push(n);
         }
       });
-      
+
       return grouped;
     }
 
@@ -6014,7 +6028,7 @@
       const minWater = parseFloat(data.water_level_min || localStorage.getItem('aquaponics_water_min')) || 50.0;
 
       const now = Date.now();
-      const COOLDOWN = 15 * 60 * 1000;
+      const COOLDOWN = 15 * 1000; // 15 detik agar notifikasi realtime langsung muncul!
 
       if (data.temp_w && data.temp_w > 0 && (data.temp_w < minTemp || data.temp_w > maxTemp)) {
         if (now - lastBrowserAlerts.temp_w > COOLDOWN) {
@@ -6100,6 +6114,69 @@
     let lastTelemetryTimestamp = 0;
     let realSessionHistory = [];
 
+    // --- KALKULASI STATUS EKOSISTEM DINAMIS BERDASARKAN ANGKA SENSOR ---
+    function updateEcosystemStatus(data) {
+      const ecoBadge = document.getElementById('ecosystem-status-badge');
+      const ecoText = document.getElementById('ecosystem-status-text');
+      const sidePulse = document.getElementById('sidebar-pulse');
+      const sideStatus = document.getElementById('sidebar-status-text');
+
+      if (!data || data.status === 'Mati') {
+        if (ecoBadge) {
+          ecoBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+          ecoBadge.style.color = '#ef4444';
+          ecoBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+          ecoBadge.innerHTML = '<span class="indicator-pulse red"></span> Ekosistem: Offline / Terputus';
+        }
+        if (sideStatus && sidePulse) {
+          sideStatus.innerText = 'Alat Terputus (Offline)';
+          sidePulse.className = 'indicator-pulse red';
+        }
+        return;
+      }
+
+      const temp = parseFloat(data.temp_w) || 0;
+      const level = parseFloat(data.water_level) || 0;
+      const tds = parseFloat(data.tds) || 0;
+
+      let issues = 0;
+      if (temp > 0 && (temp < 24.0 || temp > 30.0)) issues++;
+      if (level > 0 && level < 50.0) issues++;
+      if (tds > 0 && (tds < 400 || tds > 900)) issues++;
+
+      let statusMsg = '🟢 Ekosistem: Sangat Baik (Ideal)';
+      let bg = 'rgba(16, 185, 129, 0.15)';
+      let color = '#10b981';
+      let border = 'rgba(16, 185, 129, 0.3)';
+      let pulseClass = 'green';
+
+      if (issues === 1) {
+        statusMsg = '🟡 Ekosistem: Perlu Perhatian (Waspada)';
+        bg = 'rgba(245, 158, 11, 0.15)';
+        color = '#f59e0b';
+        border = 'rgba(245, 158, 11, 0.3)';
+        pulseClass = 'orange';
+      } else if (issues >= 2) {
+        statusMsg = '🔴 Ekosistem: Kritis / Bahaya';
+        bg = 'rgba(239, 68, 68, 0.15)';
+        color = '#ef4444';
+        border = 'rgba(239, 68, 68, 0.3)';
+        pulseClass = 'red';
+      }
+
+      if (ecoBadge) {
+        ecoBadge.style.background = bg;
+        ecoBadge.style.color = color;
+        ecoBadge.style.borderColor = border;
+        ecoBadge.innerHTML = `<span class="indicator-pulse ${pulseClass}"></span> ${statusMsg}`;
+      }
+
+      if (sideStatus && sidePulse) {
+        sideStatus.innerText = `Alat Terhubung (${statusMsg.split(':')[1].trim()})`;
+        sidePulse.className = `indicator-pulse ${pulseClass}`;
+      }
+    }
+
     function processIncomingTelemetry(data, modeName) {
       if (!data) return;
       lastTelemetryTimestamp = Date.now();
@@ -6176,23 +6253,62 @@
       }
       updateUI();
       checkRealtimeAlerts(telemetryData);
+      updateEcosystemStatus(telemetryData);
 
-      const sideStatus = document.getElementById('sidebar-status-text');
-      const sidePulse = document.getElementById('sidebar-pulse');
-      const demoBanner = document.getElementById('demo-banner');
-      
-      if (demoBanner) {
-        demoBanner.style.display = 'none';
+      // --- DETEKSI TELEMETRI & PERUBAHAN ANGKA SENSOR (NOTIFIKASI LONCENG DASHBOARD) ---
+      if (!window.previousSensorValues) {
+        window.previousSensorValues = {
+          temp_w: telemetryData.temp_w,
+          tds: telemetryData.tds,
+          temp_a: telemetryData.temp_a,
+          hum: telemetryData.hum,
+          water_level: telemetryData.water_level
+        };
+        // Langsung tampilkan notifikasi awal telemetri saat data pertama kali masuk!
+        if (telemetryData.temp_w > 0) {
+          addNotification('info', 'Status Telemetri Alat', `Suhu Air: ${telemetryData.temp_w}°C | Level Air: ${telemetryData.water_level}% | Udara: ${telemetryData.temp_a}°C (${telemetryData.hum}%)`);
+        }
+      } else {
+        // 1. Deteksi Perubahan Suhu Air Kolam
+        if (telemetryData.temp_w !== null && telemetryData.temp_w !== undefined && window.previousSensorValues.temp_w !== telemetryData.temp_w) {
+          const diff = (telemetryData.temp_w - window.previousSensorValues.temp_w).toFixed(1);
+          const icon = diff >= 0 ? '📈' : '📉';
+          addNotification('info', 'Perubahan Suhu Air', `Suhu air kolam berubah ${icon} menjadi ${telemetryData.temp_w}°C.`);
+          window.previousSensorValues.temp_w = telemetryData.temp_w;
+        }
+
+        // 2. Deteksi Perubahan Level Air Kolam
+        if (telemetryData.water_level !== null && telemetryData.water_level !== undefined && window.previousSensorValues.water_level !== telemetryData.water_level) {
+          const diff = (telemetryData.water_level - window.previousSensorValues.water_level).toFixed(1);
+          const icon = diff >= 0 ? '🌊' : '💧';
+          addNotification('info', 'Perubahan Level Air', `Ketinggian air kolam berubah ${icon} menjadi ${telemetryData.water_level}%.`);
+          window.previousSensorValues.water_level = telemetryData.water_level;
+        }
+
+        // 3. Deteksi Perubahan Nutrisi TDS
+        if (telemetryData.tds !== null && telemetryData.tds !== undefined && window.previousSensorValues.tds !== telemetryData.tds) {
+          addNotification('info', 'Perubahan TDS Nutrisi', `Kadar TDS nutrisi air berubah menjadi ${telemetryData.tds} PPM.`);
+          window.previousSensorValues.tds = telemetryData.tds;
+        }
+
+        // 4. Deteksi Perubahan Suhu Udara & Kelembaban Ambient
+        if (telemetryData.temp_a !== null && telemetryData.temp_a !== undefined && window.previousSensorValues.temp_a !== telemetryData.temp_a) {
+          addNotification('info', 'Perubahan Udara Ambient', `Suhu udara ambient berubah menjadi ${telemetryData.temp_a}°C (Kelembaban ${telemetryData.hum}%).`);
+          window.previousSensorValues.temp_a = telemetryData.temp_a;
+          window.previousSensorValues.hum = telemetryData.hum;
+        }
       }
 
-      if (sideStatus && sidePulse) {
-        if (telemetryData.status === 'Aktif') {
-          sideStatus.innerText = `Alat Terhubung (${modeName || 'Firebase'})`;
-          sidePulse.className = 'indicator-pulse green';
-        } else {
-          sideStatus.innerText = 'Mencari Alat...';
-          sidePulse.className = 'indicator-pulse orange';
-        }
+      // Notifikasi Berkala Setiap 10 Detik
+      if (!window.lastPeriodicCheckTime) window.lastPeriodicCheckTime = 0;
+      if (Date.now() - window.lastPeriodicCheckTime > 10000 && telemetryData.temp_w > 0) {
+        window.lastPeriodicCheckTime = Date.now();
+        addNotification('info', 'Pembaruan Telemetri Live', `Suhu Air: ${telemetryData.temp_w}°C | Level Air: ${telemetryData.water_level}% | Udara: ${telemetryData.temp_a}°C (${telemetryData.hum}%)`);
+      }
+
+      const demoBanner = document.getElementById('demo-banner');
+      if (demoBanner) {
+        demoBanner.style.display = 'none';
       }
     }
 
@@ -6405,6 +6521,15 @@
       document.body.classList.remove('theme-deep-ocean');
       localStorage.setItem('aquaponics_theme_deep_ocean', 'false');
       
+      // Bersihkan Service Worker Cache lama di browser pengguna
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) {
+            registration.update();
+          }
+        });
+      }
+
       // Direct Event Listeners for Mode Pill Buttons
       const btnLampAuto = document.getElementById('btn-lamp-auto');
       const btnLampManual = document.getElementById('btn-lamp-manual');
@@ -6418,6 +6543,11 @@
 
       setFeedMode(currentFeedMode);
       startLocalApiPolling();
+
+      // Notifikasi Welcome Selamat Datang saat baru masuk ke aplikasi
+      setTimeout(() => {
+        addNotification('info', 'Selamat Datang di Smart Akuaponik! 👋', 'Sistem monitoring IoT aktif secara real-time. Memantau kesehatan ekosistem dari Firebase Cloud & Sensor Hardware.');
+      }, 1200);
     });
   </script>
 </body>
