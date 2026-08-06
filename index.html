@@ -2626,7 +2626,7 @@
         style="margin-top: auto; display: flex; flex-direction: column; gap: 10px; width: 100%;">
         <div class="badge-demo">
           <span class="indicator-pulse red" id="sidebar-pulse"></span>
-          <span id="sidebar-status-text">Aplikasi Offline</span>
+          <span id="sidebar-status-text">Sistem Offline</span>
         </div>
         <button class="sidebar-item" onclick="confirmLogout()" style="color: #ef4444; margin-top: 5px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -2679,7 +2679,7 @@
 
         <!-- App Header -->
         <div class="app-header">
-          <span class="app-header-title" id="app-header-title">Aplikasi Monitoring IoT</span>
+          <span class="app-header-title" id="app-header-title">Monitoring IoT</span>
           <div style="display: flex; gap: 8px;">
             <!-- Dark mode toggle -->
             <button class="btn-icon" onclick="toggleDarkMode()" title="Ubah Mode Gelap/Terang">
@@ -3454,7 +3454,7 @@
                 </div>
               </div>
 
-              <!-- 6. Tentang Aplikasi -->
+              <!-- 6. Tentang Sistem -->
               <div class="config-row-card" role="button" tabindex="0" onclick="openConfigModal('About')" style="display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 18px 24px !important; background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; box-shadow: var(--shadow) !important; cursor: pointer !important; outline: none !important; min-height: 64px !important; transition: transform 0.2s, box-shadow 0.2s !important;">
                 <div style="display: flex !important; align-items: center !important; gap: 14px !important;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -3462,7 +3462,7 @@
                     <line x1="12" y1="16" x2="12" y2="12" />
                     <line x1="12" y1="8" x2="12.01" y2="8" />
                   </svg>
-                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Tentang Aplikasi</span>
+                  <span style="font-family: var(--font-inter) !important; font-size: 0.98rem !important; font-weight: 700 !important; color: var(--text-main) !important;">Tentang Sistem</span>
                 </div>
                 <div style="color: var(--text-sub) !important; display: flex !important; align-items: center !important;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -3656,7 +3656,7 @@
   <script>
     // --- STATE MANAGEMENT ---
     let activeScreen = 'beranda';
-    let currentFeedMode = 'Auto'; // 'Auto' or 'Manual'
+    let currentFeedMode = localStorage.getItem('aquaponics_feed_mode') || 'Auto'; // 'Auto' or 'Manual'
     let manualPortion = 1;
     let isDarkMode = false;
     let isLocalApiMode = true;
@@ -3666,7 +3666,8 @@
       pump_b: 0,
       pump_p: 0,
       pump_s: 0,
-      aerator: 0
+      aerator: 0,
+      feed_mode: 0
     };
 
     // Default Schedules
@@ -3757,6 +3758,7 @@
 
       if (!modal || !titleEl || !bodyEl) return;
 
+      modal.setAttribute('data-current-type', type);
       modal.classList.add('active');
       if (saveBtn) saveBtn.style.display = 'inline-flex';
 
@@ -3913,7 +3915,7 @@
           </div>
         `;
       } else if (type === 'About') {
-        titleEl.innerText = '6. Tentang Aplikasi';
+        titleEl.innerText = '6. Tentang Sistem';
         if (saveBtn) saveBtn.style.display = 'none';
         bodyEl.innerHTML = `
           <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
@@ -3922,16 +3924,16 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
               <div>
-                <h4 style="margin:0; font-family:var(--font-outfit); font-size:1.05rem; font-weight:800; color:var(--text-main);">Smart Akuaponik Pro</h4>
+                <h4 style="margin:0; font-family:var(--font-outfit); font-size:1.05rem; font-weight:800; color:var(--text-main);">Monitoring Akuaponik</h4>
                 <span style="font-size:0.78rem; color:var(--text-sub);">Versi Firmware: v1.0.0 | ID Alat: ESP32-AQUAPONICS-01</span>
               </div>
             </div>
             <div style="background:var(--bg-app); border:1px solid var(--border-glass); border-radius:14px; padding:14px;">
               <h5 style="margin:0 0 8px 0; color:var(--primary); font-size:0.88rem; font-weight:800;">📋 Urutan Wajib Pengisian Agar Sistem Berjalan:</h5>
               <ol style="margin:0; padding-left:18px; font-size:0.82rem; color:var(--text-main); line-height:1.7;">
-                <li><strong>1. Pengaturan WiFi</strong> → Biar alat terhubung ke internet dan online dulu.</li>
-                <li><strong>2. Integrasi Firebase</strong> → Biar data telemetri otomatis masuk ke Cloud.</li>
-                <li><strong>3. Notifikasi</strong> → Aktifkan jika ingin menerima alarm & alert di HP.</li>
+                <li><strong>Pengaturan WiFi</strong> → Biar alat terhubung ke internet dan online dulu.</li>
+                <li><strong>Integrasi Firebase</strong> → Biar data telemetri otomatis masuk ke Cloud.</li>
+                <li><strong>Notifikasi</strong> → Aktifkan jika ingin menerima alert</li>
               </ol>
             </div>
           </div>
@@ -3945,7 +3947,8 @@
         const pass = document.getElementById('cfg-wifi-pass')?.value;
         if (ssid) localStorage.setItem('cfg_wifi_ssid', ssid);
         if (pass) localStorage.setItem('cfg_wifi_pass', pass);
-        if (typeof showToast === 'function') showToast('Pengaturan WiFi berhasil disimpan!');
+        sendLocalControl({ wifi_ssid: ssid, wifi_pass: pass });
+        if (typeof showToast === 'function') showToast('Pengaturan WiFi berhasil dikirim ke Firebase & Gateway!');
       } else if (currentConfigType === 'Server') {
         const url = document.getElementById('cfg-server-url')?.value;
         const port = document.getElementById('cfg-server-port')?.value;
@@ -4323,7 +4326,7 @@
       // Header title update
       const titleEl = document.getElementById('app-header-title');
       if (screenId === 'beranda') {
-        titleEl.innerText = 'Aplikasi Monitoring IoT';
+        titleEl.innerText = 'Monitoring IoT';
       } else {
         titleEl.innerText = screenId.charAt(0).toUpperCase() + screenId.slice(1);
       }
@@ -4904,15 +4907,28 @@
     // Feeder Tab Switching
     function setFeedMode(mode) {
       currentFeedMode = mode;
-      document.getElementById('btn-feed-auto').classList.toggle('active', mode === 'Auto');
-      document.getElementById('btn-feed-manual').classList.toggle('active', mode === 'Manual');
+      localStorage.setItem('aquaponics_feed_mode', mode);
+      lastManualChangeTime.feed_mode = Date.now();
 
-      document.getElementById('feed-content-auto').classList.toggle('active', mode === 'Auto');
-      document.getElementById('feed-content-manual').classList.toggle('active', mode === 'Manual');
+      const btnAuto = document.getElementById('btn-feed-auto');
+      const btnManual = document.getElementById('btn-feed-manual');
+      const contentAuto = document.getElementById('feed-content-auto');
+      const contentManual = document.getElementById('feed-content-manual');
+
+      if (btnAuto) btnAuto.classList.toggle('active', mode === 'Auto');
+      if (btnManual) btnManual.classList.toggle('active', mode === 'Manual');
+      if (contentAuto) contentAuto.classList.toggle('active', mode === 'Auto');
+      if (contentManual) contentManual.classList.toggle('active', mode === 'Manual');
 
       updateUI();
 
       sendLocalControl({ feed_mode: mode });
+
+      fetch(`${FIREBASE_REST_URL}/sensor_data/feed_mode.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mode)
+      }).catch(() => {});
     }
 
     function adjustPortion(val) {
@@ -5293,7 +5309,7 @@
 
     function saveConfiguration() {
       const modal = document.getElementById('modal-config');
-      const type = modal.getAttribute('data-current-type');
+      const type = currentConfigType || (modal ? modal.getAttribute('data-current-type') : '');
 
       if (type === 'Schedules') {
         const lampStart = document.getElementById('sched-lamp-start').value;
@@ -5308,44 +5324,46 @@
         alert("Jadwal Lampu dan Pompa berhasil disimpan!");
         closeModal('modal-config');
       } else if (type === 'WiFi') {
-        const ssid = document.getElementById('wifi-ssid').value;
-        const pass = document.getElementById('wifi-pass').value;
-        localStorage.setItem('aquaponics_wifi_ssid', ssid);
-        localStorage.setItem('aquaponics_wifi_pass', pass);
-        alert("Konfigurasi WiFi berhasil disimpan secara lokal!");
+        const ssid = document.getElementById('cfg-wifi-ssid')?.value || document.getElementById('wifi-ssid')?.value || '';
+        const pass = document.getElementById('cfg-wifi-pass')?.value || document.getElementById('wifi-pass')?.value || '';
+        localStorage.setItem('cfg_wifi_ssid', ssid);
+        localStorage.setItem('cfg_wifi_pass', pass);
+        sendLocalControl({ wifi_ssid: ssid, wifi_pass: pass });
+        syncAllConfigToFirebase();
+        alert("✅ Konfigurasi WiFi berhasil disimpan ke Firebase Cloud & ESP32!");
         closeModal('modal-config');
       } else if (type === 'Server') {
-        const ip = document.getElementById('server-ip').value;
-        const port = document.getElementById('server-port').value;
-        localStorage.setItem('aquaponics_server_ip', ip);
-        localStorage.setItem('aquaponics_server_port', port);
-        alert("Konfigurasi Server berhasil disimpan secara lokal!");
+        const ip = document.getElementById('cfg-server-url')?.value || document.getElementById('server-ip')?.value || '';
+        const port = document.getElementById('cfg-server-port')?.value || document.getElementById('server-port')?.value || '';
+        localStorage.setItem('cfg_server_url', ip);
+        localStorage.setItem('cfg_server_port', port);
+        syncAllConfigToFirebase();
+        alert("✅ Konfigurasi Server berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       } else if (type === 'Calibration') {
-        const ppm = document.getElementById('cal-tds-ppm').value;
-        const volts = document.getElementById('cal-tds-v').value;
-        localStorage.setItem('aquaponics_cal_tds_ppm', ppm);
-        localStorage.setItem('aquaponics_cal_tds_v', volts);
-        alert("Konfigurasi Kalibrasi Sensor berhasil disimpan secara lokal!");
+        const tw = document.getElementById('cfg-cal-temp-w')?.value || '0.0';
+        const tds = document.getElementById('cfg-cal-tds')?.value || '0';
+        const ta = document.getElementById('cfg-cal-temp-a')?.value || '0.0';
+        const w = document.getElementById('cfg-cal-water')?.value || '0.0';
+        localStorage.setItem('cfg_cal_temp_w', tw);
+        localStorage.setItem('cfg_cal_tds', tds);
+        localStorage.setItem('cfg_cal_temp_a', ta);
+        localStorage.setItem('cfg_cal_water', w);
+        syncAllConfigToFirebase();
+        alert("✅ Kalibrasi Sensor berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       } else if (type === 'Notifications') {
-        const enabled = document.getElementById('email-notif-enabled').checked;
-        const serviceId = document.getElementById('emailjs-service-id').value;
-        const templateId = document.getElementById('emailjs-template-id').value;
-        const publicKey = document.getElementById('emailjs-public-key').value;
-        const recipient = document.getElementById('email-recipient').value;
-        const tdsMin = parseFloat(document.getElementById('email-tds-min').value) || 400;
-        const tdsMax = parseFloat(document.getElementById('email-tds-max').value) || 900;
-        const tempMin = parseFloat(document.getElementById('email-temp-min').value) || 24.0;
-        const tempMax = parseFloat(document.getElementById('email-temp-max').value) || 30.0;
-        const waterMin = parseFloat(document.getElementById('email-water-min').value) || 50.0;
+        const enabled = document.getElementById('cfg-email-enabled')?.checked || document.getElementById('email-notif-enabled')?.checked || false;
+        const serviceId = document.getElementById('cfg-emailjs-service-id')?.value || 'service_4e9rkbf';
+        const templateId = document.getElementById('cfg-emailjs-template-id')?.value || 'template_p2vuw8k';
+        const publicKey = document.getElementById('cfg-emailjs-public-key')?.value || '4v1gUffZm6c9CtGXH';
+        const recipient = document.getElementById('cfg-email-recipient')?.value || 'icelanggriany@gmail.com';
 
-        localStorage.setItem('aquaponics_email_enabled', enabled);
-        localStorage.setItem('aquaponics_email_provider', 'emailjs');
-        localStorage.setItem('aquaponics_emailjs_service_id', serviceId);
-        localStorage.setItem('aquaponics_emailjs_template_id', templateId);
-        localStorage.setItem('aquaponics_emailjs_public_key', publicKey);
-        localStorage.setItem('aquaponics_recipient_email', recipient);
+        localStorage.setItem('cfg_email_enabled', enabled ? 'true' : 'false');
+        localStorage.setItem('cfg_emailjs_service_id', serviceId);
+        localStorage.setItem('cfg_emailjs_template_id', templateId);
+        localStorage.setItem('cfg_emailjs_public_key', publicKey);
+        localStorage.setItem('cfg_recipient_email', recipient);
 
         sendLocalControl({
           email_notif_enabled: enabled,
@@ -5353,18 +5371,15 @@
           emailjs_service_id: serviceId,
           emailjs_template_id: templateId,
           emailjs_public_key: publicKey,
-          recipient_email: recipient,
-          tds_min: tdsMin,
-          tds_max: tdsMax,
-          temp_w_min: tempMin,
-          temp_w_max: tempMax,
-          water_level_min: waterMin
+          recipient_email: recipient
         });
+        syncAllConfigToFirebase();
 
-        alert("Pengaturan Notifikasi EmailJS berhasil disimpan!");
+        alert("✅ Pengaturan Notifikasi EmailJS berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       } else {
-        alert(`Konfigurasi ${type} disimpan secara lokal!`);
+        syncAllConfigToFirebase();
+        alert("✅ Konfigurasi berhasil disimpan ke Firebase Cloud!");
         closeModal('modal-config');
       }
     }
@@ -5646,7 +5661,7 @@
           {
             id: 1,
             title: 'Sistem Dimulai',
-            message: 'Aplikasi monitoring IoT aquaponics berhasil diinisialisasi.',
+            message: 'Sistem monitoring IoT aquaponics berhasil diinisialisasi.',
             timestamp: Date.now() - 3600000 * 2, // 2 jam yang lalu
             type: 'info',
             isNew: false
@@ -6148,36 +6163,33 @@
       }
       telemetryData.pump_b_schedule = data.pump_b_schedule || { start: '07:00', end: '17:00' };
       
-      if (data.feed_mode) {
-        currentFeedMode = data.feed_mode;
-        document.getElementById('btn-feed-auto').classList.toggle('active', currentFeedMode === 'Auto');
-        document.getElementById('btn-feed-manual').classList.toggle('active', currentFeedMode === 'Manual');
-        document.getElementById('feed-content-auto').classList.toggle('active', currentFeedMode === 'Auto');
-        document.getElementById('feed-content-manual').classList.toggle('active', currentFeedMode === 'Manual');
-      }
       if (data.schedules) {
         schedules = data.schedules;
         renderSchedules();
       }
       
-      // Pengecekan status keaktifan sistem
-      telemetryData.status = (data.status === 'Mati') ? 'Mati' : 'Aktif';
+      // Pengecekan status keaktifan sistem (Cegah glitch/flicker)
+      if (data.status === 'Mati' && (!data.temp_w || data.temp_w === 0) && (!data.temp_a || data.temp_a === 0)) {
+        telemetryData.status = 'Mati';
+      } else {
+        telemetryData.status = 'Aktif';
+      }
       updateUI();
       checkRealtimeAlerts(telemetryData);
 
-      const sideSync = document.getElementById('sidebar-sync-text');
       const sideStatus = document.getElementById('sidebar-status-text');
       const sidePulse = document.getElementById('sidebar-pulse');
+      const demoBanner = document.getElementById('demo-banner');
       
-      if (sideSync && sideStatus && sidePulse) {
+      if (demoBanner) {
+        demoBanner.style.display = 'none';
+      }
+
+      if (sideStatus && sidePulse) {
         if (telemetryData.status === 'Aktif') {
-          sideSync.innerText = `● Terhubung (${modeName})`;
-          sideSync.style.color = '#10b981';
-          sideStatus.innerText = `Alat Terhubung (${modeName})`;
+          sideStatus.innerText = `Alat Terhubung (${modeName || 'Firebase'})`;
           sidePulse.className = 'indicator-pulse green';
         } else {
-          sideSync.innerText = '● Mencari Alat...';
-          sideSync.style.color = '#f97316';
           sideStatus.innerText = 'Mencari Alat...';
           sidePulse.className = 'indicator-pulse orange';
         }
@@ -6191,32 +6203,18 @@
         .then(fbData => {
           if (fbData && (fbData.temp_w !== undefined || fbData.temp_a !== undefined)) {
             processIncomingTelemetry(fbData, 'Firebase Realtime');
-          } else {
-            throw new Error('Firebase data belum ada');
           }
         })
         .catch(fbErr => {
-          // 2. Fallback ke Server API Lokal jika Firebase sedang bermasalah
+          // 2. Fallback ke Server API Lokal HANYA jika data lokal Aktif dan Valid
           fetch(`${baseUrl}/api/status?t=${Date.now()}`, { cache: 'no-store' })
             .then(res => res.json())
             .then(data => {
-              if (data && data.temp_w !== undefined) {
+              if (data && data.status === 'Aktif' && data.temp_w !== undefined && data.temp_w > 0) {
                 processIncomingTelemetry(data, 'Lokal');
               }
             })
-            .catch(err => {
-              if (Date.now() - lastTelemetryTimestamp > 15000) {
-                const sideSync = document.getElementById('sidebar-sync-text');
-                const sideStatus = document.getElementById('sidebar-status-text');
-                const sidePulse = document.getElementById('sidebar-pulse');
-                if (sideSync && sideStatus && sidePulse) {
-                  sideSync.innerText = '● Terputus';
-                  sideSync.style.color = '#ef4444';
-                  sideStatus.innerText = 'Menunggu ESP32 Real...';
-                  sidePulse.className = 'indicator-pulse red';
-                }
-              }
-            });
+            .catch(() => {});
         });
     }
 
@@ -6418,6 +6416,7 @@
       if (btnPumpBAuto) btnPumpBAuto.onclick = (e) => { e.preventDefault(); window.setPumpBMode('Auto'); };
       if (btnPumpBManual) btnPumpBManual.onclick = (e) => { e.preventDefault(); window.setPumpBMode('Manual'); };
 
+      setFeedMode(currentFeedMode);
       startLocalApiPolling();
     });
   </script>
